@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, Monitor, Wrench, ChevronRight, ShoppingCart, DollarSign, CreditCard, Unlock } from "lucide-react";
 import { useConsolasVenta, useConsolasCompra, useGamePass, useJuegos, usePlataformas } from "../admin/store";
 import JuegoCard from "./JuegoCard";
+import ConsolaCard from "./ConsolaCard";
 import WhatsAppButton from "./WhatsAppButton";
 import { Link } from "react-router-dom";
 
@@ -32,6 +33,8 @@ const ShopTabs = () => {
   const [gamePassPlanes] = useGamePass();
   
   const displayedJuegos = juegos.slice(0, 4);
+  const displayedConsolas = consolasVenta.slice(0, 8);
+  const hasMultipleConsolas = consolasVenta.length > 8;
 
   const tabs = [
     { id: "juegos", label: "Juegos", icon: Gamepad2 },
@@ -111,22 +114,18 @@ const ShopTabs = () => {
                 transition={{ duration: 0.4 }}
               >
                 <div className="space-y-8">
-                   <div className="flex items-center gap-3">
-                    <ShoppingCart className="h-5 w-5 text-primary" />
-                    <h3 className="font-heading text-xl font-bold text-foreground sm:text-2xl">Venta de Consolas</h3>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <ShoppingCart className="h-5 w-5 text-primary" />
+                      <h3 className="font-heading text-xl font-bold text-foreground sm:text-2xl">Venta de Consolas</h3>
+                    </div>
+                    <Link to="/consolas" className="group flex items-center gap-1 text-sm font-semibold text-primary">
+                      Ver todo <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
                   </div>
                   <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4">
-                    {consolasVenta.map((c, i) => (
-                      <div key={c.id || c.name} className="group relative overflow-hidden rounded-xl border border-border bg-card p-3 sm:p-5 transition-all hover:border-primary/40">
-                         <div className="absolute right-2 top-2 z-10 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-primary">
-                          {c.badge}
-                        </div>
-                        <div className="mb-3 aspect-video overflow-hidden rounded-md bg-muted/20">
-                          <img src={c.image} alt={c.name} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
-                        </div>
-                        <h4 className="text-sm sm:text-base font-bold text-foreground line-clamp-1">{c.name}</h4>
-                        <p className="mt-1 text-xs text-muted-foreground">Consultar precio</p>
-                      </div>
+                    {displayedConsolas.map((c, i) => (
+                      <ConsolaCard key={c.id || c.name} {...c} index={i} />
                     ))}
                   </div>
                 </div>

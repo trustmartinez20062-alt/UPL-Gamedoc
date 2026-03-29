@@ -1,7 +1,9 @@
-import { useState } from "react";
-import { Monitor, Plus, Pencil, Trash2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { Monitor, Plus, Pencil, Trash2, Upload, Loader2 } from "lucide-react";
 import { useConsolasVenta, genId, type ConsolaVenta } from "../../store";
+import { uploadImage, deleteImageFromStorage } from "../../../lib/db";
 import { useAuth } from "../../hooks/useAuth";
+import { toast } from "@/components/ui/sonner";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
@@ -11,23 +13,33 @@ export default function ConsolasVenta() {
   const { user } = useAuth();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: ConsolaVenta } | null>(null);
   const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", badge: "Disponible", image: "" });
+  const [uploading, setUploading] = useState(false);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const openAdd = () => {
     setForm({ name: "", badge: "Disponible", image: "" });
+    setLocalPreview(null);
     setModal({ mode: "add" });
   };
 
   const openEdit = (item: ConsolaVenta) => {
     setForm({ name: item.name, badge: item.badge, image: item.image });
+    setLocalPreview(null);
     setModal({ mode: "edit", item });
   };
 
   // @DB-CRUD-LOGIC: Migrar a supabase.from('products').upsert().
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) return;
     if (modal?.mode === "add") {
       setConsolas((prev) => [...prev, { id: genId(), ...form } as ConsolaVenta]);
     } else if (modal?.item) {
+      // Si la imagen cambió y teníamos una subida, borrar la anterior
+      if (modal.item.image && modal.item.image !== form.image) {
+        await deleteImageFromStorage(modal.item.image);
+        toast.info("Imagen anterior eliminada del servidor");
+      }
       setConsolas((prev) =>
         prev.map((c) => (c.id === modal.item!.id ? ({ ...c, ...form } as ConsolaVenta) : c))
       );
@@ -35,9 +47,49 @@ export default function ConsolasVenta() {
     setModal(null);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("¿Eliminar esta consola?")) {
+  const handleDelete = async (id: string) => {
+    const itemToDelete = consolas.find(c => c.id === id);
+    if (itemToDelete && confirm("¿Eliminar esta consola?")) {
+      if (itemToDelete.image) {
+        await deleteImageFromStorage(itemToDelete.image);
+        toast.info("Imagen eliminada del servidor");
+      }
       setConsolas((prev) => prev.filter((c) => c.id !== id));
+      toast.success("Consola eliminada correctamente");
+    }
+  };
+
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validación de imagen legible
+    const isValidImage = await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = URL.createObjectURL(file);
+    });
+
+    if (!isValidImage) {
+      toast.error("El archivo no es una imagen válida o está corrupto");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setUploading(true);
+    setLocalPreview(URL.createObjectURL(file));
+    try {
+      const url = await uploadImage(file, "consolas");
+      if (url) {
+        setForm(prev => ({ ...prev, image: url }));
+        toast.success("Imagen subida con éxito");
+      }
+    } catch (err) {
+      toast.error("Error al subir la imagen");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -145,17 +197,53 @@ export default function ConsolasVenta() {
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "hsl(215 15% 55%)" }}>
-                URL de Imagen
+                Imagen de la Consola (URL o Archivo)
               </label>
-              <input
-                className="input-field"
-                placeholder="https://ejemplo.com/imagen.jpg"
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
-              />
-              {form.image && (
-                <div className="mt-2 aspect-video w-full max-w-[200px] overflow-hidden rounded-md border" style={{ borderColor: 'hsl(220 15% 22%)' }}>
-                  <img src={form.image} alt="Preview" className="h-full w-full object-cover" />
+              
+              <div className="flex gap-2 mb-3">
+                <input
+                  className="input-field flex-1"
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                  value={form.image}
+                  onChange={(e) => {
+                    setForm({ ...form, image: e.target.value });
+                    setLocalPreview(null);
+                  }}
+                />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={onFileChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-2 px-4 rounded-lg border border-dashed transition-all hover:bg-muted/10"
+                  style={{ 
+                    borderColor: "hsl(220 15% 25%)", 
+                    color: "hsl(215 15% 60%)" 
+                  }}
+                >
+                  {uploading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Upload size={16} />
+                      <span className="text-xs font-medium">Subir</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {(form.image || localPreview) && (
+                <div className="relative group/preview mt-2 aspect-video w-full max-w-[200px] overflow-hidden rounded-md border" style={{ borderColor: 'hsl(220 15% 22%)' }}>
+                  <img src={localPreview || form.image} alt="Preview" className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                    <p className="text-[10px] text-white font-bold px-1 text-center">Preview</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -164,8 +252,12 @@ export default function ConsolasVenta() {
               <button onClick={() => setModal(null)} className="btn-ghost flex-1 text-sm">
                 Cancelar
               </button>
-              <button onClick={handleSave} className="btn-primary flex-1 text-sm">
-                {modal.mode === "add" ? "Agregar" : "Guardar"}
+              <button 
+                onClick={handleSave} 
+                disabled={uploading}
+                className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {uploading ? "Subiendo..." : (modal.mode === "add" ? "Agregar" : "Guardar")}
               </button>
             </div>
           </div>

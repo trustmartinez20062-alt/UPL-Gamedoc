@@ -1,7 +1,9 @@
-import { useState } from "react";
-import { Gamepad2, Plus, Pencil, Trash2, Check } from "lucide-react";
+import { useState, useRef } from "react";
+import { Gamepad2, Plus, Pencil, Trash2, Check, Upload, Loader2 } from "lucide-react";
 import { useJuegos, usePlataformas, genId, type Juego } from "../../store";
+import { uploadImage, deleteImageFromStorage } from "../../../lib/db";
 import { useAuth } from "../../hooks/useAuth";
+import { toast } from "@/components/ui/sonner";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
@@ -18,6 +20,9 @@ export default function Juegos() {
     precio: "Consultar" 
   });
   const [search, setSearch] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getPlatformNames = (ids: string[]) => {
     return ids
@@ -34,6 +39,7 @@ export default function Juegos() {
 
   const openAdd = () => {
     setForm({ name: "", plataformas: [], image: "", precio: "Consultar" });
+    setLocalPreview(null);
     setModal({ mode: "add" });
   };
 
@@ -44,15 +50,21 @@ export default function Juegos() {
       image: item.image, 
       precio: item.precio 
     });
+    setLocalPreview(null);
     setModal({ mode: "edit", item });
   };
 
 // @DB-CRUD-LOGIC: Estas operaciones deben llamar a supabase.from('products').insert() o .update().
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) return;
     if (modal?.mode === "add") {
       setJuegos((prev) => [...prev, { id: genId(), ...form } as Juego]);
     } else if (modal?.item) {
+      // Si la imagen cambió y teníamos una subida, borrar la anterior
+      if (modal.item.image && modal.item.image !== form.image) {
+        await deleteImageFromStorage(modal.item.image);
+        toast.info("Imagen anterior eliminada del servidor");
+      }
       setJuegos((prev) =>
         prev.map((j) => (j.id === modal.item!.id ? ({ ...j, ...form } as Juego) : j))
       );
@@ -69,9 +81,55 @@ export default function Juegos() {
     }));
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("¿Eliminar este juego?")) {
+  const handleDelete = async (id: string) => {
+    const itemToDelete = juegos.find(j => j.id === id);
+    if (itemToDelete && confirm("¿Eliminar este juego?")) {
+      if (itemToDelete.image) {
+        await deleteImageFromStorage(itemToDelete.image);
+        toast.info("Imagen eliminada del servidor");
+      }
       setJuegos((prev) => prev.filter((j) => j.id !== id));
+      toast.success("Juego eliminado correctamente");
+    }
+  };
+
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validación de imagen legible
+    const isValidImage = await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(img.src);
+        resolve(true);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src);
+        resolve(false);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    if (!isValidImage) {
+      toast.error("El archivo no es una imagen válida o está corrupto");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setUploading(true);
+    setLocalPreview(URL.createObjectURL(file));
+    try {
+      const url = await uploadImage(file, "juegos");
+      if (url) {
+        setForm(prev => ({ ...prev, image: url }));
+        toast.success("Imagen subida con éxito");
+      }
+    } catch (err) {
+      toast.error("Error al subir la imagen");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -163,7 +221,10 @@ export default function Juegos() {
                 className="input-field"
                 placeholder="Ej: EA FC 25"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, name: e.target.value });
+                  setLocalPreview(null); // URL manually entered, clear local preview
+                }}
                 autoFocus
               />
             </div>
@@ -218,25 +279,65 @@ export default function Juegos() {
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "hsl(215 15% 55%)" }}>
-                URL de Imagen
+                Imagen del Juego (URL o Archivo)
               </label>
-              <input
-                className="input-field"
-                placeholder="https://ejemplo.com/caratula.jpg"
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
-              />
-              {form.image && (
-                <div className="mt-2 aspect-[3/4] w-[80px] overflow-hidden rounded-md border" style={{ borderColor: 'hsl(220 15% 22%)' }}>
-                  <img src={form.image} alt="Preview" className="h-full w-full object-cover" />
+              
+              <div className="flex gap-2 mb-3">
+                <input
+                  className="input-field flex-1"
+                  placeholder="https://ejemplo.com/caratula.jpg"
+                  value={form.image}
+                  onChange={(e) => {
+                    setForm({ ...form, image: e.target.value });
+                    setLocalPreview(null);
+                  }}
+                />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={onFileChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-2 px-4 rounded-lg border border-dashed transition-all hover:bg-muted/10"
+                  style={{ 
+                    borderColor: "hsl(220 15% 25%)", 
+                    color: "hsl(215 15% 60%)" 
+                  }}
+                >
+                  {uploading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Upload size={16} />
+                      <span className="text-xs font-medium">Subir</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {(form.image || localPreview) && (
+                <div className="relative group/preview mt-2 aspect-[3/4] w-[80px] overflow-hidden rounded-md border" style={{ borderColor: 'hsl(220 15% 22%)' }}>
+                  <img src={localPreview || form.image} alt="Preview" className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                    <p className="text-[10px] text-white font-bold px-1 text-center">Preview</p>
+                  </div>
                 </div>
               )}
             </div>
 
             <div className="flex gap-3 pt-2">
               <button onClick={() => setModal(null)} className="btn-ghost flex-1 text-sm">Cancelar</button>
-              <button onClick={handleSave} className="btn-primary flex-1 text-sm">
-                {modal.mode === "add" ? "Agregar" : "Guardar"}
+              <button 
+                onClick={handleSave} 
+                disabled={uploading}
+                className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {uploading ? "Subiendo..." : (modal.mode === "add" ? "Agregar" : "Guardar")}
               </button>
             </div>
           </div>

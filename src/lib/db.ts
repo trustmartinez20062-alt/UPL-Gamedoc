@@ -198,3 +198,47 @@ export async function upsertContacto(info: ContactoInfo): Promise<void> {
     await supabase.from("config_contacto").insert(payload);
   }
 }
+
+// ── STORAGE ───────────────────────────────────────────────────────────
+export async function uploadImage(file: File, folder: string): Promise<string | null> {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Math.random().toString(36).slice(2)}.${fileExt}`;
+  const filePath = `${folder}/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("images")
+    .upload(filePath, file);
+
+  if (uploadError) {
+    console.error("Error al subir imagen:", uploadError);
+    return null;
+  }
+
+  const { data } = supabase.storage
+    .from("images")
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+}
+
+export async function deleteImageFromStorage(url: string): Promise<void> {
+  if (!url) return;
+
+  // Solo borrar si es una URL de nuestro bucket 'images'.
+  // Las URLs de Supabase tienen este formato: .../public/images/[path]
+  const parts = url.split("/public/images/");
+  if (parts.length < 2) return;
+
+  const path = parts[1].split('?')[0]; // Ignora parámetros como ?v=123
+  if (!path) return;
+
+  const { error } = await supabase.storage
+    .from("images")
+    .remove([path]);
+
+  if (error) {
+    console.error("Error al borrar imagen del storage:", error);
+  } else {
+    console.log("Imagen borrada exitosamente del storage:", path);
+  }
+}
