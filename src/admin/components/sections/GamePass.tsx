@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { CreditCard, Plus, Pencil, Trash2 } from "lucide-react";
 import { useGamePass, genId, type GamePassPlan } from "../../store";
+import { useAuth } from "../../hooks/useAuth";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
 export default function GamePass() {
   const [planes, setPlanes] = useGamePass();
+  const { user } = useAuth();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: GamePassPlan } | null>(null);
   const [form, setForm] = useState<{ plan: string; precio: string; tipo: "Core" | "Ultimate" | "Otros" }>({ 
     plan: "", 

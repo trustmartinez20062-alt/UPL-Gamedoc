@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { usePlataformas, type Juego } from "../admin/store";
 
+// @DB-DYNAMIC-DATA: Las propiedades del juego deben coincidir con la tabla 'products' en Supabase.
 interface JuegoCardProps extends Juego {
   index: number;
 }

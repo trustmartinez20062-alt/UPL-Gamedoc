@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { Monitor, Plus, Pencil, Trash2 } from "lucide-react";
 import { useConsolasVenta, genId, type ConsolaVenta } from "../../store";
+import { useAuth } from "../../hooks/useAuth";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
 export default function ConsolasVenta() {
+  // @DB-CRUD-STATE: Sincronizar con tabla 'products' (categoría consolas_venta).
   const [consolas, setConsolas] = useConsolasVenta();
+  const { user } = useAuth();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: ConsolaVenta } | null>(null);
   const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", badge: "Disponible", image: "" });
 
@@ -19,13 +22,14 @@ export default function ConsolasVenta() {
     setModal({ mode: "edit", item });
   };
 
+  // @DB-CRUD-LOGIC: Migrar a supabase.from('products').upsert().
   const handleSave = () => {
     if (!form.name.trim()) return;
     if (modal?.mode === "add") {
-      setConsolas((prev) => [...prev, { id: genId(), ...form }]);
+      setConsolas((prev) => [...prev, { id: genId(), ...form } as ConsolaVenta]);
     } else if (modal?.item) {
       setConsolas((prev) =>
-        prev.map((c) => (c.id === modal.item!.id ? { ...c, ...form } : c))
+        prev.map((c) => (c.id === modal.item!.id ? ({ ...c, ...form } as ConsolaVenta) : c))
       );
     }
     setModal(null);

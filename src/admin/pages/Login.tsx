@@ -15,9 +15,9 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 600)); // fake delay
 
-    if (login(user, pass)) {
+    const ok = await login(user, pass);
+    if (ok) {
       navigate("/admin", { replace: true });
     } else {
       setError("Usuario o contraseña incorrectos.");

@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { DollarSign, Plus, Pencil, Trash2 } from "lucide-react";
 import { useConsolasCompra, genId, type ConsolaCompra } from "../../store";
+import { useAuth } from "../../hooks/useAuth";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
 export default function ConsolasCompra() {
+  // @DB-CRUD-STATE: Sincronizar con tabla de 'consolas_compra'.
   const [consolas, setConsolas] = useConsolasCompra();
+  const { user } = useAuth();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: ConsolaCompra } | null>(null);
   const [form, setForm] = useState<Omit<ConsolaCompra, "id">>({ name: "", precio: "" });
 
@@ -19,13 +22,14 @@ export default function ConsolasCompra() {
     setModal({ mode: "edit", item });
   };
 
+  // @DB-CRUD-LOGIC: Sincronizar con base de datos.
   const handleSave = () => {
-    if (!form.name.trim() || !form.precio.trim()) return;
+    if (!form.name.trim()) return;
     if (modal?.mode === "add") {
-      setConsolas((prev) => [...prev, { id: genId(), ...form }]);
+      setConsolas((prev) => [...prev, { id: genId(), ...form } as ConsolaCompra]);
     } else if (modal?.item) {
       setConsolas((prev) =>
-        prev.map((c) => (c.id === modal.item!.id ? { ...c, ...form } : c))
+        prev.map((c) => (c.id === modal.item!.id ? ({ ...c, ...form } as ConsolaCompra) : c))
       );
     }
     setModal(null);

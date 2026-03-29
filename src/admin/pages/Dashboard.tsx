@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, NavLink, useNavigate } from "react-router-dom";
-import { logout } from "../auth";
+import { logout, getCurrentUser } from "../auth";
 import {
   Monitor, DollarSign, Wrench, Unlock, Gamepad2, Server, CreditCard,
-  Phone, LogOut, Menu, X, ChevronRight
+  Phone, LogOut, Menu, X, ChevronRight, Users
 } from "lucide-react";
 
 import ConsolasVenta from "../components/sections/ConsolasVenta";
@@ -14,6 +14,7 @@ import Juegos from "../components/sections/Juegos";
 import Plataformas from "../components/sections/Plataformas";
 import GamePass from "../components/sections/GamePass";
 import Contacto from "../components/sections/Contacto";
+import Usuarios from "../components/sections/Usuarios";
 
 const navItems = [
   { to: ".", label: "Consolas en Venta", icon: Monitor, end: true },
@@ -24,14 +25,25 @@ const navItems = [
   { to: "plataformas", label: "Plataformas", icon: Server },
   { to: "gamepass", label: "Game Pass", icon: CreditCard },
   { to: "contacto", label: "Contacto", icon: Phone },
+  { to: "usuarios", label: "Usuarios", icon: Users },
 ];
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<{ nombre: string; role: string } | null>(null);
 
-  const handleLogout = () => {
-    logout();
+  useEffect(() => {
+    getCurrentUser().then(setUser);
+  }, []);
+
+  const filteredNavItems = navItems.filter(item => {
+    if (item.to === "usuarios" && user?.role !== "admin") return false;
+    return true;
+  });
+
+  const handleLogout = async () => {
+    await logout();
     navigate("/admin/login", { replace: true });
   };
 
@@ -55,7 +67,12 @@ export default function Dashboard() {
             <div className="font-bold text-sm text-glow" style={{ fontFamily: "Orbitron, sans-serif", color: "hsl(175 80% 50%)" }}>
               GAME DOCTOR
             </div>
-            <div className="text-xs" style={{ color: "hsl(215 15% 45%)" }}>Admin Panel</div>
+            <div className="text-[10px] flex items-center gap-1.5" style={{ color: "hsl(215 15% 45%)" }}>
+              <span className="uppercase font-bold" style={{ color: user?.role === 'admin' ? 'hsl(175 80% 50%)' : 'inherit' }}>
+                {user?.role}
+              </span> 
+              • {user?.nombre}
+            </div>
           </div>
         </div>
       </div>
@@ -65,7 +82,7 @@ export default function Dashboard() {
         <p className="text-xs font-semibold uppercase tracking-wider px-3 mb-3" style={{ color: "hsl(215 15% 38%)" }}>
           Secciones
         </p>
-        {navItems.map(({ to, label, icon: Icon, end }) => (
+        {filteredNavItems.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
@@ -144,6 +161,7 @@ export default function Dashboard() {
             <Route path="plataformas" element={<Plataformas />} />
             <Route path="gamepass" element={<GamePass />} />
             <Route path="contacto" element={<Contacto />} />
+            <Route path="usuarios" element={<Usuarios />} />
           </Routes>
         </main>
       </div>

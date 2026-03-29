@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Unlock, Plus, Pencil, Trash2 } from "lucide-react";
 import { useDestraba, genId, type DestrabaModelo } from "../../store";
+import { useAuth } from "../../hooks/useAuth";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
 export default function Destraba() {
   const [modelos, setModelos] = useDestraba();
+  const { user } = useAuth();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: DestrabaModelo } | null>(null);
   const [form, setForm] = useState<Omit<DestrabaModelo, "id">>({ modelo: "", precio: "" });
 

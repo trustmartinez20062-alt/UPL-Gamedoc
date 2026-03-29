@@ -1,20 +1,40 @@
 import { useState } from "react";
-import { Server, Plus, Trash2 } from "lucide-react";
+import { Server, Plus, Trash2, Pencil } from "lucide-react";
 import { usePlataformas, genId, type Plataforma, useJuegos } from "../../store";
+import { useAuth } from "../../hooks/useAuth";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
 export default function Plataformas() {
   const [plataformas, setPlataformas] = usePlataformas();
+  const { user } = useAuth();
   const [juegos, setJuegos] = useJuegos();
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: Plataforma } | null>(null);
   const [form, setForm] = useState<Omit<Plataforma, "id">>({ name: "" });
+
+  const openAdd = () => {
+    setForm({ name: "" });
+    setModal({ mode: "add" });
+  };
+
+  const openEdit = (item: Plataforma) => {
+    setForm({ name: item.name });
+    setModal({ mode: "edit", item });
+  };
 
   const handleSave = () => {
     if (!form.name.trim()) return;
-    setPlataformas((prev) => [...prev, { id: genId(), ...form }]);
+    
+    if (modal?.mode === "add") {
+      setPlataformas((prev) => [...prev, { id: genId(), ...form }]);
+    } else if (modal?.item) {
+      setPlataformas((prev) =>
+        prev.map((p) => (p.id === modal.item!.id ? { ...p, ...form } : p))
+      );
+    }
+    
     setForm({ name: "" });
-    setModal(false);
+    setModal(null);
   };
 
   const handleDelete = (id: string) => {
@@ -26,10 +46,7 @@ export default function Plataformas() {
     }
 
     if (confirm(message)) {
-      // Remove from platforms list
       setPlataformas((prev) => prev.filter((p) => p.id !== id));
-      
-      // Remove from all games
       setJuegos((prev) => prev.map(j => ({
         ...j,
         plataformas: j.plataformas?.filter(pId => pId !== id) || []
@@ -44,7 +61,7 @@ export default function Plataformas() {
         title="Gestión de Plataformas"
         description={`${plataformas.length} plataformas configuradas`}
         action={
-          <button onClick={() => setModal(true)} className="btn-primary flex items-center gap-2 text-sm">
+          <button onClick={openAdd} className="btn-primary flex items-center gap-2 text-sm">
             <Plus size={16} /> Agregar Plataforma
           </button>
         }
@@ -70,13 +87,32 @@ export default function Plataformas() {
                 {p.name}
               </span>
             </div>
-            <button
-              onClick={() => handleDelete(p.id)}
-              className="p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500/10"
-              style={{ color: "hsl(0 84% 65%)" }}
-            >
-              <Trash2 size={15} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => openEdit(p)}
+                className="p-2 rounded-lg transition-all"
+                style={{ color: "hsl(215 15% 60%)" }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "hsl(220 15% 18%)";
+                  (e.currentTarget as HTMLElement).style.color = "hsl(175 80% 55%)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "transparent";
+                  (e.currentTarget as HTMLElement).style.color = "hsl(215 15% 60%)";
+                }}
+              >
+                <Pencil size={15} />
+              </button>
+              <button
+                onClick={() => handleDelete(p.id)}
+                className="p-2 rounded-lg transition-all"
+                style={{ color: "hsl(0 84% 65%)" }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "hsl(0 84% 60% / 0.12)")}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
+              >
+                <Trash2 size={15} />
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -94,7 +130,7 @@ export default function Plataformas() {
       </div>
 
       {modal && (
-        <Modal title="Nueva Plataforma" onClose={() => setModal(false)}>
+        <Modal title={modal.mode === "add" ? "Nueva Plataforma" : "Editar Plataforma"} onClose={() => setModal(null)}>
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>
@@ -110,8 +146,10 @@ export default function Plataformas() {
               />
             </div>
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setModal(false)} className="btn-ghost flex-1 text-sm">Cancelar</button>
-              <button onClick={handleSave} className="btn-primary flex-1 text-sm">Guardar</button>
+              <button onClick={() => setModal(null)} className="btn-ghost flex-1 text-sm">Cancelar</button>
+              <button onClick={handleSave} className="btn-primary flex-1 text-sm">
+                {modal.mode === "add" ? "Guardar" : "Actualizar"}
+              </button>
             </div>
           </div>
         </Modal>

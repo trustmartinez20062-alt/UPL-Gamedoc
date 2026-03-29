@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Wrench, Gamepad2, CreditCard, Monitor } from "lucide-react";
 
+// @DB-DYNAMIC-DATA: Esta lista de servicios principales debería ser editable desde el panel/BD.
 const services = [
   {
     icon: Wrench,

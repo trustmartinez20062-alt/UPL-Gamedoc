@@ -1,23 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, Monitor, Wrench, ChevronRight, ShoppingCart, DollarSign, CreditCard, Unlock } from "lucide-react";
-import { useJuegos } from "../admin/store";
+import { useConsolasVenta, useConsolasCompra, useGamePass, useJuegos, usePlataformas } from "../admin/store";
 import JuegoCard from "./JuegoCard";
 import WhatsAppButton from "./WhatsAppButton";
 import { Link } from "react-router-dom";
 
-/* ── Data to be shown in the tabs ── */
-const consolasVenta = [
-  { name: "PlayStation 5 Slim", badge: "Disponible", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Slim" },
-  { name: "PlayStation 5 Digital", badge: "Agotado", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Digital" },
-  { name: "PlayStation 4 Pro (1TB)", badge: "Disponible", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PS4+Pro+1TB" },
-  { name: "PlayStation 4 Slim", badge: "Agotado", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PS4+Slim" },
-  { name: "Xbox Series X", badge: "Disponible", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+X" },
-  { name: "Xbox Series S", badge: "Disponible", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+S" },
-  { name: "Nintendo Switch OLED", badge: "Disponible", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+OLED" },
-  { name: "Nintendo Switch Lite", badge: "Disponible", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+Lite" },
-];
-
+// @DB-DYNAMIC-DATA: Estos arreglos pronto deben venir de Supabase.
 const reparacionModelos = [
   "PlayStation 4 / Slim / Pro (Service & HDMI)",
   "PlayStation 5 / Slim / Digital (Liquid Metal)",
@@ -33,17 +22,15 @@ const destrabaModelos = [
   { modelo: "Xbox 360", precio: "$1.500" },
 ];
 
-const gamePassPlanes = [
-  { plan: "Game Pass Core (1 mes)", precio: "$350" },
-  { plan: "Game Pass Core (3 meses)", precio: "$900" },
-  { plan: "Game Pass Core (12 meses)", precio: "$2.500" },
-  { plan: "Game Pass Ultimate (1 mes)", precio: "$600" },
-  { plan: "Game Pass Ultimate (3 meses)", precio: "$1.600" },
-];
-
 const ShopTabs = () => {
   const [activeTab, setActiveTab] = useState("juegos");
+  
+  // @DB-DYNAMIC-DATA: Hooks listos para conectarse a Supabase en el store.
   const [juegos] = useJuegos();
+  const [consolasVenta] = useConsolasVenta();
+  const [consolasCompra] = useConsolasCompra();
+  const [gamePassPlanes] = useGamePass();
+  
   const displayedJuegos = juegos.slice(0, 4);
 
   const tabs = [
@@ -56,7 +43,6 @@ const ShopTabs = () => {
   return (
     <section id="tienda" className="py-24 gradient-dark overflow-hidden">
       <div className="container">
-        {/* ... (Titles and Tab Selector same as before) ... */}
         <div className="mb-12 text-center">
           <h2 className="mb-4 font-heading text-3xl font-bold text-foreground sm:text-4xl">
             Nuestra <span className="text-primary text-glow">Tienda</span>
@@ -131,7 +117,7 @@ const ShopTabs = () => {
                   </div>
                   <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4">
                     {consolasVenta.map((c, i) => (
-                      <div key={c.name} className="group relative overflow-hidden rounded-xl border border-border bg-card p-3 sm:p-5 transition-all hover:border-primary/40">
+                      <div key={c.id || c.name} className="group relative overflow-hidden rounded-xl border border-border bg-card p-3 sm:p-5 transition-all hover:border-primary/40">
                          <div className="absolute right-2 top-2 z-10 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-primary">
                           {c.badge}
                         </div>
@@ -171,7 +157,7 @@ const ShopTabs = () => {
                         </thead>
                         <tbody className="divide-y divide-border">
                           {gamePassPlanes.map((g, i) => (
-                            <tr key={g.plan} className="group transition-colors hover:bg-muted/10">
+                            <tr key={g.id || g.plan} className="group transition-colors hover:bg-muted/10">
                               <td className="px-6 py-4 font-medium text-foreground">{g.plan}</td>
                               <td className="px-6 py-4 text-right font-bold text-primary">{g.precio}</td>
                             </tr>

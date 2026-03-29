@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Gamepad2, CreditCard } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useJuegos } from "../admin/store";
+import { useJuegos, usePlataformas } from "../admin/store";
 import JuegoCard from "./JuegoCard";
 import WhatsAppButton from "./WhatsAppButton";
 
@@ -11,10 +11,13 @@ const sectionVariant = {
 };
 
 const JuegosSection = () => {
+  // @DB-DYNAMIC-DATA: Este hook ya está preparado para consumir datos, solo falta conectar useJuegos() a Supabase en store.ts.
   const [juegos] = useJuegos();
+  const [allPlataformas] = usePlataformas();
   const displayedJuegos = juegos.slice(0, 4);
   const hasMore = juegos.length > 4;
 
+  // @DB-DYNAMIC-DATA: Los precios de Game Pass deberían ser gestionados desde la base de datos.
   const gamePassPlanes = [
     { plan: "Game Pass Core (1 mes)", precio: "$350" },
     { plan: "Game Pass Core (3 meses)", precio: "$900" },

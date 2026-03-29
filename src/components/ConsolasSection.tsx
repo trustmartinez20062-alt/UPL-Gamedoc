@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ShoppingCart, DollarSign, Wrench, Unlock } from "lucide-react";
 import WhatsAppButton from "./WhatsAppButton";
 
-/* ── Venta de consolas ── */
+// @DB-DYNAMIC-DATA: Este arreglo debe ser poblado desde una tabla 'products' filtrada por categoría 'venta'.
 const consolasVenta = [
   { name: "PlayStation 5 Slim", badge: "Disponible", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Slim" },
   { name: "PlayStation 5 Digital", badge: "Agotado", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Digital" },
@@ -14,7 +14,7 @@ const consolasVenta = [
   { name: "Nintendo Switch Lite", badge: "Disponible", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+Lite" },
 ];
 
-/* ── Compra de consolas ── */
+// @DB-DYNAMIC-DATA: Este arreglo debe venir de una tabla de 'buying_prices' o similar.
 const consolasCompra = [
   { name: "PlayStation 4 Slim", precio: "$4.000" },
   { name: "PlayStation 4 Pro", precio: "$5.500" },
@@ -37,7 +37,7 @@ const reparacionModelos = [
   "Controles (PS4, PS5, Xbox Series)",
 ];
 
-/* ── Destraba ── */
+// @DB-DYNAMIC-DATA: Precios de destraba.
 const destrabaModelos = [
   { modelo: "PlayStation 4 (todas las versiones)", precio: "$2.500" },
   { modelo: "Nintendo Switch / OLED (V1, V2, OLED)", precio: "$3.000" },

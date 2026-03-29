@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { Gamepad2, Plus, Pencil, Trash2, Check } from "lucide-react";
 import { useJuegos, usePlataformas, genId, type Juego } from "../../store";
+import { useAuth } from "../../hooks/useAuth";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
 export default function Juegos() {
+// @DB-CRUD-STATE: Este estado local debe ser reemplazado por datos provenientes de Supabase.
   const [juegos, setJuegos] = useJuegos();
+  const { user } = useAuth();
   const [allPlataformas] = usePlataformas();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: Juego } | null>(null);
   const [form, setForm] = useState<Omit<Juego, "id">>({ 
@@ -44,6 +47,7 @@ export default function Juegos() {
     setModal({ mode: "edit", item });
   };
 
+// @DB-CRUD-LOGIC: Estas operaciones deben llamar a supabase.from('products').insert() o .update().
   const handleSave = () => {
     if (!form.name.trim()) return;
     if (modal?.mode === "add") {

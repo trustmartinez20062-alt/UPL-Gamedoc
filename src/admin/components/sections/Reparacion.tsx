@@ -1,19 +1,39 @@
 import { useState } from "react";
-import { Wrench, Plus, Trash2 } from "lucide-react";
+import { Wrench, Plus, Trash2, Pencil } from "lucide-react";
 import { useReparacion, genId, type ReparacionModelo } from "../../store";
+import { useAuth } from "../../hooks/useAuth";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
 export default function Reparacion() {
   const [modelos, setModelos] = useReparacion();
-  const [modal, setModal] = useState(false);
+  const { user } = useAuth();
+  const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: ReparacionModelo } | null>(null);
   const [form, setForm] = useState<Omit<ReparacionModelo, "id">>({ modelo: "" });
+
+  const openAdd = () => {
+    setForm({ modelo: "" });
+    setModal({ mode: "add" });
+  };
+
+  const openEdit = (item: ReparacionModelo) => {
+    setForm({ modelo: item.modelo });
+    setModal({ mode: "edit", item });
+  };
 
   const handleSave = () => {
     if (!form.modelo.trim()) return;
-    setModelos((prev) => [...prev, { id: genId(), ...form }]);
+    
+    if (modal?.mode === "add") {
+      setModelos((prev) => [...prev, { id: genId(), ...form }]);
+    } else if (modal?.item) {
+      setModelos((prev) =>
+        prev.map((m) => (m.id === modal.item!.id ? { ...m, ...form } : m))
+      );
+    }
+    
     setForm({ modelo: "" });
-    setModal(false);
+    setModal(null);
   };
 
   const handleDelete = (id: string) => {
@@ -29,7 +49,7 @@ export default function Reparacion() {
         title="Reparación de Consolas"
         description={`${modelos.length} modelos disponibles para reparación`}
         action={
-          <button onClick={() => setModal(true)} className="btn-primary flex items-center gap-2 text-sm">
+          <button onClick={openAdd} className="btn-primary flex items-center gap-2 text-sm">
             <Plus size={16} /> Agregar Modelo
           </button>
         }
@@ -55,15 +75,32 @@ export default function Reparacion() {
                 {m.modelo}
               </span>
             </div>
-            <button
-              onClick={() => handleDelete(m.id)}
-              className="p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-              style={{ color: "hsl(0 84% 65%)" }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "hsl(0 84% 60% / 0.12)")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
-            >
-              <Trash2 size={15} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => openEdit(m)}
+                className="p-2 rounded-lg transition-all"
+                style={{ color: "hsl(215 15% 60%)" }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "hsl(220 15% 18%)";
+                  (e.currentTarget as HTMLElement).style.color = "hsl(175 80% 55%)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "transparent";
+                  (e.currentTarget as HTMLElement).style.color = "hsl(215 15% 60%)";
+                }}
+              >
+                <Pencil size={15} />
+              </button>
+              <button
+                onClick={() => handleDelete(m.id)}
+                className="p-2 rounded-lg transition-all"
+                style={{ color: "hsl(0 84% 65%)" }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "hsl(0 84% 60% / 0.12)")}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
+              >
+                <Trash2 size={15} />
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -76,7 +113,7 @@ export default function Reparacion() {
       </div>
 
       {modal && (
-        <Modal title="Agregar Modelo de Reparación" onClose={() => setModal(false)}>
+        <Modal title={modal.mode === "add" ? "Agregar Modelo de Reparación" : "Editar Modelo de Reparación"} onClose={() => setModal(null)}>
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>
@@ -91,8 +128,10 @@ export default function Reparacion() {
               />
             </div>
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setModal(false)} className="btn-ghost flex-1 text-sm">Cancelar</button>
-              <button onClick={handleSave} className="btn-primary flex-1 text-sm">Agregar</button>
+              <button onClick={() => setModal(null)} className="btn-ghost flex-1 text-sm">Cancelar</button>
+              <button onClick={handleSave} className="btn-primary flex-1 text-sm">
+                {modal.mode === "add" ? "Agregar" : "Guardar"}
+              </button>
             </div>
           </div>
         </Modal>
