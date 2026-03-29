@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, NavLink, useNavigate } from "react-router-dom";
+import { Routes, Route, NavLink, useNavigate, Navigate } from "react-router-dom";
 import { logout, getCurrentUser } from "../auth";
 import {
   Monitor, DollarSign, Wrench, Unlock, Gamepad2, Server, CreditCard,
-  Phone, LogOut, Menu, X, ChevronRight, Users
+  Phone, LogOut, Menu, X, ChevronRight, Users, User
 } from "lucide-react";
 
 import ConsolasVenta from "../components/sections/ConsolasVenta";
@@ -15,6 +15,8 @@ import Plataformas from "../components/sections/Plataformas";
 import GamePass from "../components/sections/GamePass";
 import Contacto from "../components/sections/Contacto";
 import Usuarios from "../components/sections/Usuarios";
+import MiPerfil from "../components/sections/MiPerfil";
+import type { Usuario } from "../store";
 
 const navItems = [
   { to: ".", label: "Consolas en Venta", icon: Monitor, end: true },
@@ -26,15 +28,20 @@ const navItems = [
   { to: "gamepass", label: "Game Pass", icon: CreditCard },
   { to: "contacto", label: "Contacto", icon: Phone },
   { to: "usuarios", label: "Usuarios", icon: Users },
+  { to: "perfil", label: "Mi Perfil", icon: User },
 ];
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState<{ nombre: string; role: string } | null>(null);
+  const [user, setUser] = useState<Usuario | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCurrentUser().then(setUser);
+    getCurrentUser().then(u => {
+      setUser(u);
+      setLoading(false);
+    });
   }, []);
 
   const filteredNavItems = navItems.filter(item => {
@@ -67,11 +74,19 @@ export default function Dashboard() {
             <div className="font-bold text-sm text-glow" style={{ fontFamily: "Orbitron, sans-serif", color: "hsl(175 80% 50%)" }}>
               GAME DOCTOR
             </div>
-            <div className="text-[10px] flex items-center gap-1.5" style={{ color: "hsl(215 15% 45%)" }}>
-              <span className="uppercase font-bold" style={{ color: user?.role === 'admin' ? 'hsl(175 80% 50%)' : 'inherit' }}>
-                {user?.role}
-              </span> 
-              • {user?.nombre}
+            <div className="mt-1 flex flex-col items-start gap-1">
+              <span 
+                className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                  user?.role === 'admin' 
+                    ? "bg-[hsl(175_80%_50%/0.15)] text-[hsl(175_80%_50%)] border border-[hsl(175_80%_50%/0.2)]" 
+                    : "bg-[hsl(215_15%_18%)] text-[hsl(215_15%_55%)] border border-[hsl(215_15%_25%)]"
+                }`}
+              >
+                {user?.role || "Cargando..."}
+              </span>
+              <div className="text-[10px] pl-0.5" style={{ color: "hsl(215 15% 45%)" }}>
+                {user?.nombre}
+              </div>
             </div>
           </div>
         </div>
@@ -112,6 +127,19 @@ export default function Dashboard() {
       </div>
     </>
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(220 20% 6%)" }}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: "hsl(175 80% 50%) transparent" }} />
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ fontFamily: "Orbitron, sans-serif", color: "hsl(215 15% 45%)" }}>
+            Iniciando Panel...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "hsl(220 20% 6%)" }}>
@@ -161,7 +189,10 @@ export default function Dashboard() {
             <Route path="plataformas" element={<Plataformas />} />
             <Route path="gamepass" element={<GamePass />} />
             <Route path="contacto" element={<Contacto />} />
-            <Route path="usuarios" element={<Usuarios />} />
+            <Route path="perfil" element={<MiPerfil />} />
+            {user?.role === "admin" && <Route path="usuarios" element={<Usuarios />} />}
+            {/* Si no es admin y trata de entrar a usuarios, redirigir a dashboard */}
+            <Route path="usuarios" element={<Navigate to="/admin" replace />} />
           </Routes>
         </main>
       </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Users, Plus, Trash2, Shield, User, Key, AlertCircle, RefreshCw } from "lucide-react";
-import { getCurrentUser, fetchUsuarios, createUsuario, deleteUsuario } from "../../auth";
+import { Users, Plus, Trash2, Shield, User, Key, AlertCircle, RefreshCw, Edit2 } from "lucide-react";
+import { getCurrentUser, fetchUsuarios, createUsuario, deleteUsuario, updateNombre, adminChangePassword } from "../../auth";
 import type { Usuario } from "../../store";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
@@ -9,7 +9,8 @@ export default function Usuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<Usuario | null>(null);
-  const [modal, setModal] = useState<"add" | null>(null);
+  const [modal, setModal] = useState<"add" | "edit" | null>(null);
+  const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
   const [form, setForm] = useState({ nombre: "", password: "", role: "subadmin" as "admin" | "subadmin" });
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
@@ -43,6 +44,13 @@ export default function Usuarios() {
     setModal("add");
   };
 
+  const openEdit = (u: Usuario) => {
+    setSelectedUser(u);
+    setForm({ nombre: u.nombre, password: "", role: u.role });
+    setErrorMsg("");
+    setModal("edit");
+  };
+
   const handleSave = async () => {
     if (!form.nombre.trim() || !form.password.trim()) return;
     setSaving(true);
@@ -54,6 +62,39 @@ export default function Usuarios() {
       await load();
     } else {
       setErrorMsg("No se pudo crear el usuario. El nombre puede estar en uso o la contraseña es muy corta (min. 6 caracteres).");
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!selectedUser || !form.nombre.trim()) return;
+    setSaving(true);
+    setErrorMsg("");
+
+    let success = true;
+
+    // 1. Actualizar nombre si cambió
+    if (form.nombre !== selectedUser.nombre) {
+      const ok = await updateNombre(selectedUser.id, form.nombre);
+      if (!ok) success = false;
+    }
+
+    // 2. Actualizar contraseña si se ingresó
+    if (success && form.password.trim()) {
+      if (form.password.length < 6) {
+        setErrorMsg("La contraseña debe tener al menos 6 caracteres.");
+        setSaving(false);
+        return;
+      }
+      const ok = await adminChangePassword(selectedUser.id, form.password);
+      if (!ok) success = false;
+    }
+
+    setSaving(false);
+    if (success) {
+      setModal(null);
+      await load();
+    } else {
+      setErrorMsg("Error al actualizar el usuario. Revisa la consola.");
     }
   };
 
@@ -126,6 +167,12 @@ export default function Usuarios() {
               </div>
 
               <div className="flex gap-2 pt-4 border-t" style={{ borderColor: "hsl(220 15% 15%)" }}>
+                <button
+                  onClick={() => openEdit(u)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all hover:bg-[hsl(220_15%_14%)] text-[hsl(215_15%_55%)]"
+                >
+                  <Edit2 size={14} /> Editar
+                </button>
                 <button
                   onClick={() => handleDelete(u)}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all hover:bg-[hsl(0_84%_60%/0.1)] text-[hsl(0_84%_70%)]"
@@ -209,6 +256,56 @@ export default function Usuarios() {
               </button>
               <button onClick={handleSave} disabled={saving} className="btn-primary flex-1 py-3.5 rounded-2xl text-sm">
                 {saving ? "Creando..." : "Crear Usuario"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+      {modal === "edit" && selectedUser && (
+        <Modal title={`Editar Usuario: ${selectedUser.nombre}`} onClose={() => setModal(null)}>
+          <div className="space-y-5">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider mb-2.5" style={{ color: "hsl(215 15% 50%)" }}>
+                Nombre de Usuario
+              </label>
+              <div className="relative">
+                <input
+                  className="input-field pl-10"
+                  value={form.nombre}
+                  onChange={(e) => setForm({ ...form, nombre: e.target.value.toLowerCase().replace(/\s/g, '') })}
+                />
+                <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider mb-2.5" style={{ color: "hsl(215 15% 50%)" }}>
+                Nueva Contraseña (dejar vacío para no cambiar)
+              </label>
+              <div className="relative">
+                <input
+                  className="input-field pl-10"
+                  type="text"
+                  placeholder="Nueva contraseña segura"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                />
+                <Key size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
+              </div>
+            </div>
+
+            {errorMsg && (
+              <div className="text-xs px-3 py-2 rounded-lg" style={{ background: "hsl(0 84% 60% / 0.1)", border: "1px solid hsl(0 84% 60% / 0.25)", color: "hsl(0 84% 70%)" }}>
+                {errorMsg}
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-4">
+              <button onClick={() => setModal(null)} className="flex-1 py-3.5 rounded-2xl font-bold transition-all hover:bg-[hsl(220_15%_14%)] text-[hsl(215_15%_50%)]">
+                Cancelar
+              </button>
+              <button onClick={handleEdit} disabled={saving} className="btn-primary flex-1 py-3.5 rounded-2xl text-sm">
+                {saving ? "Guardando..." : "Guardar Cambios"}
               </button>
             </div>
           </div>

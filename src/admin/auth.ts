@@ -36,13 +36,27 @@ export async function getCurrentUser(): Promise<Usuario | null> {
     .eq("id", session.user.id)
     .single();
 
-  if (error || !profile) return null;
+  if (error || !profile) {
+    if (error) console.error("Error al obtener perfil de usuario:", error.message);
+    else console.warn("No se encontró perfil para el usuario:", session.user.id);
+    
+    // Fallback: Si no hay perfil pero el email es admin@gamedoctor.uy, dar admin
+    const email = session.user.email ?? "";
+    const isSpecialAdmin = email === "admin@gamedoctor.uy";
+    
+    return {
+      id: session.user.id,
+      nombre: email.split("@")[0],
+      email: email,
+      role: isSpecialAdmin ? "admin" : "subadmin",
+    };
+  }
 
   return {
     id: profile.id,
     nombre: profile.nombre,
     email: session.user.email ?? "",
-    role: profile.role,
+    role: profile.role as "admin" | "subadmin",
   };
 }
 
@@ -72,10 +86,33 @@ export async function createUsuario(nombre: string, password: string, role: "adm
   return true;
 }
 
-// Cambiar contraseña (solo el propio usuario autenticado puede)
-export async function changePassword(newPassword: string): Promise<boolean> {
+// Cambiar mi propia contraseña
+export async function changeMyPassword(newPassword: string): Promise<boolean> {
   const { error } = await supabase.auth.updateUser({ password: newPassword });
-  if (error) { console.error("Error cambiando contraseña:", error.message); return false; }
+  if (error) { console.error("Error cambiando mi contraseña:", error.message); return false; }
+  return true;
+}
+
+// Actualizar mi nombre o el de otro (si soy admin)
+export async function updateNombre(id: string, nuevoNombre: string): Promise<boolean> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ nombre: nuevoNombre })
+    .eq("id", id);
+  if (error) { console.error("Error actualizando nombre:", error.message); return false; }
+  return true;
+}
+
+// Admin cambia la contraseña de un tercero (vía Edge Function)
+export async function adminChangePassword(userId: string, newPassword: string): Promise<boolean> {
+  const { data, error } = await supabase.functions.invoke("admin-reset-password", {
+    body: { userId, password: newPassword },
+  });
+
+  if (error || data?.error) {
+    console.error("Error en admin-reset-password:", error?.message || data?.error);
+    return false;
+  }
   return true;
 }
 
