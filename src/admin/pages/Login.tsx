@@ -149,9 +149,31 @@ export default function Login() {
           </form>
         </div>
 
-        <p className="text-center mt-6 text-xs" style={{ color: "hsl(215 15% 35%)" }}>
-          © 2024 Game Doctor UY — Administración interna
-        </p>
+        <div className="text-center mt-6 flex flex-col items-center gap-4">
+          <button
+            onClick={() => navigate("/")}
+            className="text-xs py-2 px-4 rounded-lg border transition-all duration-200 flex items-center gap-2 group"
+            style={{ 
+              borderColor: "hsl(220 15% 18%)", 
+              background: "hsl(220 18% 10%)",
+              color: "hsl(215 15% 55%)"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "hsl(175 80% 50% / 0.4)";
+              e.currentTarget.style.color = "hsl(175 80% 50%)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "hsl(220 15% 18%)";
+              e.currentTarget.style.color = "hsl(215 15% 55%)";
+            }}
+          >
+            Volver al inicio
+          </button>
+          
+          <p className="text-xs" style={{ color: "hsl(215 15% 35%)" }}>
+            © {new Date().getFullYear()} Game Doctor UY — Administración interna
+          </p>
+        </div>
       </div>
     </div>
   );

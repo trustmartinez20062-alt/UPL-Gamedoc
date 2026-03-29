@@ -4,12 +4,12 @@ import WhatsAppButton from "./WhatsAppButton";
 
 /* ── Venta de consolas ── */
 const consolasVenta = [
-  { name: "PlayStation 5 Slim", badge: "Disponible", emoji: "🎮" },
-  { name: "PlayStation 5 Digital", badge: "Disponible", emoji: "🎮" },
-  { name: "Xbox Series X", badge: "Disponible", emoji: "🕹️" },
-  { name: "Xbox Series S", badge: "Disponible", emoji: "🕹️" },
-  { name: "Nintendo Switch OLED", badge: "Disponible", emoji: "🎯" },
-  { name: "Nintendo Switch Lite", badge: "Disponible", emoji: "🎯" },
+  { name: "PlayStation 5 Slim", badge: "Disponible", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Slim" },
+  { name: "PlayStation 5 Digital", badge: "Agotado", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Digital" },
+  { name: "Xbox Series X", badge: "Disponible", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+X" },
+  { name: "Xbox Series S", badge: "Disponible", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+S" },
+  { name: "Nintendo Switch OLED", badge: "Disponible", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+OLED" },
+  { name: "Nintendo Switch Lite", badge: "Disponible", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+Lite" },
 ];
 
 /* ── Compra de consolas ── */
@@ -92,10 +92,12 @@ const ConsolasSection = () => (
               transition={{ delay: i * 0.06 }}
               className="group relative overflow-hidden rounded-xl border border-border bg-card p-6 text-center transition-all hover:border-primary/40"
             >
-              <div className="absolute right-3 top-3 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">
+              <div className="absolute right-3 top-3 z-10 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">
                 {c.badge}
               </div>
-              <span className="mb-3 block text-4xl">{c.emoji}</span>
+              <div className="mb-4 aspect-video overflow-hidden rounded-md">
+                <img src={c.image} alt={c.name} className="h-full w-full object-cover" />
+              </div>
               <h4 className="font-heading text-lg font-semibold text-foreground">
                 {c.name}
               </h4>

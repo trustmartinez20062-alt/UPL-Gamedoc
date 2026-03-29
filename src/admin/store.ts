@@ -5,7 +5,7 @@ export interface ConsolaVenta {
   id: string;
   name: string;
   badge: "Disponible" | "Agotado";
-  emoji: string;
+  image: string;
 }
 
 export interface ConsolaCompra {
@@ -29,7 +29,7 @@ export interface Juego {
   id: string;
   name: string;
   plataforma: string;
-  emoji: string;
+  image: string;
   precio: string;
 }
 
@@ -44,16 +44,17 @@ export interface ContactoInfo {
   telefono: string;
   horario: string;
   whatsapp: string;
+  mapaEmbed: string;
 }
 
 // ── Seed data (first load) ─────────────────────────────────────────
 const SEED_CONSOLAS_VENTA: ConsolaVenta[] = [
-  { id: "1", name: "PlayStation 5 Slim", badge: "Disponible", emoji: "🎮" },
-  { id: "2", name: "PlayStation 5 Digital", badge: "Disponible", emoji: "🎮" },
-  { id: "3", name: "Xbox Series X", badge: "Disponible", emoji: "🕹️" },
-  { id: "4", name: "Xbox Series S", badge: "Disponible", emoji: "🕹️" },
-  { id: "5", name: "Nintendo Switch OLED", badge: "Disponible", emoji: "🎯" },
-  { id: "6", name: "Nintendo Switch Lite", badge: "Disponible", emoji: "🎯" },
+  { id: "1", name: "PlayStation 5 Slim", badge: "Disponible", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Slim" },
+  { id: "2", name: "PlayStation 5 Digital", badge: "Agotado", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Digital" },
+  { id: "3", name: "Xbox Series X", badge: "Disponible", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+X" },
+  { id: "4", name: "Xbox Series S", badge: "Disponible", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+S" },
+  { id: "5", name: "Nintendo Switch OLED", badge: "Disponible", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+OLED" },
+  { id: "6", name: "Nintendo Switch Lite", badge: "Disponible", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+Lite" },
 ];
 
 const SEED_CONSOLAS_COMPRA: ConsolaCompra[] = [
@@ -83,14 +84,14 @@ const SEED_DESTRABA: DestrabaModelo[] = [
 ];
 
 const SEED_JUEGOS: Juego[] = [
-  { id: "1", name: "EA FC 25", plataforma: "PS4 / PS5", emoji: "⚽", precio: "Consultar" },
-  { id: "2", name: "GTA V Online", plataforma: "PS4 / PS5 / Xbox", emoji: "🚗", precio: "Consultar" },
-  { id: "3", name: "Call of Duty: MW III", plataforma: "PS4 / PS5 / Xbox", emoji: "🔫", precio: "Consultar" },
-  { id: "4", name: "Spider-Man 2", plataforma: "PS5", emoji: "🕷️", precio: "Consultar" },
-  { id: "5", name: "Hogwarts Legacy", plataforma: "PS4 / PS5 / Xbox", emoji: "🧙", precio: "Consultar" },
-  { id: "6", name: "Minecraft", plataforma: "Todas las plataformas", emoji: "⛏️", precio: "Consultar" },
-  { id: "7", name: "Fortnite V-Bucks", plataforma: "Todas las plataformas", emoji: "🎯", precio: "Consultar" },
-  { id: "8", name: "NBA 2K25", plataforma: "PS4 / PS5 / Xbox", emoji: "🏀", precio: "Consultar" },
+  { id: "1", name: "EA FC 25", plataforma: "PS4 / PS5", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=EA+FC+25", precio: "Consultar" },
+  { id: "2", name: "GTA V Online", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=GTA+V+Online", precio: "Consultar" },
+  { id: "3", name: "Call of Duty: MW III", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Call+of+Duty+MW+III", precio: "Consultar" },
+  { id: "4", name: "Spider-Man 2", plataforma: "PS5", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Spider-Man+2", precio: "Consultar" },
+  { id: "5", name: "Hogwarts Legacy", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Hogwarts+Legacy", precio: "Consultar" },
+  { id: "6", name: "Minecraft", plataforma: "Todas las plataformas", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Minecraft", precio: "Consultar" },
+  { id: "7", name: "Fortnite V-Bucks", plataforma: "Todas las plataformas", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Fortnite", precio: "Consultar" },
+  { id: "8", name: "NBA 2K25", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=NBA+2K25", precio: "Consultar" },
 ];
 
 const SEED_GAMEPASS: GamePassPlan[] = [
@@ -101,11 +102,21 @@ const SEED_GAMEPASS: GamePassPlan[] = [
   { id: "5", plan: "Game Pass Ultimate (3 meses)", precio: "$1.600" },
 ];
 
+function sanitizeMapaUrl(url: string): string {
+  if (!url) return "";
+  if (url.includes("<iframe") && url.includes("src=\"")) {
+    const match = url.match(/src="([^"]+)"/);
+    if (match && match[1]) return match[1];
+  }
+  return url.trim();
+}
+
 const SEED_CONTACTO: ContactoInfo = {
   direccion: "Juan José Castro 2381, Montevideo, Uruguay",
   telefono: "096 593 154",
   horario: "Lunes a Sábado — Consultá disponibilidad",
   whatsapp: "https://wa.me/59896593154?text=Hola%20Game%20Doctor!%20Quiero%20consultar%20sobre...",
+  mapaEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3273.2247270613843!2d-56.13018048791508!3d-34.875702772744795!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x959f81af46cb7f33%3A0xfa038957580c9695!2sTienda%20de%20Juegos%20-%20GAME%20DOCTOR!5e0!3m2!1ses!2suy!4v1774756722738!5m2!1ses!2suy",
 };
 
 // ── Generic localStorage hook ──────────────────────────────────────
@@ -118,6 +129,22 @@ function useLocalStorage<T>(key: string, seed: T): [T, (val: T | ((prev: T) => T
       return seed;
     }
   });
+
+  // Migration for the new map URL
+  useEffect(() => {
+    if (key === "gd_contacto") {
+      const current = localStorage.getItem(key);
+      if (current) {
+        const parsed = JSON.parse(current) as ContactoInfo;
+        // Check if it's using the old placeholder
+        if (parsed.mapaEmbed.includes("56.17!3d-34.87")) {
+          const updated = { ...parsed, mapaEmbed: (seed as ContactoInfo).mapaEmbed };
+          localStorage.setItem(key, JSON.stringify(updated));
+          setData(updated as T);
+        }
+      }
+    }
+  }, [key, seed]);
 
   const setValue = useCallback((val: T | ((prev: T) => T)) => {
     setData((prev) => {
@@ -145,7 +172,17 @@ export const useReparacion = () => useLocalStorage<ReparacionModelo[]>("gd_repar
 export const useDestraba = () => useLocalStorage<DestrabaModelo[]>("gd_destraba", SEED_DESTRABA);
 export const useJuegos = () => useLocalStorage<Juego[]>("gd_juegos", SEED_JUEGOS);
 export const useGamePass = () => useLocalStorage<GamePassPlan[]>("gd_gamepass", SEED_GAMEPASS);
-export const useContacto = () => useLocalStorage<ContactoInfo>("gd_contacto", SEED_CONTACTO);
+
+export const useContacto = (): [ContactoInfo, (val: ContactoInfo | ((prev: ContactoInfo) => ContactoInfo)) => void] => {
+  const [data, setData] = useLocalStorage<ContactoInfo>("gd_contacto", SEED_CONTACTO);
+
+  const sanitizedData = {
+    ...data,
+    mapaEmbed: sanitizeMapaUrl(data.mapaEmbed)
+  };
+
+  return [sanitizedData, setData];
+};
 
 // ── ID generator ───────────────────────────────────────────────────
 export function genId(): string {

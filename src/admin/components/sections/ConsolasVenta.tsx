@@ -4,20 +4,18 @@ import { useConsolasVenta, genId, type ConsolaVenta } from "../../store";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
-const EMOJIS = ["🎮", "🕹️", "🎯", "🏆", "⚡", "💥", "🔥", "🌟"];
-
 export default function ConsolasVenta() {
   const [consolas, setConsolas] = useConsolasVenta();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: ConsolaVenta } | null>(null);
-  const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", badge: "Disponible", emoji: "🎮" });
+  const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", badge: "Disponible", image: "" });
 
   const openAdd = () => {
-    setForm({ name: "", badge: "Disponible", emoji: "🎮" });
+    setForm({ name: "", badge: "Disponible", image: "" });
     setModal({ mode: "add" });
   };
 
   const openEdit = (item: ConsolaVenta) => {
-    setForm({ name: item.name, badge: item.badge, emoji: item.emoji });
+    setForm({ name: item.name, badge: item.badge, image: item.image });
     setModal({ mode: "edit", item });
   };
 
@@ -74,7 +72,9 @@ export default function ConsolasVenta() {
             </span>
 
             <div className="mt-3 text-center">
-              <span className="text-4xl block mb-2">{c.emoji}</span>
+              <div className="aspect-video w-full overflow-hidden rounded-md mb-3">
+                <img src={c.image} alt={c.name} className="h-full w-full object-cover" />
+              </div>
               <h3 className="font-semibold text-sm" style={{ color: "hsl(210 20% 92%)" }}>
                 {c.name}
               </h3>
@@ -141,24 +141,19 @@ export default function ConsolasVenta() {
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "hsl(215 15% 55%)" }}>
-                Emoji
+                URL de Imagen
               </label>
-              <div className="flex flex-wrap gap-2">
-                {EMOJIS.map((e) => (
-                  <button
-                    key={e}
-                    type="button"
-                    onClick={() => setForm({ ...form, emoji: e })}
-                    className="w-10 h-10 text-xl rounded-lg transition-all flex items-center justify-center"
-                    style={{
-                      background: form.emoji === e ? "hsl(175 80% 50% / 0.2)" : "hsl(220 15% 16%)",
-                      border: form.emoji === e ? "1px solid hsl(175 80% 50% / 0.5)" : "1px solid hsl(220 15% 22%)",
-                    }}
-                  >
-                    {e}
-                  </button>
-                ))}
-              </div>
+              <input
+                className="input-field"
+                placeholder="https://ejemplo.com/imagen.jpg"
+                value={form.image}
+                onChange={(e) => setForm({ ...form, image: e.target.value })}
+              />
+              {form.image && (
+                <div className="mt-2 aspect-video w-full max-w-[200px] overflow-hidden rounded-md border" style={{ borderColor: 'hsl(220 15% 22%)' }}>
+                  <img src={form.image} alt="Preview" className="h-full w-full object-cover" />
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 pt-2">

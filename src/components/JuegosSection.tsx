@@ -4,14 +4,14 @@ import WhatsAppButton from "./WhatsAppButton";
 
 /* ── Juegos digitales ── */
 const juegos = [
-  { name: "EA FC 25", plataforma: "PS4 / PS5", emoji: "⚽" },
-  { name: "GTA V Online", plataforma: "PS4 / PS5 / Xbox", emoji: "🚗" },
-  { name: "Call of Duty: MW III", plataforma: "PS4 / PS5 / Xbox", emoji: "🔫" },
-  { name: "Spider-Man 2", plataforma: "PS5", emoji: "🕷️" },
-  { name: "Hogwarts Legacy", plataforma: "PS4 / PS5 / Xbox", emoji: "🧙" },
-  { name: "Minecraft", plataforma: "Todas las plataformas", emoji: "⛏️" },
-  { name: "Fortnite V-Bucks", plataforma: "Todas las plataformas", emoji: "🎯" },
-  { name: "NBA 2K25", plataforma: "PS4 / PS5 / Xbox", emoji: "🏀" },
+  { name: "EA FC 25", plataforma: "PS4 / PS5", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=EA+FC+25" },
+  { name: "GTA V Online", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=GTA+V+Online" },
+  { name: "Call of Duty: MW III", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Call+of+Duty+MW+III" },
+  { name: "Spider-Man 2", plataforma: "PS5", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Spider-Man+2" },
+  { name: "Hogwarts Legacy", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Hogwarts+Legacy" },
+  { name: "Minecraft", plataforma: "Todas las plataformas", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Minecraft" },
+  { name: "Fortnite V-Bucks", plataforma: "Todas las plataformas", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Fortnite" },
+  { name: "NBA 2K25", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=NBA+2K25" },
 ];
 
 /* ── Game Pass ── */
@@ -74,7 +74,9 @@ const JuegosSection = () => (
               transition={{ delay: i * 0.05 }}
               className="rounded-xl border border-border bg-card p-5 text-center transition-all hover:border-primary/40"
             >
-              <span className="mb-2 block text-3xl">{j.emoji}</span>
+              <div className="mb-4 aspect-[3/4] overflow-hidden rounded-md">
+                <img src={j.image} alt={j.name} className="h-full w-full object-cover" />
+              </div>
               <h4 className="font-heading text-base font-semibold text-foreground">
                 {j.name}
               </h4>

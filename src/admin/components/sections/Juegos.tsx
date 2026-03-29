@@ -4,13 +4,12 @@ import { useJuegos, genId, type Juego } from "../../store";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
-const EMOJIS = ["⚽", "🚗", "🔫", "🕷️", "🧙", "⛏️", "🎯", "🏀", "🎮", "🏆", "💥", "🔥", "🌟", "🎲", "⚡", "🦇"];
-const PLATAFORMAS = ["PS4 / PS5", "PS5", "PS4", "Xbox", "PS4 / PS5 / Xbox", "Nintendo Switch", "Todas las plataformas", "PC", "Xbox / PC"];
+const PLATAFORMAS = ["PS4 / PS5", "PS5", "PS4", "Xbox", "PS4 / PS5 / Xbox", "Nintendo Switch", "Todas las plataformas", "PC", "Xbox / PC", "PS4 / PC", "PS5 / PC"];
 
 export default function Juegos() {
   const [juegos, setJuegos] = useJuegos();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: Juego } | null>(null);
-  const [form, setForm] = useState<Omit<Juego, "id">>({ name: "", plataforma: "PS4 / PS5", emoji: "🎮", precio: "Consultar" });
+  const [form, setForm] = useState<Omit<Juego, "id">>({ name: "", plataforma: "PS4 / PS5", image: "", precio: "Consultar" });
   const [search, setSearch] = useState("");
 
   const filtered = juegos.filter((j) =>
@@ -19,12 +18,12 @@ export default function Juegos() {
   );
 
   const openAdd = () => {
-    setForm({ name: "", plataforma: "PS4 / PS5", emoji: "🎮", precio: "Consultar" });
+    setForm({ name: "", plataforma: "PS4 / PS5", image: "", precio: "Consultar" });
     setModal({ mode: "add" });
   };
 
   const openEdit = (item: Juego) => {
-    setForm({ name: item.name, plataforma: item.plataforma, emoji: item.emoji, precio: item.precio });
+    setForm({ name: item.name, plataforma: item.plataforma, image: item.image, precio: item.precio });
     setModal({ mode: "edit", item });
   };
 
@@ -79,7 +78,9 @@ export default function Juegos() {
             onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "hsl(220 15% 18%)")}
           >
             <div className="text-center mb-3">
-              <span className="text-3xl block mb-2">{j.emoji}</span>
+              <div className="aspect-[3/4] w-[100px] mx-auto overflow-hidden rounded-md mb-3">
+                <img src={j.image} alt={j.name} className="h-full w-full object-cover" />
+              </div>
               <h3 className="font-semibold text-sm" style={{ color: "hsl(210 20% 92%)" }}>{j.name}</h3>
               <p className="text-xs mt-1" style={{ color: "hsl(215 15% 50%)" }}>{j.plataforma}</p>
               <p className="text-sm font-bold mt-1" style={{ color: "hsl(175 80% 55%)" }}>{j.precio}</p>
@@ -164,24 +165,19 @@ export default function Juegos() {
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "hsl(215 15% 55%)" }}>
-                Emoji
+                URL de Imagen
               </label>
-              <div className="flex flex-wrap gap-2">
-                {EMOJIS.map((e) => (
-                  <button
-                    key={e}
-                    type="button"
-                    onClick={() => setForm({ ...form, emoji: e })}
-                    className="w-9 h-9 text-lg rounded-lg transition-all flex items-center justify-center"
-                    style={{
-                      background: form.emoji === e ? "hsl(175 80% 50% / 0.2)" : "hsl(220 15% 16%)",
-                      border: form.emoji === e ? "1px solid hsl(175 80% 50% / 0.5)" : "1px solid hsl(220 15% 22%)",
-                    }}
-                  >
-                    {e}
-                  </button>
-                ))}
-              </div>
+              <input
+                className="input-field"
+                placeholder="https://ejemplo.com/caratula.jpg"
+                value={form.image}
+                onChange={(e) => setForm({ ...form, image: e.target.value })}
+              />
+              {form.image && (
+                <div className="mt-2 aspect-[3/4] w-[100px] overflow-hidden rounded-md border" style={{ borderColor: 'hsl(220 15% 22%)' }}>
+                  <img src={form.image} alt="Preview" className="h-full w-full object-cover" />
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 pt-2">

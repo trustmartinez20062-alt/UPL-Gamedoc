@@ -7,25 +7,46 @@ import PageHeader from "../PageHeader";
 export default function GamePass() {
   const [planes, setPlanes] = useGamePass();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: GamePassPlan } | null>(null);
-  const [form, setForm] = useState<Omit<GamePassPlan, "id">>({ plan: "", precio: "" });
+  const [form, setForm] = useState<{ plan: string; precio: string; tipo: "Core" | "Ultimate" | "Otros" }>({ 
+    plan: "", 
+    precio: "",
+    tipo: "Core"
+  });
 
   const openAdd = () => {
-    setForm({ plan: "", precio: "" });
+    setForm({ plan: "", precio: "", tipo: "Core" });
     setModal({ mode: "add" });
   };
 
   const openEdit = (item: GamePassPlan) => {
-    setForm({ plan: item.plan, precio: item.precio });
+    const isUltimate = item.plan.toLowerCase().includes("ultimate");
+    const isCore = item.plan.toLowerCase().includes("core");
+    setForm({ 
+      plan: item.plan, 
+      precio: item.precio,
+      tipo: isUltimate ? "Ultimate" : isCore ? "Core" : "Otros"
+    });
     setModal({ mode: "edit", item });
   };
 
   const handleSave = () => {
     if (!form.plan.trim() || !form.precio.trim()) return;
+    
+    // Ensure the name reflects the type if it doesn't already
+    let finalName = form.plan;
+    if (form.tipo === "Ultimate" && !finalName.toLowerCase().includes("ultimate")) {
+      finalName = `Game Pass Ultimate ${finalName}`;
+    } else if (form.tipo === "Core" && !finalName.toLowerCase().includes("core")) {
+      finalName = `Game Pass Core ${finalName}`;
+    }
+
+    const data = { plan: finalName, precio: form.precio };
+
     if (modal?.mode === "add") {
-      setPlanes((prev) => [...prev, { id: genId(), ...form }]);
+      setPlanes((prev) => [...prev, { id: genId(), ...data }]);
     } else if (modal?.item) {
       setPlanes((prev) =>
-        prev.map((p) => (p.id === modal.item!.id ? { ...p, ...form } : p))
+        prev.map((p) => (p.id === modal.item!.id ? { ...p, ...data } : p))
       );
     }
     setModal(null);
@@ -114,16 +135,22 @@ export default function GamePass() {
                       style={{
                         background: p.plan.toLowerCase().includes("ultimate")
                           ? "hsl(260 70% 60% / 0.15)"
-                          : "hsl(210 80% 60% / 0.15)",
+                          : p.plan.toLowerCase().includes("core")
+                            ? "hsl(210 80% 60% / 0.15)"
+                            : "hsl(38 92% 55% / 0.15)",
                         color: p.plan.toLowerCase().includes("ultimate")
                           ? "hsl(260 70% 75%)"
-                          : "hsl(210 80% 70%)",
+                          : p.plan.toLowerCase().includes("core")
+                            ? "hsl(210 80% 70%)"
+                            : "hsl(38 92% 70%)",
                         border: `1px solid ${p.plan.toLowerCase().includes("ultimate")
                           ? "hsl(260 70% 60% / 0.3)"
-                          : "hsl(210 80% 60% / 0.3)"}`,
+                          : p.plan.toLowerCase().includes("core")
+                            ? "hsl(210 80% 60% / 0.3)"
+                            : "hsl(38 92% 55% / 0.3)"}`,
                       }}
                     >
-                      {p.plan.toLowerCase().includes("ultimate") ? "Ultimate" : "Core"}
+                      {p.plan.toLowerCase().includes("ultimate") ? "Ultimate" : p.plan.toLowerCase().includes("core") ? "Core" : "Otros"}
                     </span>
                     <span style={{ color: "hsl(210 20% 88%)" }}>{p.plan}</span>
                   </div>
@@ -172,12 +199,33 @@ export default function GamePass() {
         >
           <div className="space-y-4">
             <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "hsl(215 15% 55%)" }}>
+                Tipo de Plan
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {(["Core", "Ultimate", "Otros"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setForm({ ...form, tipo: t })}
+                    className={`py-2 rounded-lg border text-xs font-bold transition-all ${
+                      form.tipo === t 
+                        ? "bg-primary/10 border-primary text-primary shadow-[0_0_15px_hsl(175_80%_50%_/_0.2)]" 
+                        : "bg-transparent border-[hsl(220_15%_18%)] text-[hsl(215_15%_50%)] hover:border-[hsl(220_15%_25%)]"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
               <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>
-                Nombre del plan
+                Nombre / Detalle del plan
               </label>
               <input
                 className="input-field"
-                placeholder="Ej: Game Pass Ultimate (1 mes)"
+                placeholder={form.tipo === "Otros" ? "Ej: PS Plus Extra (1 mes)" : "Ej: 1 mes, 3 meses..."}
                 value={form.plan}
                 onChange={(e) => setForm({ ...form, plan: e.target.value })}
                 autoFocus
