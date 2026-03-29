@@ -5,7 +5,9 @@ interface ConsolaCardProps extends ConsolaVenta {
   index: number;
 }
 
-const ConsolaCard = ({ name, image, badge, index }: ConsolaCardProps) => {
+const ConsolaCard = ({ name, image, estado, precio, index }: ConsolaCardProps) => {
+  const isConsultar = !precio || precio.toLowerCase().includes("consultar");
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -13,9 +15,9 @@ const ConsolaCard = ({ name, image, badge, index }: ConsolaCardProps) => {
       transition={{ duration: 0.3, delay: index * 0.1 }}
       className="group relative overflow-hidden rounded-xl border border-border bg-card p-3 sm:p-5 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5"
     >
-      {badge && (
+      {estado && (
         <div className="absolute right-2 top-2 z-10 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-primary backdrop-blur-md">
-          {badge}
+          {estado}
         </div>
       )}
       <div className="mb-3 aspect-video overflow-hidden rounded-md bg-muted/20">
@@ -28,7 +30,9 @@ const ConsolaCard = ({ name, image, badge, index }: ConsolaCardProps) => {
       <h4 className="text-sm sm:text-base font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
         {name}
       </h4>
-      <p className="mt-1 text-xs text-muted-foreground">Consultar precio</p>
+      <p className="mt-1 text-xs sm:text-sm font-bold text-primary">
+        {isConsultar ? "Consultar precio" : precio}
+      </p>
     </motion.div>
   );
 };

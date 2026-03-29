@@ -102,16 +102,23 @@
   background: hsl(220 15% 12%);
 }
 
-.badge-available {
+.badge-available, .badge-new {
   @apply text-xs font-semibold px-2.5 py-1 rounded-full;
   background: hsl(175 80% 50% / 0.15);
   color: hsl(175 80% 60%);
   border: 1px solid hsl(175 80% 50% / 0.3);
 }
 
-.badge-unavailable {
+.badge-unavailable, .badge-used {
   @apply text-xs font-semibold px-2.5 py-1 rounded-full;
-  background: hsl(0 84% 60% / 0.12);
-  color: hsl(0 84% 70%);
-  border: 1px solid hsl(0 84% 60% / 0.25);
+  background: hsl(45 90% 50% / 0.12);
+  color: hsl(45 90% 60%);
+  border: 1px solid hsl(45 90% 50% / 0.25);
+}
+
+.badge-refurbished {
+  @apply text-xs font-semibold px-2.5 py-1 rounded-full;
+  background: hsl(260 70% 60% / 0.12);
+  color: hsl(260 70% 70%);
+  border: 1px solid hsl(260 70% 60% / 0.25);
 }

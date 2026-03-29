@@ -5,7 +5,8 @@ import * as db from "../lib/db";
 export interface ConsolaVenta {
   id: string;
   name: string;
-  badge: "Disponible" | "Agotado";
+  estado: "Nueva" | "Usada" | "Restaurada";
+  precio: string;
   image: string;
 }
 

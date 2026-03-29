@@ -32,7 +32,7 @@ export default function GamePass() {
   };
 
   const handleSave = () => {
-    if (!form.plan.trim() || !form.precio.trim()) return;
+    if (!form.plan.trim()) return;
     
     // Ensure the name reflects the type if it doesn't already
     let finalName = form.plan;
@@ -158,7 +158,7 @@ export default function GamePass() {
                   </div>
                 </td>
                 <td className="px-5 py-3.5 text-right font-bold" style={{ color: "hsl(175 80% 55%)" }}>
-                  {p.precio}
+                  {p.precio || "Consultar"}
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center justify-end gap-2">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, NavLink, useNavigate, Navigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { logout, getCurrentUser } from "../auth";
 import {
   Monitor, DollarSign, Wrench, Unlock, Gamepad2, Server, CreditCard,
@@ -150,20 +151,37 @@ export default function Dashboard() {
       </aside>
 
       {/* ── Mobile Sidebar Overlay ── */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 flex flex-col border-r animate-slide-in"
-            style={{ background: "hsl(220 18% 8%)", borderColor: "hsl(220 15% 14%)" }}>
-            <div className="flex justify-end p-4">
-              <button onClick={() => setSidebarOpen(false)} style={{ color: "hsl(215 15% 55%)" }}>
-                <X size={22} />
-              </button>
-            </div>
-            <SidebarContent />
-          </aside>
-        </div>
-      )}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            />
+            
+            {/* Sidebar */}
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute left-0 top-0 bottom-0 w-72 flex flex-col border-r"
+              style={{ background: "hsl(220 18% 8%)", borderColor: "hsl(220 15% 14%)" }}
+            >
+              <div className="flex justify-end p-4">
+                <button onClick={() => setSidebarOpen(false)} style={{ color: "hsl(215 15% 55%)" }}>
+                  <X size={22} />
+                </button>
+              </div>
+              <SidebarContent />
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* ── Main Content ── */}
       <div className="flex-1 flex flex-col overflow-hidden">

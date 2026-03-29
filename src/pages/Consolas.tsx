@@ -19,7 +19,7 @@ const Consolas = () => {
 
   const filtered = consolas.filter(c => 
     c.name.toLowerCase().includes(search.toLowerCase()) || 
-    c.badge?.toLowerCase().includes(search.toLowerCase())
+    c.estado?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (

@@ -98,7 +98,7 @@ export default function ConsolasCompra() {
                   className="px-5 py-3.5 text-right font-bold"
                   style={{ color: "hsl(175 80% 55%)" }}
                 >
-                  {c.precio}
+                  {c.precio || "Consultar"}
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center justify-end gap-2">

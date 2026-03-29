@@ -14,6 +14,8 @@ const JuegoCard = ({ name, plataformas, image, precio, index }: JuegoCardProps) 
     .filter(Boolean)
     .join(" / ");
 
+  const isConsultar = !precio || precio.toLowerCase().includes("consultar");
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -36,7 +38,9 @@ const JuegoCard = ({ name, plataformas, image, precio, index }: JuegoCardProps) 
           {platformNames || "Sin plataforma"}
         </p>
         <div className="mt-auto flex items-center justify-between border-t border-border pt-2 sm:pt-3">
-          <span className="text-base sm:text-xl font-bold text-primary text-glow">{precio}</span>
+          <span className={`font-bold text-primary text-glow ${isConsultar ? "text-sm" : "text-base sm:text-xl"}`}>
+            {isConsultar ? "Consultar precio" : precio}
+          </span>
         </div>
       </div>
     </motion.div>

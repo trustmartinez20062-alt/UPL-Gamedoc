@@ -56,7 +56,7 @@ const ShopTabs = () => {
         </div>
 
         <div className="mb-10 flex justify-center px-4">
-          <div className="flex w-full max-w-2xl gap-2 rounded-2xl border border-border bg-card/50 p-1.5 shadow-xl backdrop-blur-sm sm:gap-4">
+          <div className="grid grid-cols-2 w-full max-w-2xl gap-2 rounded-2xl border border-border bg-card/50 p-1.5 shadow-xl backdrop-blur-sm sm:flex sm:gap-4">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -158,7 +158,9 @@ const ShopTabs = () => {
                           {gamePassPlanes.map((g, i) => (
                             <tr key={g.id || g.plan} className="group transition-colors hover:bg-muted/10">
                               <td className="px-6 py-4 font-medium text-foreground">{g.plan}</td>
-                              <td className="px-6 py-4 text-right font-bold text-primary">{g.precio}</td>
+                              <td className="px-6 py-4 text-right font-bold text-primary">
+                                {g.precio || "Consultar"}
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -211,7 +213,9 @@ const ShopTabs = () => {
                       {destrabaModelos.map((d) => (
                         <div key={d.modelo} className="flex items-center justify-between rounded-lg border border-primary/10 bg-card p-4 transition-all hover:border-primary/30">
                           <span className="text-xs sm:text-sm font-semibold">{d.modelo}</span>
-                          <span className="text-sm font-bold text-primary">{d.precio}</span>
+                          <span className="text-sm font-bold text-primary">
+                            {d.precio || "Consultar"}
+                          </span>
                         </div>
                       ))}
                     </div>

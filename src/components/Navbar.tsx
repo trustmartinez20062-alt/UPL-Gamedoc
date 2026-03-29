@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const links = [
   { label: "Inicio", href: "/#inicio" },
@@ -36,23 +37,31 @@ const Navbar = () => {
       </div>
 
       {/* Mobile menu */}
-      {open && (
-        <div className="border-t border-border bg-background/95 backdrop-blur-xl md:hidden">
-          <ul className="container flex flex-col gap-4 py-6">
-            {links.map((l) => (
-              <li key={l.href}>
-                <a
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="block text-lg font-medium text-foreground transition-colors hover:text-primary"
-                >
-                  {l.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden border-t border-border bg-background/95 backdrop-blur-xl md:hidden"
+          >
+            <ul className="container flex flex-col gap-4 py-6">
+              {links.map((l) => (
+                <li key={l.href}>
+                  <a
+                    href={l.href}
+                    onClick={() => setOpen(false)}
+                    className="block text-lg font-medium text-foreground transition-colors hover:text-primary"
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };

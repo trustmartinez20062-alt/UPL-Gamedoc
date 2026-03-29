@@ -17,7 +17,7 @@ export default function Juegos() {
     name: "", 
     plataformas: [], 
     image: "", 
-    precio: "Consultar" 
+    precio: "" 
   });
   const [search, setSearch] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -38,7 +38,7 @@ export default function Juegos() {
   });
 
   const openAdd = () => {
-    setForm({ name: "", plataformas: [], image: "", precio: "Consultar" });
+    setForm({ name: "", plataformas: [], image: "", precio: "" });
     setLocalPreview(null);
     setModal({ mode: "add" });
   };
@@ -173,7 +173,9 @@ export default function Juegos() {
               <p className="text-xs mt-1 line-clamp-1" style={{ color: "hsl(215 15% 50%)" }}>
                 {getPlatformNames(j.plataformas || []) || "Sin plataforma"}
               </p>
-              <p className="text-sm font-bold mt-1" style={{ color: "hsl(175 80% 55%)" }}>{j.precio}</p>
+              <p className="text-sm font-bold mt-1" style={{ color: "hsl(175 80% 55%)" }}>
+                {j.precio || "Consultar"}
+              </p>
             </div>
 
             <div className="flex gap-2">

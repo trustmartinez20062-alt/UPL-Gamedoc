@@ -12,19 +12,19 @@ export default function ConsolasVenta() {
   const [consolas, setConsolas] = useConsolasVenta();
   const { user } = useAuth();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: ConsolaVenta } | null>(null);
-  const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", badge: "Disponible", image: "" });
+  const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", estado: "Nueva", precio: "", image: "" });
   const [uploading, setUploading] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const openAdd = () => {
-    setForm({ name: "", badge: "Disponible", image: "" });
+    setForm({ name: "", estado: "Nueva", precio: "", image: "" });
     setLocalPreview(null);
     setModal({ mode: "add" });
   };
 
   const openEdit = (item: ConsolaVenta) => {
-    setForm({ name: item.name, badge: item.badge, image: item.image });
+    setForm({ name: item.name, estado: item.estado, precio: item.precio || "", image: item.image });
     setLocalPreview(null);
     setModal({ mode: "edit", item });
   };
@@ -122,9 +122,13 @@ export default function ConsolasVenta() {
               (e.currentTarget as HTMLDivElement).style.borderColor = "hsl(220 15% 18%)";
             }}
           >
-            {/* Badge */}
-            <span className={c.badge === "Disponible" ? "badge-available" : "badge-unavailable"}>
-              {c.badge}
+            {/* Estado Badge */}
+            <span className={
+              c.estado === "Nueva" ? "badge-new" : 
+              c.estado === "Usada" ? "badge-used" : 
+              "badge-refurbished"
+            }>
+              {c.estado}
             </span>
 
             <div className="mt-3 text-center">
@@ -134,6 +138,9 @@ export default function ConsolasVenta() {
               <h3 className="font-semibold text-sm" style={{ color: "hsl(210 20% 92%)" }}>
                 {c.name}
               </h3>
+              <p className="mt-1 text-xs font-bold text-primary">
+                {c.precio || "Consultar"}
+              </p>
             </div>
 
             {/* Actions */}
@@ -187,12 +194,25 @@ export default function ConsolasVenta() {
               </label>
               <select
                 className="input-field"
-                value={form.badge}
-                onChange={(e) => setForm({ ...form, badge: e.target.value as "Disponible" | "Agotado" })}
+                value={form.estado}
+                onChange={(e) => setForm({ ...form, estado: e.target.value as any })}
               >
-                <option value="Disponible">Disponible</option>
-                <option value="Agotado">Agotado</option>
+                <option value="Nueva">Nueva</option>
+                <option value="Usada">Usada</option>
+                <option value="Restaurada">Restaurada</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>
+                Precio
+              </label>
+              <input
+                className="input-field"
+                placeholder="Ej: $25.900 o dejar vacío para 'Consultar'"
+                value={form.precio}
+                onChange={(e) => setForm({ ...form, precio: e.target.value })}
+              />
             </div>
 
             <div>

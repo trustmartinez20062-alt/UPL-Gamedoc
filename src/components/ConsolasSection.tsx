@@ -4,14 +4,14 @@ import WhatsAppButton from "./WhatsAppButton";
 
 // @DB-DYNAMIC-DATA: Este arreglo debe ser poblado desde una tabla 'products' filtrada por categoría 'venta'.
 const consolasVenta = [
-  { name: "PlayStation 5 Slim", badge: "Disponible", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Slim" },
-  { name: "PlayStation 5 Digital", badge: "Agotado", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Digital" },
-  { name: "PlayStation 4 Pro (1TB)", badge: "Disponible", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PS4+Pro+1TB" },
-  { name: "PlayStation 4 Slim", badge: "Agotado", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PS4+Slim" },
-  { name: "Xbox Series X", badge: "Disponible", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+X" },
-  { name: "Xbox Series S", badge: "Disponible", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+S" },
-  { name: "Nintendo Switch OLED", badge: "Disponible", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+OLED" },
-  { name: "Nintendo Switch Lite", badge: "Disponible", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+Lite" },
+  { name: "PlayStation 5 Slim", estado: "Nueva", precio: "", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Slim" },
+  { name: "PlayStation 5 Digital", estado: "Usada", precio: "", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Digital" },
+  { name: "PlayStation 4 Pro (1TB)", estado: "Nueva", precio: "", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PS4+Pro+1TB" },
+  { name: "PlayStation 4 Slim", estado: "Usada", precio: "", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PS4+Slim" },
+  { name: "Xbox Series X", estado: "Nueva", precio: "", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+X" },
+  { name: "Xbox Series S", estado: "Nueva", precio: "", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+S" },
+  { name: "Nintendo Switch OLED", estado: "Nueva", precio: "", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+OLED" },
+  { name: "Nintendo Switch Lite", estado: "Nueva", precio: "", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+Lite" },
 ];
 
 // @DB-DYNAMIC-DATA: Este arreglo debe venir de una tabla de 'buying_prices' o similar.
@@ -97,7 +97,7 @@ const ConsolasSection = () => (
               className="group relative overflow-hidden rounded-xl border border-border bg-card p-3 sm:p-6 text-center transition-all hover:border-primary/40"
             >
               <div className="absolute right-2 top-2 z-10 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-primary">
-                {c.badge}
+                {c.estado}
               </div>
               <div className="mb-3 sm:mb-4 aspect-video overflow-hidden rounded-md">
                 <img src={c.image} alt={c.name} className="h-full w-full object-cover" />
@@ -105,8 +105,8 @@ const ConsolasSection = () => (
               <h4 className="font-heading text-sm sm:text-lg font-semibold text-foreground line-clamp-1">
                 {c.name}
               </h4>
-              <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                Consultar precio
+              <p className="mt-1 text-xs sm:text-sm font-bold text-primary">
+                {(!c.precio || c.precio.toLowerCase().includes("consultar")) ? "Consultar precio" : c.precio}
               </p>
             </motion.div>
           ))}
@@ -154,7 +154,7 @@ const ConsolasSection = () => (
                 >
                   <td className="px-5 py-3 text-foreground">{c.name}</td>
                   <td className="px-5 py-3 text-right font-semibold text-primary">
-                    {c.precio}
+                    {c.precio || "Consultar"}
                   </td>
                 </tr>
               ))}
@@ -242,7 +242,7 @@ const ConsolasSection = () => (
                 >
                   <td className="px-5 py-3 text-foreground">{d.modelo}</td>
                   <td className="px-5 py-3 text-right font-semibold text-primary">
-                    {d.precio}
+                    {d.precio || "Consultar"}
                   </td>
                 </tr>
               ))}

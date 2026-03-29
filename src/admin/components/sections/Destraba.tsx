@@ -22,7 +22,7 @@ export default function Destraba() {
   };
 
   const handleSave = () => {
-    if (!form.modelo.trim() || !form.precio.trim()) return;
+    if (!form.modelo.trim()) return;
     if (modal?.mode === "add") {
       setModelos((prev) => [...prev, { id: genId(), ...form }]);
     } else if (modal?.item) {
@@ -81,7 +81,9 @@ export default function Destraba() {
                 }}
               >
                 <td className="px-5 py-3.5" style={{ color: "hsl(210 20% 88%)" }}>{m.modelo}</td>
-                <td className="px-5 py-3.5 text-right font-bold" style={{ color: "hsl(175 80% 55%)" }}>{m.precio}</td>
+                <td className="px-5 py-3.5 text-right font-bold" style={{ color: "hsl(175 80% 55%)" }}>
+                  {m.precio || "Consultar"}
+                </td>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center justify-end gap-2">
                     <button
