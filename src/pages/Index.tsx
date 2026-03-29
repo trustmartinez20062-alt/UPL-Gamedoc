@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import ServicesSection from "@/components/ServicesSection";
 import ConsolasSection from "@/components/ConsolasSection";
 import JuegosSection from "@/components/JuegosSection";
 import AboutSection from "@/components/AboutSection";
