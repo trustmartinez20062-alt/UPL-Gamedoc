@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
-import ServicesSection from "@/components/ServicesSection";
-import ProductsSection from "@/components/ProductsSection";
+import ConsolasSection from "@/components/ConsolasSection";
+import JuegosSection from "@/components/JuegosSection";
 import AboutSection from "@/components/AboutSection";
 import ReviewsSection from "@/components/ReviewsSection";
 import ContactSection from "@/components/ContactSection";
@@ -11,10 +11,8 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 const Index = () => (
   <>
     <Navbar />
-    <HeroSection />
-    <ServicesSection />
-    <ProductsSection />
-    <AboutSection />
+    <ConsolasSection />
+    <JuegosSection />
     <ReviewsSection />
     <ContactSection />
     <Footer />
