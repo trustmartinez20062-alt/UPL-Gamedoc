@@ -98,8 +98,12 @@ export async function updateNombre(id: string, nuevoNombre: string, password?: s
   const email = `${nuevoNombre}@gamedoctor.uy`;
 
   // 1. Sincronizar con Auth vía Edge Function (Email + Opcional Password)
+  const { data: { session } } = await supabase.auth.getSession();
   const { data, error: functionError } = await supabase.functions.invoke("admin-reset-password", {
     body: { userId: id, newEmail: email, password },
+    headers: {
+      Authorization: `Bearer ${session?.access_token}`
+    }
   });
 
   if (functionError || data?.error) {
