@@ -5,9 +5,8 @@ import type { Usuario } from "./store";
 // Los usuarios se crean en el dashboard de Supabase con email.
 // El campo "nombre" se mapea al email (nombre@gamedoctor.uy) para simplificar el login.
 export async function login(user: string, pass: string): Promise<boolean> {
-  // Construimos el email desde el nombre de usuario
-  const email = `${user}@gamedoctor.uy`;
-
+  // Ahora el usuario ingresa su correo electrónico completo
+  const email = user.includes("@") ? user : `${user}@gamedoctor.uy`;
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
 
   if (error || !data.session) {
@@ -32,7 +31,7 @@ export async function getCurrentUser(): Promise<Usuario | null> {
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("id, nombre, role")
+    .select("id, nombre, role, email")
     .eq("id", session.user.id)
     .single();
 
@@ -40,49 +39,41 @@ export async function getCurrentUser(): Promise<Usuario | null> {
     if (error) console.error("Error al obtener perfil de usuario:", error.message);
     else console.warn("No se encontró perfil para el usuario:", session.user.id);
     
-    // Fallback: Si no hay perfil pero el email es admin@gamedoctor.uy, dar admin
-    const email = session.user.email ?? "";
-    const isSpecialAdmin = email === "admin@gamedoctor.uy";
-    
     return {
       id: session.user.id,
-      nombre: email.split("@")[0],
-      email: email,
-      role: isSpecialAdmin ? "admin" : "subadmin",
+      nombre: session.user.email?.split("@")[0] || "Usuario",
+      email: session.user.email ?? "",
+      role: (session.user.email === "admin@gamedoctor.uy" || session.user.email === "santi@gamedoctor.uy") ? "admin" : "subadmin",
     };
   }
 
   return {
     id: profile.id,
     nombre: profile.nombre,
-    email: session.user.email ?? "",
+    email: profile.email || session.user.email || "",
     role: profile.role as "admin" | "subadmin",
   };
 }
 
 // ── GESTIÓN DE USUARIOS (solo admin) ─────────────────────────────────────
 export async function fetchUsuarios(): Promise<Usuario[]> {
-  const { data, error } = await supabase.from("profiles").select("id, nombre, role");
+  const { data, error } = await supabase.from("profiles").select("id, nombre, role, email");
   if (error) { console.error(error); return []; }
-  return (data ?? []).map(p => ({ ...p, email: `${p.nombre}@gamedoctor.uy`, password: "" }));
+  return (data ?? []).map(p => ({ ...p, password: "" }));
 }
 
-// Crear un nuevo usuario en Supabase Auth + perfil
-export async function createUsuario(nombre: string, password: string, role: "admin" | "subadmin"): Promise<boolean> {
-  const email = `${nombre}@gamedoctor.uy`;
-
-  // Usamos el Admin API (service_role) para crear usuarios.
-  // Con la anon key, solo podemos hacer signup si está habilitado.
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error || !data.user) { console.error("Error creando usuario:", error?.message); return false; }
-
-  // Crear el perfil asociado
-  const { error: profileError } = await supabase.from("profiles").insert({
-    id: data.user.id,
-    nombre,
-    role,
+// Crear un nuevo usuario en Supabase Auth + perfil (ATÓMICO vía Edge Function)
+export async function createUsuario(nombre: string, email: string, password: string, role: "admin" | "subadmin"): Promise<boolean> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const { data, error: functionError } = await supabase.functions.invoke("admin-reset-password", {
+    body: { action: "create", nombre, email, password, role },
+    headers: { Authorization: `Bearer ${session?.access_token}` }
   });
-  if (profileError) { console.error("Error creando perfil:", profileError.message); return false; }
+
+  if (functionError || data?.error) {
+    console.error("Error creando usuario:", functionError?.message || data?.error);
+    return false;
+  }
   return true;
 }
 
@@ -93,42 +84,27 @@ export async function changeMyPassword(newPassword: string): Promise<boolean> {
   return true;
 }
 
-// Actualizar nombre y sincronizar con Auth (email)
-export async function updateNombre(id: string, nuevoNombre: string, password?: string): Promise<boolean> {
-  const email = `${nuevoNombre}@gamedoctor.uy`;
-
-  // 1. Sincronizar con Auth vía Edge Function (Email + Opcional Password)
+// Actualizar nombre/email y sincronizar con Auth (ATÓMICO vía Edge Function)
+export async function updateUsuario(id: string, nombre: string, email: string, password?: string): Promise<boolean> {
   const { data: { session } } = await supabase.auth.getSession();
   const { data, error: functionError } = await supabase.functions.invoke("admin-reset-password", {
-    body: { userId: id, newEmail: email, password },
-    headers: {
-      Authorization: `Bearer ${session?.access_token}`
-    }
+    body: { action: "update", userId: id, nombre, newEmail: email, password },
+    headers: { Authorization: `Bearer ${session?.access_token}` }
   });
 
   if (functionError || data?.error) {
-    console.error("Error sincronizando Auth:", functionError?.message || data?.error);
+    console.error("Error actualizando usuario:", functionError?.message || data?.error);
     return false;
   }
-
-  // 2. Actualizar tabla profiles
-  const { error } = await supabase
-    .from("profiles")
-    .update({ nombre: nuevoNombre })
-    .eq("id", id);
-
-  if (error) { 
-    console.error("Error actualizando perfil:", error.message); 
-    return false; 
-  }
-
   return true;
 }
 
 // Admin cambia la contraseña de un tercero (vía Edge Function)
 export async function adminChangePassword(userId: string, newPassword: string): Promise<boolean> {
+  const { data: { session } } = await supabase.auth.getSession();
   const { data, error } = await supabase.functions.invoke("admin-reset-password", {
-    body: { userId, password: newPassword },
+    body: { action: "update", userId, password: newPassword },
+    headers: { Authorization: `Bearer ${session?.access_token}` }
   });
 
   if (error || data?.error) {
@@ -138,7 +114,11 @@ export async function adminChangePassword(userId: string, newPassword: string): 
   return true;
 }
 
-// Eliminar usuario: baja del perfil (el auth.users requiere service_role)
+// Eliminar usuario: baja del perfil + auth (ATÓMICO vía Edge Function)
 export async function deleteUsuario(id: string): Promise<void> {
-  await supabase.from("profiles").delete().eq("id", id);
+  const { data: { session } } = await supabase.auth.getSession();
+  await supabase.functions.invoke("admin-reset-password", {
+    body: { action: "delete", userId: id },
+    headers: { Authorization: `Bearer ${session?.access_token}` }
+  });
 }

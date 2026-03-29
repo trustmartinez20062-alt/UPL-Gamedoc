@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../auth";
-import { Eye, EyeOff, Gamepad2, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Gamepad2, Lock, User, Mail } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ export default function Login() {
     if (ok) {
       navigate("/admin", { replace: true });
     } else {
-      setError("Usuario o contraseña incorrectos.");
+      setError("Correo o contraseña incorrectos.");
       setLoading(false);
     }
   };
@@ -76,18 +76,18 @@ export default function Login() {
             {/* Usuario */}
             <div>
               <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "hsl(215 15% 55%)" }}>
-                Usuario
+                Correo Electrónico
               </label>
               <div className="relative">
-                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "hsl(215 15% 55%)" }} />
+                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "hsl(215 15% 55%)" }} />
                 <input
-                  type="text"
+                  type="email"
                   value={user}
                   onChange={(e) => setUser(e.target.value)}
-                  placeholder="Ingresá tu usuario"
+                  placeholder="ejemplo@correo.com"
                   className="input-field pl-12"
                   required
-                  autoComplete="username"
+                  autoComplete="email"
                 />
               </div>
             </div>

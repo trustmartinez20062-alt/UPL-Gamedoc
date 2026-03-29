@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { User, Key, Save, Shield, Mail, CheckCircle2 } from "lucide-react";
-import { getCurrentUser, updateNombre, changeMyPassword } from "../../auth";
+import { getCurrentUser, updateUsuario, changeMyPassword } from "../../auth";
 import type { Usuario } from "../../store";
 import PageHeader from "../PageHeader";
 import { toast } from "sonner";
@@ -10,30 +10,33 @@ export default function MiPerfil() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
-  const [form, setForm] = useState({ nombre: "", password: "" });
+  const [form, setForm] = useState({ nombre: "", email: "", password: "" });
 
   const load = async () => {
     setLoading(true);
     const u = await getCurrentUser();
     if (u) {
       setUser(u);
-      setForm({ nombre: u.nombre, password: "" });
+      setForm({ nombre: u.nombre, email: u.email, password: "" });
     }
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
 
-  const handleUpdateNombre = async () => {
-    if (!user || !form.nombre.trim()) return;
+  const handleUpdatePerfil = async () => {
+    if (!user || !form.nombre.trim() || !form.email.trim()) {
+      toast.error("El nombre y el correo son obligatorios");
+      return;
+    }
     setSaving(true);
-    const ok = await updateNombre(user.id, form.nombre.trim());
+    const ok = await updateUsuario(user.id, form.nombre.trim(), form.email.trim());
     setSaving(false);
     if (ok) {
-      toast.success("Nombre actualizado correctamente");
+      toast.success("Perfil actualizado correctamente");
       await load();
     } else {
-      toast.error("Error al actualizar el nombre");
+      toast.error("Error al actualizar el perfil");
     }
   };
 
@@ -43,7 +46,7 @@ export default function MiPerfil() {
       return;
     }
     setSaving(true);
-    const ok = await updateNombre(user.id, user.nombre, form.password);
+    const ok = await updateUsuario(user.id, form.nombre, form.email, form.password);
     setSaving(false);
     if (ok) {
       toast.success("Contraseña actualizada correctamente");
@@ -91,13 +94,14 @@ export default function MiPerfil() {
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider mb-2.5 opacity-40">
-                Correo Electrónico
+                Correo Electrónico (Login)
               </label>
               <div className="relative">
                 <input
-                  className="input-field pl-10 opacity-60 cursor-not-allowed"
-                  value={user?.email}
-                  disabled
+                  className="input-field pl-10"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="ejemplo@correo.com"
                 />
                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
               </div>
@@ -119,8 +123,8 @@ export default function MiPerfil() {
             </div>
 
             <button
-              onClick={handleUpdateNombre}
-              disabled={saving || form.nombre === user?.nombre}
+              onClick={handleUpdatePerfil}
+              disabled={saving || (form.nombre === user?.nombre && form.email === user?.email)}
               className="btn-primary w-full flex items-center justify-center gap-2 py-3"
             >
               <Save size={18} />

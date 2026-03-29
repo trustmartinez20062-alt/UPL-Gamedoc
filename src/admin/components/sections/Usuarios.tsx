@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Users, Plus, Trash2, Shield, User, Key, AlertCircle, RefreshCw, Edit2 } from "lucide-react";
-import { getCurrentUser, fetchUsuarios, createUsuario, deleteUsuario, updateNombre, adminChangePassword } from "../../auth";
+import { Users, Plus, Trash2, Shield, User, Key, AlertCircle, RefreshCw, Edit2, Mail } from "lucide-react";
+import { getCurrentUser, fetchUsuarios, createUsuario, deleteUsuario, updateUsuario, adminChangePassword } from "../../auth";
 import type { Usuario } from "../../store";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
@@ -11,7 +11,7 @@ export default function Usuarios() {
   const [currentUser, setCurrentUser] = useState<Usuario | null>(null);
   const [modal, setModal] = useState<"add" | "edit" | null>(null);
   const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
-  const [form, setForm] = useState({ nombre: "", password: "", role: "subadmin" as "admin" | "subadmin" });
+  const [form, setForm] = useState({ nombre: "", email: "", password: "", role: "subadmin" as "admin" | "subadmin" });
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -39,40 +39,44 @@ export default function Usuarios() {
   const filtered = usuarios.filter(u => u.nombre.toLowerCase().includes(search.toLowerCase()));
 
   const openAdd = () => {
-    setForm({ nombre: "", password: "", role: "subadmin" });
+    setForm({ nombre: "", email: "", password: "", role: "subadmin" });
     setErrorMsg("");
     setModal("add");
   };
 
   const openEdit = (u: Usuario) => {
     setSelectedUser(u);
-    setForm({ nombre: u.nombre, password: "", role: u.role });
+    setForm({ nombre: u.nombre, email: u.email, password: "", role: u.role });
     setErrorMsg("");
     setModal("edit");
   };
 
   const handleSave = async () => {
-    if (!form.nombre.trim() || !form.password.trim()) return;
+    if (!form.nombre.trim() || !form.email.trim() || !form.password.trim()) {
+      setErrorMsg("Todos los campos son obligatorios.");
+      return;
+    }
     setSaving(true);
     setErrorMsg("");
-    const ok = await createUsuario(form.nombre.trim(), form.password, form.role);
+    const ok = await createUsuario(form.nombre.trim(), form.email.trim(), form.password, form.role);
     setSaving(false);
     if (ok) {
       setModal(null);
       await load();
     } else {
-      setErrorMsg("No se pudo crear el usuario. El nombre puede estar en uso o la contraseña es muy corta (min. 6 caracteres).");
+      setErrorMsg("Error al crear el usuario. Revisa la consola.");
     }
   };
 
   const handleEdit = async () => {
-    if (!selectedUser || !form.nombre.trim()) return;
+    if (!selectedUser || !form.nombre.trim() || !form.email.trim()) return;
     setSaving(true);
     setErrorMsg("");
 
-    const ok = await updateNombre(
+    const ok = await updateUsuario(
       selectedUser.id, 
       form.nombre.trim(), 
+      form.email.trim(),
       form.password.trim() || undefined
     );
 
@@ -148,8 +152,8 @@ export default function Usuarios() {
                   {u.nombre}
                 </h3>
                 <div className="flex items-center gap-2 text-xs" style={{ color: "hsl(215 15% 45%)" }}>
-                  <Key size={12} className="shrink-0" />
-                  <span>{u.nombre}@gamedoctor.uy</span>
+                  <Mail size={12} className="shrink-0" />
+                  <span className="truncate">{u.email}</span>
                 </div>
               </div>
 
@@ -178,19 +182,33 @@ export default function Usuarios() {
           <div className="space-y-5">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider mb-2.5" style={{ color: "hsl(215 15% 50%)" }}>
-                Nombre de Usuario
+                Nombre / Nick
               </label>
               <div className="relative">
                 <input
                   className="input-field pl-10"
-                  placeholder="Ej: vendedor2"
+                  placeholder="Ej: santiago"
                   value={form.nombre}
-                  onChange={(e) => setForm({ ...form, nombre: e.target.value.toLowerCase().replace(/\s/g, '') })}
+                  onChange={(e) => setForm({ ...form, nombre: e.target.value })}
                   autoFocus
                 />
                 <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
               </div>
-              <p className="text-[10px] mt-1.5 opacity-40 ml-1">El email será: {form.nombre || "nombre"}@gamedoctor.uy</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider mb-2.5" style={{ color: "hsl(215 15% 50%)" }}>
+                Correo Electrónico (Login)
+              </label>
+              <div className="relative">
+                <input
+                  className="input-field pl-10"
+                  placeholder="ejemplo@correo.com"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
+              </div>
             </div>
 
             <div>
@@ -259,9 +277,23 @@ export default function Usuarios() {
                 <input
                   className="input-field pl-10"
                   value={form.nombre}
-                  onChange={(e) => setForm({ ...form, nombre: e.target.value.toLowerCase().replace(/\s/g, '') })}
+                  onChange={(e) => setForm({ ...form, nombre: e.target.value })}
                 />
                 <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider mb-2.5" style={{ color: "hsl(215 15% 50%)" }}>
+                Correo Electrónico
+              </label>
+              <div className="relative">
+                <input
+                  className="input-field pl-10"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
               </div>
             </div>
 
