@@ -12,8 +12,8 @@ const sectionVariant = {
 
 const JuegosSection = () => {
   const [juegos] = useJuegos();
-  const displayedJuegos = juegos.slice(0, 8);
-  const hasMore = juegos.length >= 8;
+  const displayedJuegos = juegos.slice(0, 4);
+  const hasMore = juegos.length > 4;
 
   const gamePassPlanes = [
     { plan: "Game Pass Core (1 mes)", precio: "$350" },
@@ -70,7 +70,7 @@ const JuegosSection = () => {
             )}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4">
             {displayedJuegos.map((j, i) => (
               <JuegoCard key={j.id} {...j} index={i} />
             ))}

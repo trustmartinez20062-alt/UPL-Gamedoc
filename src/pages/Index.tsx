@@ -5,6 +5,7 @@ import ConsolasSection from "@/components/ConsolasSection";
 import JuegosSection from "@/components/JuegosSection";
 import AboutSection from "@/components/AboutSection";
 import ReviewsSection from "@/components/ReviewsSection";
+import FacebookSection from "@/components/FacebookSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -18,6 +19,7 @@ const Index = () => (
     <JuegosSection />
     <AboutSection />
     <ReviewsSection />
+    <FacebookSection />
     <ContactSection />
     <Footer />
     <WhatsAppButton floating />

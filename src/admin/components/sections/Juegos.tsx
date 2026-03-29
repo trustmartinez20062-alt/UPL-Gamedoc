@@ -1,42 +1,68 @@
 import { useState } from "react";
-import { Gamepad2, Plus, Pencil, Trash2 } from "lucide-react";
-import { useJuegos, genId, type Juego } from "../../store";
+import { Gamepad2, Plus, Pencil, Trash2, Check } from "lucide-react";
+import { useJuegos, usePlataformas, genId, type Juego } from "../../store";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
-const PLATAFORMAS = ["PS4 / PS5", "PS5", "PS4", "Xbox", "PS4 / PS5 / Xbox", "Nintendo Switch", "Todas las plataformas", "PC", "Xbox / PC", "PS4 / PC", "PS5 / PC"];
-
 export default function Juegos() {
   const [juegos, setJuegos] = useJuegos();
+  const [allPlataformas] = usePlataformas();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: Juego } | null>(null);
-  const [form, setForm] = useState<Omit<Juego, "id">>({ name: "", plataforma: "PS4 / PS5", image: "", precio: "Consultar" });
+  const [form, setForm] = useState<Omit<Juego, "id">>({ 
+    name: "", 
+    plataformas: [], 
+    image: "", 
+    precio: "Consultar" 
+  });
   const [search, setSearch] = useState("");
 
-  const filtered = juegos.filter((j) =>
-    j.name.toLowerCase().includes(search.toLowerCase()) ||
-    j.plataforma.toLowerCase().includes(search.toLowerCase())
-  );
+  const getPlatformNames = (ids: string[]) => {
+    return ids
+      .map(id => allPlataformas.find(p => p.id === id)?.name)
+      .filter(Boolean)
+      .join(" / ");
+  };
+
+  const filtered = juegos.filter((j) => {
+    const names = getPlatformNames(j.plataformas || []);
+    return j.name.toLowerCase().includes(search.toLowerCase()) ||
+           names.toLowerCase().includes(search.toLowerCase());
+  });
 
   const openAdd = () => {
-    setForm({ name: "", plataforma: "PS4 / PS5", image: "", precio: "Consultar" });
+    setForm({ name: "", plataformas: [], image: "", precio: "Consultar" });
     setModal({ mode: "add" });
   };
 
   const openEdit = (item: Juego) => {
-    setForm({ name: item.name, plataforma: item.plataforma, image: item.image, precio: item.precio });
+    setForm({ 
+      name: item.name, 
+      plataformas: item.plataformas || [], 
+      image: item.image, 
+      precio: item.precio 
+    });
     setModal({ mode: "edit", item });
   };
 
   const handleSave = () => {
     if (!form.name.trim()) return;
     if (modal?.mode === "add") {
-      setJuegos((prev) => [...prev, { id: genId(), ...form }]);
+      setJuegos((prev) => [...prev, { id: genId(), ...form } as Juego]);
     } else if (modal?.item) {
       setJuegos((prev) =>
-        prev.map((j) => (j.id === modal.item!.id ? { ...j, ...form } : j))
+        prev.map((j) => (j.id === modal.item!.id ? ({ ...j, ...form } as Juego) : j))
       );
     }
     setModal(null);
+  };
+
+  const togglePlataforma = (id: string) => {
+    setForm(prev => ({
+      ...prev,
+      plataformas: prev.plataformas.includes(id)
+        ? prev.plataformas.filter(pId => pId !== id)
+        : [...prev.plataformas, id]
+    }));
   };
 
   const handleDelete = (id: string) => {
@@ -81,8 +107,10 @@ export default function Juegos() {
               <div className="aspect-[3/4] w-[100px] mx-auto overflow-hidden rounded-md mb-3">
                 <img src={j.image} alt={j.name} className="h-full w-full object-cover" />
               </div>
-              <h3 className="font-semibold text-sm" style={{ color: "hsl(210 20% 92%)" }}>{j.name}</h3>
-              <p className="text-xs mt-1" style={{ color: "hsl(215 15% 50%)" }}>{j.plataforma}</p>
+              <h3 className="font-semibold text-sm line-clamp-1" style={{ color: "hsl(210 20% 92%)" }}>{j.name}</h3>
+              <p className="text-xs mt-1 line-clamp-1" style={{ color: "hsl(215 15% 50%)" }}>
+                {getPlatformNames(j.plataformas || []) || "Sin plataforma"}
+              </p>
               <p className="text-sm font-bold mt-1" style={{ color: "hsl(175 80% 55%)" }}>{j.precio}</p>
             </div>
 
@@ -137,18 +165,39 @@ export default function Juegos() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>
-                Plataforma
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-2.5" style={{ color: "hsl(215 15% 55%)" }}>
+                Plataformas Disponibles
               </label>
-              <select
-                className="input-field"
-                value={form.plataforma}
-                onChange={(e) => setForm({ ...form, plataforma: e.target.value })}
-              >
-                {PLATAFORMAS.map((p) => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
+              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                {allPlataformas.map((p) => {
+                  const isSelected = form.plataformas.includes(p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => togglePlataforma(p.id)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg border text-left transition-all"
+                      style={{ 
+                        background: isSelected ? "hsl(175 80% 50% / 0.1)" : "hsl(220 15% 12%)",
+                        borderColor: isSelected ? "hsl(175 80% 50% / 0.4)" : "hsl(220 15% 20%)"
+                      }}
+                    >
+                      <div className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
+                        isSelected ? "bg-primary border-primary" : "border-muted-foreground/30"
+                      }`} style={isSelected ? { background: "hsl(175 80% 50%)", borderColor: "hsl(175 80% 50%)" } : {}}>
+                        {isSelected && <Check size={10} className="text-black" />}
+                      </div>
+                      <span className="text-xs font-medium" style={{ color: isSelected ? "hsl(175 80% 70%)" : "hsl(215 15% 60%)" }}>
+                        {p.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {allPlataformas.length === 0 && (
+                <p className="text-xs italic" style={{ color: "hsl(215 15% 45%)" }}>
+                  No hay plataformas configuradas. Andá a la sección "Plataformas" primero.
+                </p>
+              )}
             </div>
 
             <div>
@@ -174,7 +223,7 @@ export default function Juegos() {
                 onChange={(e) => setForm({ ...form, image: e.target.value })}
               />
               {form.image && (
-                <div className="mt-2 aspect-[3/4] w-[100px] overflow-hidden rounded-md border" style={{ borderColor: 'hsl(220 15% 22%)' }}>
+                <div className="mt-2 aspect-[3/4] w-[80px] overflow-hidden rounded-md border" style={{ borderColor: 'hsl(220 15% 22%)' }}>
                   <img src={form.image} alt="Preview" className="h-full w-full object-cover" />
                 </div>
               )}

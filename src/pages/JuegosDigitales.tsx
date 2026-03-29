@@ -60,7 +60,7 @@ const JuegosDigitales = () => {
 
             {/* Grid */}
             {juegos.length > 0 ? (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                 {juegos.map((j, i) => (
                   <JuegoCard key={j.id} {...j} index={i} />
                 ))}

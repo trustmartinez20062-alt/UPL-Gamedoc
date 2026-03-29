@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Routes, Route, NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../auth";
 import {
-  Monitor, DollarSign, Wrench, Unlock, Gamepad2, CreditCard,
+  Monitor, DollarSign, Wrench, Unlock, Gamepad2, Server, CreditCard,
   Phone, LogOut, Menu, X, ChevronRight
 } from "lucide-react";
 
@@ -11,6 +11,7 @@ import ConsolasCompra from "../components/sections/ConsolasCompra";
 import Reparacion from "../components/sections/Reparacion";
 import Destraba from "../components/sections/Destraba";
 import Juegos from "../components/sections/Juegos";
+import Plataformas from "../components/sections/Plataformas";
 import GamePass from "../components/sections/GamePass";
 import Contacto from "../components/sections/Contacto";
 
@@ -20,6 +21,7 @@ const navItems = [
   { to: "reparacion", label: "Reparación", icon: Wrench },
   { to: "destraba", label: "Destraba", icon: Unlock },
   { to: "juegos", label: "Catálogo de Juegos", icon: Gamepad2 },
+  { to: "plataformas", label: "Plataformas", icon: Server },
   { to: "gamepass", label: "Game Pass", icon: CreditCard },
   { to: "contacto", label: "Contacto", icon: Phone },
 ];
@@ -139,6 +141,7 @@ export default function Dashboard() {
             <Route path="reparacion" element={<Reparacion />} />
             <Route path="destraba" element={<Destraba />} />
             <Route path="juegos" element={<Juegos />} />
+            <Route path="plataformas" element={<Plataformas />} />
             <Route path="gamepass" element={<GamePass />} />
             <Route path="contacto" element={<Contacto />} />
           </Routes>

@@ -28,9 +28,14 @@ export interface DestrabaModelo {
 export interface Juego {
   id: string;
   name: string;
-  plataforma: string;
+  plataformas: string[]; // IDs de plataformas
   image: string;
   precio: string;
+}
+
+export interface Plataforma {
+  id: string;
+  name: string;
 }
 
 export interface GamePassPlan {
@@ -83,15 +88,23 @@ const SEED_DESTRABA: DestrabaModelo[] = [
   { id: "3", modelo: "Xbox 360", precio: "$1.500" },
 ];
 
+const SEED_PLATAFORMAS: Plataforma[] = [
+  { id: "ps4", name: "PS4" },
+  { id: "ps5", name: "PS5" },
+  { id: "xbox", name: "Xbox" },
+  { id: "pc", name: "PC" },
+  { id: "switch", name: "Nintendo Switch" },
+];
+
 const SEED_JUEGOS: Juego[] = [
-  { id: "1", name: "EA FC 25", plataforma: "PS4 / PS5", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=EA+FC+25", precio: "Consultar" },
-  { id: "2", name: "GTA V Online", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=GTA+V+Online", precio: "Consultar" },
-  { id: "3", name: "Call of Duty: MW III", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Call+of+Duty+MW+III", precio: "Consultar" },
-  { id: "4", name: "Spider-Man 2", plataforma: "PS5", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Spider-Man+2", precio: "Consultar" },
-  { id: "5", name: "Hogwarts Legacy", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Hogwarts+Legacy", precio: "Consultar" },
-  { id: "6", name: "Minecraft", plataforma: "Todas las plataformas", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Minecraft", precio: "Consultar" },
-  { id: "7", name: "Fortnite V-Bucks", plataforma: "Todas las plataformas", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Fortnite", precio: "Consultar" },
-  { id: "8", name: "NBA 2K25", plataforma: "PS4 / PS5 / Xbox", image: "https://placehold.co/300x400/1e293b/FFFFFF?text=NBA+2K25", precio: "Consultar" },
+  { id: "1", name: "EA FC 25", plataformas: ["ps4", "ps5"], image: "https://placehold.co/300x400/1e293b/FFFFFF?text=EA+FC+25", precio: "Consultar" },
+  { id: "2", name: "GTA V Online", plataformas: ["ps4", "ps5", "xbox"], image: "https://placehold.co/300x400/1e293b/FFFFFF?text=GTA+V+Online", precio: "Consultar" },
+  { id: "3", name: "Call of Duty: MW III", plataformas: ["ps4", "ps5", "xbox"], image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Call+of+Duty+MW+III", precio: "Consultar" },
+  { id: "4", name: "Spider-Man 2", plataformas: ["ps5"], image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Spider-Man+2", precio: "Consultar" },
+  { id: "5", name: "Hogwarts Legacy", plataformas: ["ps4", "ps5", "xbox"], image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Hogwarts+Legacy", precio: "Consultar" },
+  { id: "6", name: "Minecraft", plataformas: ["ps4", "ps5", "xbox", "switch", "pc"], image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Minecraft", precio: "Consultar" },
+  { id: "7", name: "Fortnite V-Bucks", plataformas: ["ps4", "ps5", "xbox", "switch", "pc"], image: "https://placehold.co/300x400/1e293b/FFFFFF?text=Fortnite", precio: "Consultar" },
+  { id: "8", name: "NBA 2K25", plataformas: ["ps4", "ps5", "xbox"], image: "https://placehold.co/300x400/1e293b/FFFFFF?text=NBA+2K25", precio: "Consultar" },
 ];
 
 const SEED_GAMEPASS: GamePassPlan[] = [
@@ -124,7 +137,33 @@ function useLocalStorage<T>(key: string, seed: T): [T, (val: T | ((prev: T) => T
   const [data, setData] = useState<T>(() => {
     try {
       const raw = localStorage.getItem(key);
-      return raw ? (JSON.parse(raw) as T) : seed;
+      if (!raw) return seed;
+      let parsed = JSON.parse(raw) as T;
+
+      // Migration for Juegos: from plataforma (string) to plataformas (string[])
+      if (key === "gd_juegos" && Array.isArray(parsed)) {
+        parsed = (parsed as any[]).map(j => {
+          if (typeof j.plataforma === 'string' && !j.plataformas) {
+            const str = j.plataforma.toLowerCase();
+            const ids: string[] = [];
+            if (str.includes("ps4")) ids.push("ps4");
+            if (str.includes("ps5")) ids.push("ps5");
+            if (str.includes("xbox")) ids.push("xbox");
+            if (str.includes("pc")) ids.push("pc");
+            if (str.includes("switch")) ids.push("switch");
+            if (str.includes("todas")) ids.push("ps4", "ps5", "xbox", "pc", "switch");
+            return {
+              id: j.id,
+              name: j.name,
+              plataformas: ids.length > 0 ? ids : ["ps4", "ps5"],
+              image: j.image,
+              precio: j.precio
+            };
+          }
+          return j;
+        }) as any;
+      }
+      return parsed;
     } catch {
       return seed;
     }
@@ -171,6 +210,7 @@ export const useConsolasCompra = () => useLocalStorage<ConsolaCompra[]>("gd_cons
 export const useReparacion = () => useLocalStorage<ReparacionModelo[]>("gd_reparacion", SEED_REPARACION);
 export const useDestraba = () => useLocalStorage<DestrabaModelo[]>("gd_destraba", SEED_DESTRABA);
 export const useJuegos = () => useLocalStorage<Juego[]>("gd_juegos", SEED_JUEGOS);
+export const usePlataformas = () => useLocalStorage<Plataforma[]>("gd_plataformas", SEED_PLATAFORMAS);
 export const useGamePass = () => useLocalStorage<GamePassPlan[]>("gd_gamepass", SEED_GAMEPASS);
 
 export const useContacto = (): [ContactoInfo, (val: ContactoInfo | ((prev: ContactoInfo) => ContactoInfo)) => void] => {

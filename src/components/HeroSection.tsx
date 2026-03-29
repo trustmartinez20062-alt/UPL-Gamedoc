@@ -6,20 +6,33 @@ import heroBg from "@/assets/hero-bg.jpg";
 const HeroSection = () => (
   <section id="inicio" className="relative flex min-h-screen items-center overflow-hidden">
     {/* Background */}
-    <img
-      src={heroBg}
-      alt="Consolas de videojuegos"
-      className="absolute inset-0 h-full w-full object-cover"
-      width={1920}
-      height={1080}
-    />
+    <motion.div 
+      initial={{ scale: 1 }}
+      animate={{ scale: 1.05 }}
+      transition={{ duration: 10, repeat: Infinity, repeatType: "mirror", ease: "linear" }}
+      className="absolute inset-0"
+    >
+      <img
+        src={heroBg}
+        alt="Consolas de videojuegos"
+        className="h-full w-full object-cover"
+        width={1920}
+        height={1080}
+      />
+    </motion.div>
     <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/80 to-background" />
 
     <div className="container relative z-10 py-32">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        animate={{ 
+          opacity: 1, 
+          y: [0, -12, 0] 
+        }}
+        transition={{ 
+          opacity: { duration: 0.8 },
+          y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+        }}
         className="max-w-2xl"
       >
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">

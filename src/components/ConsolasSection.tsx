@@ -83,7 +83,7 @@ const ConsolasSection = () => (
           </h3>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-3">
           {consolasVenta.map((c, i) => (
             <motion.div
               key={c.name}
@@ -91,18 +91,18 @@ const ConsolasSection = () => (
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.06 }}
-              className="group relative overflow-hidden rounded-xl border border-border bg-card p-6 text-center transition-all hover:border-primary/40"
+              className="group relative overflow-hidden rounded-xl border border-border bg-card p-3 sm:p-6 text-center transition-all hover:border-primary/40"
             >
-              <div className="absolute right-3 top-3 z-10 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">
+              <div className="absolute right-2 top-2 z-10 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-primary">
                 {c.badge}
               </div>
-              <div className="mb-4 aspect-video overflow-hidden rounded-md">
+              <div className="mb-3 sm:mb-4 aspect-video overflow-hidden rounded-md">
                 <img src={c.image} alt={c.name} className="h-full w-full object-cover" />
               </div>
-              <h4 className="font-heading text-lg font-semibold text-foreground">
+              <h4 className="font-heading text-sm sm:text-lg font-semibold text-foreground line-clamp-1">
                 {c.name}
               </h4>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
                 Consultar precio
               </p>
             </motion.div>
@@ -185,11 +185,11 @@ const ConsolasSection = () => (
           técnico profesional con diagnóstico rápido y garantía.
         </p>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
           {reparacionModelos.map((m) => (
             <div
               key={m}
-              className="rounded-lg border border-border bg-card px-5 py-4 text-sm font-medium text-foreground transition-all hover:border-primary/40"
+              className="rounded-lg border border-border bg-card px-3 py-3 sm:px-5 sm:py-4 text-xs sm:text-sm font-medium text-foreground transition-all hover:border-primary/40 text-center flex items-center justify-center min-h-[60px]"
             >
               {m}
             </div>

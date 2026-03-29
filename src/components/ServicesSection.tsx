@@ -45,7 +45,7 @@ const ServicesSection = () => (
         </p>
       </motion.div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
         {services.map((s, i) => (
           <motion.a
             key={s.title}
@@ -54,13 +54,13 @@ const ServicesSection = () => (
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.1 }}
-            className="group block rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/40 hover:box-glow"
+            className="group flex flex-col items-center justify-center text-center rounded-xl border border-border bg-card p-4 sm:p-6 transition-all hover:border-primary/40 hover:box-glow aspect-square sm:aspect-auto"
           >
-            <div className="mb-4 inline-flex rounded-lg bg-primary/10 p-3 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-              <s.icon className="h-6 w-6" />
+            <div className="mb-3 sm:mb-4 inline-flex rounded-lg bg-primary/10 p-2.5 sm:p-3 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+              <s.icon className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <h3 className="mb-2 font-heading text-lg font-semibold text-foreground">{s.title}</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+            <h3 className="mb-1 sm:mb-2 font-heading text-sm sm:text-lg font-semibold text-foreground line-clamp-2">{s.title}</h3>
+            <p className="hidden sm:block text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
           </motion.a>
         ))}
       </div>
