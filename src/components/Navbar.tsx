@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
 const links = [
-  { label: "Inicio", href: "#inicio" },
-  { label: "Servicios", href: "#servicios" },
-  { label: "Consolas", href: "#consolas" },
-  { label: "Juegos", href: "#juegos" },
-  { label: "Nosotros", href: "#nosotros" },
-  { label: "Contacto", href: "#contacto" },
+  { label: "Inicio", href: "/#inicio" },
+  { label: "Servicios", href: "/#servicios" },
+  { label: "Consolas", href: "/#consolas" },
+  { label: "Juegos", href: "/#juegos" },
+  { label: "Nosotros", href: "/#nosotros" },
+  { label: "Contacto", href: "/#contacto" },
 ];
 
 const Navbar = () => {
@@ -16,7 +16,7 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between">
-        <a href="#inicio" className="font-heading text-xl font-bold tracking-wider text-primary text-glow">
+        <a href="/#inicio" className="font-heading text-xl font-bold tracking-wider text-primary text-glow">
           GAME DOCTOR
         </a>
 

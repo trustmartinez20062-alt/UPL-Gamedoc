@@ -1,4 +1,4 @@
-import { Facebook, MessageCircle } from "lucide-react";
+import { Facebook, Instagram, MessageCircle } from "lucide-react";
 import { useContacto } from "../admin/store";
 
 const Footer = () => {
@@ -15,13 +15,22 @@ const Footer = () => {
 
           <div className="flex items-center gap-4">
             <a
-              href="https://www.facebook.com/"
+              href="https://www.facebook.com/gamedoctor2004/?locale=es_LA"
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
               aria-label="Facebook"
             >
               <Facebook className="h-5 w-5" />
+            </a>
+            <a
+              href="https://www.instagram.com/gamedoctor2004?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-pink-500/40 hover:text-pink-500"
+              aria-label="Instagram"
+            >
+              <Instagram className="h-5 w-5" />
             </a>
             <a
               href={contacto.whatsapp}

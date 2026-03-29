@@ -68,6 +68,7 @@ const ConsolasSection = () => (
 
       {/* ──────────── 1. Venta de consolas ──────────── */}
       <motion.div
+        id="venta"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
@@ -165,6 +166,7 @@ const ConsolasSection = () => (
 
       {/* ──────────── 3. Reparación de consolas ──────────── */}
       <motion.div
+        id="reparacion"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
