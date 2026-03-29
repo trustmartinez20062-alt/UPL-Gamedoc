@@ -6,6 +6,8 @@ import WhatsAppButton from "./WhatsAppButton";
 const consolasVenta = [
   { name: "PlayStation 5 Slim", badge: "Disponible", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Slim" },
   { name: "PlayStation 5 Digital", badge: "Agotado", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PlayStation+5+Digital" },
+  { name: "PlayStation 4 Pro (1TB)", badge: "Disponible", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PS4+Pro+1TB" },
+  { name: "PlayStation 4 Slim", badge: "Agotado", image: "https://placehold.co/600x400/1e293b/FFFFFF?text=PS4+Slim" },
   { name: "Xbox Series X", badge: "Disponible", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+X" },
   { name: "Xbox Series S", badge: "Disponible", image: "https://placehold.co/600x400/10b981/FFFFFF?text=Xbox+Series+S" },
   { name: "Nintendo Switch OLED", badge: "Disponible", image: "https://placehold.co/600x400/ef4444/FFFFFF?text=Nintendo+Switch+OLED" },
@@ -27,17 +29,18 @@ const consolasCompra = [
 
 /* ── Reparación ── */
 const reparacionModelos = [
-  "PlayStation 4 / Slim / Pro",
-  "PlayStation 5 / Slim / Digital",
+  "PlayStation 4 / Slim / Pro (Service & HDMI)",
+  "PlayStation 5 / Slim / Digital (Liquid Metal)",
   "Xbox One S / X",
   "Xbox Series S / X",
-  "Nintendo Switch / OLED / Lite",
+  "Nintendo Switch / OLED / Lite (Batería & Joycon)",
+  "Controles (PS4, PS5, Xbox Series)",
 ];
 
 /* ── Destraba ── */
 const destrabaModelos = [
   { modelo: "PlayStation 4 (todas las versiones)", precio: "$2.500" },
-  { modelo: "Nintendo Switch / OLED", precio: "$3.000" },
+  { modelo: "Nintendo Switch / OLED (V1, V2, OLED)", precio: "$3.000" },
   { modelo: "Xbox 360", precio: "$1.500" },
 ];
 

@@ -3,9 +3,7 @@ import { Menu, X } from "lucide-react";
 
 const links = [
   { label: "Inicio", href: "/#inicio" },
-  { label: "Servicios", href: "/#servicios" },
-  { label: "Consolas", href: "/#consolas" },
-  { label: "Juegos", href: "/#juegos" },
+  { label: "Tienda", href: "/#tienda" },
   { label: "Nosotros", href: "/#nosotros" },
   { label: "Contacto", href: "/#contacto" },
 ];

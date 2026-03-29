@@ -4,27 +4,23 @@ import { Wrench, Gamepad2, CreditCard, Monitor } from "lucide-react";
 const services = [
   {
     icon: Wrench,
-    title: "Reparación de Consolas",
+    title: "Reparación y Destraba de consolas",
     desc: "Servicio técnico profesional para PlayStation, Xbox y Nintendo. Diagnóstico rápido y garantía en cada reparación.",
-    href: "#reparacion",
   },
   {
     icon: Gamepad2,
     title: "Juegos Digitales",
     desc: "Amplio catálogo de juegos digitales para todas las plataformas. Los mejores precios del mercado.",
-    href: "#juegos",
   },
   {
     icon: CreditCard,
     title: "Game Pass Ultimate",
     desc: "Activación de Game Pass Ultimate al mejor precio. Accedé a cientos de juegos en Xbox y PC.",
-    href: "#passes",
   },
   {
     icon: Monitor,
-    title: "Venta de Consolas",
+    title: "Venta y Compra de consolas",
     desc: "Consolas nuevas y reacondicionadas. PlayStation 5, Xbox Series X|S, Nintendo Switch y más.",
-    href: "#venta",
   },
 ];
 
@@ -47,21 +43,20 @@ const ServicesSection = () => (
 
       <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
         {services.map((s, i) => (
-          <motion.a
+          <motion.div
             key={s.title}
-            href={s.href}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.1 }}
-            className="group flex flex-col items-center justify-center text-center rounded-xl border border-border bg-card p-4 sm:p-6 transition-all hover:border-primary/40 hover:box-glow aspect-square sm:aspect-auto"
+            className="group flex flex-col items-center justify-center text-center rounded-xl border border-border bg-card p-4 sm:p-6 transition-all hover:border-primary/20 aspect-square sm:aspect-auto"
           >
-            <div className="mb-3 sm:mb-4 inline-flex rounded-lg bg-primary/10 p-2.5 sm:p-3 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+            <div className="mb-3 sm:mb-4 inline-flex rounded-lg bg-primary/10 p-2.5 sm:p-3 text-primary transition-colors group-hover:bg-primary/20">
               <s.icon className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             <h3 className="mb-1 sm:mb-2 font-heading text-sm sm:text-lg font-semibold text-foreground line-clamp-2">{s.title}</h3>
             <p className="hidden sm:block text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
-          </motion.a>
+          </motion.div>
         ))}
       </div>
     </div>
