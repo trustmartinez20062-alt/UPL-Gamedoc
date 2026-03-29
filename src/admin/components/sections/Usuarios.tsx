@@ -70,27 +70,14 @@ export default function Usuarios() {
     setSaving(true);
     setErrorMsg("");
 
-    let success = true;
-
-    // 1. Actualizar nombre si cambió
-    if (form.nombre !== selectedUser.nombre) {
-      const ok = await updateNombre(selectedUser.id, form.nombre);
-      if (!ok) success = false;
-    }
-
-    // 2. Actualizar contraseña si se ingresó
-    if (success && form.password.trim()) {
-      if (form.password.length < 6) {
-        setErrorMsg("La contraseña debe tener al menos 6 caracteres.");
-        setSaving(false);
-        return;
-      }
-      const ok = await adminChangePassword(selectedUser.id, form.password);
-      if (!ok) success = false;
-    }
+    const ok = await updateNombre(
+      selectedUser.id, 
+      form.nombre.trim(), 
+      form.password.trim() || undefined
+    );
 
     setSaving(false);
-    if (success) {
+    if (ok) {
       setModal(null);
       await load();
     } else {

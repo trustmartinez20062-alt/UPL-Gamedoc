@@ -93,13 +93,31 @@ export async function changeMyPassword(newPassword: string): Promise<boolean> {
   return true;
 }
 
-// Actualizar mi nombre o el de otro (si soy admin)
-export async function updateNombre(id: string, nuevoNombre: string): Promise<boolean> {
+// Actualizar nombre y sincronizar con Auth (email)
+export async function updateNombre(id: string, nuevoNombre: string, password?: string): Promise<boolean> {
+  const email = `${nuevoNombre}@gamedoctor.uy`;
+
+  // 1. Sincronizar con Auth vía Edge Function (Email + Opcional Password)
+  const { data, error: functionError } = await supabase.functions.invoke("admin-reset-password", {
+    body: { userId: id, newEmail: email, password },
+  });
+
+  if (functionError || data?.error) {
+    console.error("Error sincronizando Auth:", functionError?.message || data?.error);
+    return false;
+  }
+
+  // 2. Actualizar tabla profiles
   const { error } = await supabase
     .from("profiles")
     .update({ nombre: nuevoNombre })
     .eq("id", id);
-  if (error) { console.error("Error actualizando nombre:", error.message); return false; }
+
+  if (error) { 
+    console.error("Error actualizando perfil:", error.message); 
+    return false; 
+  }
+
   return true;
 }
 

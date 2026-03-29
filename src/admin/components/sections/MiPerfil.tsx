@@ -43,7 +43,7 @@ export default function MiPerfil() {
       return;
     }
     setSaving(true);
-    const ok = await changeMyPassword(form.password);
+    const ok = await updateNombre(user.id, user.nombre, form.password);
     setSaving(false);
     if (ok) {
       toast.success("Contraseña actualizada correctamente");
