@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Unlock, Plus, Pencil, Trash2 } from "lucide-react";
+import { Wrench, Plus, Pencil, Trash2 } from "lucide-react";
 import { useDestraba, genId, type DestrabaModelo } from "../../store";
 import { useAuth } from "../../hooks/useAuth";
+import { formatPriceForDB, parsePriceForForm } from "../../../lib/utils";
+import { toast } from "@/components/ui/sonner";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
@@ -17,17 +19,19 @@ export default function Destraba() {
   };
 
   const openEdit = (item: DestrabaModelo) => {
-    setForm({ modelo: item.modelo, precio: item.precio });
+    setForm({ modelo: item.modelo, precio: parsePriceForForm(item.precio) });
     setModal({ mode: "edit", item });
   };
 
   const handleSave = () => {
     if (!form.modelo.trim()) return;
+    const dataToSave = { ...form, precio: formatPriceForDB(form.precio) };
+
     if (modal?.mode === "add") {
-      setModelos((prev) => [...prev, { id: genId(), ...form }]);
+      setModelos((prev) => [...prev, { id: genId(), ...dataToSave }]);
     } else if (modal?.item) {
       setModelos((prev) =>
-        prev.map((m) => (m.id === modal.item!.id ? { ...m, ...form } : m))
+        prev.map((m) => (m.id === modal.item!.id ? { ...m, ...dataToSave } : m))
       );
     }
     setModal(null);
@@ -42,9 +46,9 @@ export default function Destraba() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={Unlock}
-        title="Destraba de Consolas"
-        description={`${modelos.length} modelos con precio de destraba`}
+        icon={Wrench}
+        title="Servicios (Destraba y Software)"
+        description={`${modelos.length} servicios disponibles`}
         action={
           <button onClick={openAdd} className="btn-primary flex items-center gap-2 text-sm">
             <Plus size={16} /> Agregar
@@ -142,9 +146,15 @@ export default function Destraba() {
               </label>
               <input
                 className="input-field"
-                placeholder="Ej: $2.500"
+                placeholder="Ej: 2500 (solo números)"
                 value={form.precio}
-                onChange={(e) => setForm({ ...form, precio: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val !== "" && /\D/.test(val)) {
+                    toast.error("Por favor, ingresa solo números. El $ y el punto se agregan solos.");
+                  }
+                  setForm({ ...form, precio: val.replace(/\D/g, "") });
+                }}
               />
             </div>
             <div className="flex gap-3 pt-2">

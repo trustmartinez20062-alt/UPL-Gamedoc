@@ -50,7 +50,7 @@ const FacebookSection = () => {
             
             <div className="flex flex-wrap gap-4">
               <a
-                href="https://www.facebook.com/gamedoctor2004/?locale=es_LA"
+                href={contacto.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition-all hover:border-primary/40 hover:text-primary hover:box-glow"
@@ -59,7 +59,7 @@ const FacebookSection = () => {
                 Facebook
               </a>
               <a
-                href="https://www.instagram.com/gamedoctor2004?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                href={contacto.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition-all hover:border-pink-500/40 hover:text-pink-500 hover:shadow-[0_0_15px_rgba(236,72,153,0.15)]"

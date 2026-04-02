@@ -2,6 +2,8 @@ import { useState } from "react";
 import { CreditCard, Plus, Pencil, Trash2 } from "lucide-react";
 import { useGamePass, genId, type GamePassPlan } from "../../store";
 import { useAuth } from "../../hooks/useAuth";
+import { formatPriceForDB, parsePriceForForm } from "../../../lib/utils";
+import { toast } from "@/components/ui/sonner";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
@@ -25,7 +27,7 @@ export default function GamePass() {
     const isCore = item.plan.toLowerCase().includes("core");
     setForm({ 
       plan: item.plan, 
-      precio: item.precio,
+      precio: parsePriceForForm(item.precio),
       tipo: isUltimate ? "Ultimate" : isCore ? "Core" : "Otros"
     });
     setModal({ mode: "edit", item });
@@ -37,12 +39,14 @@ export default function GamePass() {
     // Ensure the name reflects the type if it doesn't already
     let finalName = form.plan;
     if (form.tipo === "Ultimate" && !finalName.toLowerCase().includes("ultimate")) {
-      finalName = `Game Pass Ultimate ${finalName}`;
+      finalName = `Game Pass Ultimate ${finalName.replace(/Game\s*Pass\s*Core\s*/ig, '')}`;
     } else if (form.tipo === "Core" && !finalName.toLowerCase().includes("core")) {
-      finalName = `Game Pass Core ${finalName}`;
+      finalName = `Game Pass Core ${finalName.replace(/Game\s*Pass\s*Ultimate\s*/ig, '')}`;
+    } else if (form.tipo === "Otros") {
+      finalName = finalName.replace(/Game\s*Pass\s*(Ultimate|Core)\s*/ig, '');
     }
 
-    const data = { plan: finalName, precio: form.precio };
+    const data = { plan: finalName, precio: formatPriceForDB(form.precio) };
 
     if (modal?.mode === "add") {
       setPlanes((prev) => [...prev, { id: genId(), ...data }]);
@@ -208,7 +212,10 @@ export default function GamePass() {
                 {(["Core", "Ultimate", "Otros"] as const).map((t) => (
                   <button
                     key={t}
-                    onClick={() => setForm({ ...form, tipo: t })}
+                    onClick={() => {
+                      let cleanedPlan = form.plan.replace(/Game\s*Pass\s*(Ultimate|Core)\s*/ig, '');
+                      setForm({ ...form, tipo: t, plan: cleanedPlan.trim() });
+                    }}
                     className={`py-2 rounded-lg border text-xs font-bold transition-all ${
                       form.tipo === t 
                         ? "bg-primary/10 border-primary text-primary shadow-[0_0_15px_hsl(175_80%_50%_/_0.2)]" 
@@ -239,9 +246,15 @@ export default function GamePass() {
               </label>
               <input
                 className="input-field"
-                placeholder="Ej: $600"
+                placeholder="Ej: 600 (solo números)"
                 value={form.precio}
-                onChange={(e) => setForm({ ...form, precio: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val !== "" && /\D/.test(val)) {
+                    toast.error("Por favor, ingresa solo números. El $ y el punto se agregan solos.");
+                  }
+                  setForm({ ...form, precio: val.replace(/\D/g, "") });
+                }}
               />
             </div>
             <div className="flex gap-3 pt-2">

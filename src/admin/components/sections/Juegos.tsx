@@ -3,6 +3,7 @@ import { Gamepad2, Plus, Pencil, Trash2, Check, Upload, Loader2 } from "lucide-r
 import { useJuegos, usePlataformas, genId, type Juego } from "../../store";
 import { uploadImage, deleteImageFromStorage } from "../../../lib/db";
 import { useAuth } from "../../hooks/useAuth";
+import { formatPriceForDB, parsePriceForForm } from "../../../lib/utils";
 import { toast } from "@/components/ui/sonner";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
@@ -48,7 +49,7 @@ export default function Juegos() {
       name: item.name, 
       plataformas: item.plataformas || [], 
       image: item.image, 
-      precio: item.precio 
+      precio: parsePriceForForm(item.precio) 
     });
     setLocalPreview(null);
     setModal({ mode: "edit", item });
@@ -57,8 +58,10 @@ export default function Juegos() {
 // @DB-CRUD-LOGIC: Estas operaciones deben llamar a supabase.from('products').insert() o .update().
   const handleSave = async () => {
     if (!form.name.trim()) return;
+    const dataToSave = { ...form, precio: formatPriceForDB(form.precio) };
+
     if (modal?.mode === "add") {
-      setJuegos((prev) => [...prev, { id: genId(), ...form } as Juego]);
+      setJuegos((prev) => [...prev, { id: genId(), ...dataToSave } as Juego]);
     } else if (modal?.item) {
       // Si la imagen cambió y teníamos una subida, borrar la anterior
       if (modal.item.image && modal.item.image !== form.image) {
@@ -66,7 +69,7 @@ export default function Juegos() {
         toast.info("Imagen anterior eliminada del servidor");
       }
       setJuegos((prev) =>
-        prev.map((j) => (j.id === modal.item!.id ? ({ ...j, ...form } as Juego) : j))
+        prev.map((j) => (j.id === modal.item!.id ? ({ ...j, ...dataToSave } as Juego) : j))
       );
     }
     setModal(null);
@@ -273,9 +276,15 @@ export default function Juegos() {
               </label>
               <input
                 className="input-field"
-                placeholder="Ej: $500 o Consultar"
+                placeholder="Ej: 500 (solo números) o Consultar"
                 value={form.precio}
-                onChange={(e) => setForm({ ...form, precio: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val !== "" && /\D/.test(val)) {
+                    toast.error("Por favor, ingresa solo números. El $ y el punto se agregan solos.");
+                  }
+                  setForm({ ...form, precio: val.replace(/\D/g, "") });
+                }}
               />
             </div>
 

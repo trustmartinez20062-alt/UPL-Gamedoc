@@ -1,27 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, Monitor, Wrench, ChevronRight, ShoppingCart, DollarSign, CreditCard, Unlock } from "lucide-react";
-import { useConsolasVenta, useConsolasCompra, useGamePass, useJuegos, usePlataformas } from "../admin/store";
+import { useConsolasVenta, useConsolasCompra, useGamePass, useJuegos, usePlataformas, useDestraba, useReparacion } from "../admin/store";
 import JuegoCard from "./JuegoCard";
 import ConsolaCard from "./ConsolaCard";
 import WhatsAppButton from "./WhatsAppButton";
 import { Link } from "react-router-dom";
-
-// @DB-DYNAMIC-DATA: Estos arreglos pronto deben venir de Supabase.
-const reparacionModelos = [
-  "PlayStation 4 / Slim / Pro (Service & HDMI)",
-  "PlayStation 5 / Slim / Digital (Liquid Metal)",
-  "Xbox One S / X",
-  "Xbox Series S / X",
-  "Nintendo Switch / OLED / Lite (Batería & Joycon)",
-  "Controles (PS4, PS5, Xbox Series)",
-];
-
-const destrabaModelos = [
-  { modelo: "PlayStation 4 (todas las versiones)", precio: "$2.500" },
-  { modelo: "Nintendo Switch / OLED (V1, V2, OLED)", precio: "$3.000" },
-  { modelo: "Xbox 360", precio: "$1.500" },
-];
 
 const ShopTabs = () => {
   const [activeTab, setActiveTab] = useState("juegos");
@@ -31,6 +15,8 @@ const ShopTabs = () => {
   const [consolasVenta] = useConsolasVenta();
   const [consolasCompra] = useConsolasCompra();
   const [gamePassPlanes] = useGamePass();
+  const [destrabaModelos] = useDestraba();
+  const [reparacionModelos] = useReparacion();
   
   const displayedJuegos = juegos.slice(0, 4);
   const displayedConsolas = consolasVenta.slice(0, 8);
@@ -191,9 +177,9 @@ const ShopTabs = () => {
                   <div className="flex-1 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                     <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
                       {reparacionModelos.map((m) => (
-                        <li key={m} className="flex items-center gap-2 rounded-lg bg-muted/20 px-4 py-3 text-xs sm:text-sm font-medium text-foreground">
+                        <li key={m.id} className="flex items-center gap-2 rounded-lg bg-muted/20 px-4 py-3 text-xs sm:text-sm font-medium text-foreground">
                           <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          {m}
+                          {m.modelo}
                         </li>
                       ))}
                     </ul>
@@ -211,7 +197,7 @@ const ShopTabs = () => {
                   <div className="flex-1 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                     <div className="space-y-4">
                       {destrabaModelos.map((d) => (
-                        <div key={d.modelo} className="flex items-center justify-between rounded-lg border border-primary/10 bg-card p-4 transition-all hover:border-primary/30">
+                        <div key={d.id || d.modelo} className="flex items-center justify-between rounded-lg border border-primary/10 bg-card p-4 transition-all hover:border-primary/30">
                           <span className="text-xs sm:text-sm font-semibold">{d.modelo}</span>
                           <span className="text-sm font-bold text-primary">
                             {d.precio || "Consultar"}

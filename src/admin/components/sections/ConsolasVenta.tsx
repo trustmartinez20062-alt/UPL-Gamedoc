@@ -4,6 +4,7 @@ import { useConsolasVenta, genId, type ConsolaVenta } from "../../store";
 import { uploadImage, deleteImageFromStorage } from "../../../lib/db";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "@/components/ui/sonner";
+import { formatPriceForDB, parsePriceForForm } from "../../../lib/utils";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
@@ -12,19 +13,27 @@ export default function ConsolasVenta() {
   const [consolas, setConsolas] = useConsolasVenta();
   const { user } = useAuth();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: ConsolaVenta } | null>(null);
-  const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", estado: "Nueva", precio: "", image: "" });
+  const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", image: "" });
   const [uploading, setUploading] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const openAdd = () => {
-    setForm({ name: "", estado: "Nueva", precio: "", image: "" });
+    setForm({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", image: "" });
     setLocalPreview(null);
     setModal({ mode: "add" });
   };
 
   const openEdit = (item: ConsolaVenta) => {
-    setForm({ name: item.name, estado: item.estado, precio: item.precio || "", image: item.image });
+    setForm({ 
+      name: item.name, 
+      estado: item.estado, 
+      version: item.version || "Original", 
+      info: item.info || "", 
+      garantia: item.garantia || "", 
+      precio: parsePriceForForm(item.precio), 
+      image: item.image 
+    });
     setLocalPreview(null);
     setModal({ mode: "edit", item });
   };
@@ -32,8 +41,10 @@ export default function ConsolasVenta() {
   // @DB-CRUD-LOGIC: Migrar a supabase.from('products').upsert().
   const handleSave = async () => {
     if (!form.name.trim()) return;
+    const dataToSave = { ...form, precio: formatPriceForDB(form.precio) };
+
     if (modal?.mode === "add") {
-      setConsolas((prev) => [...prev, { id: genId(), ...form } as ConsolaVenta]);
+      setConsolas((prev) => [...prev, { id: genId(), ...dataToSave } as ConsolaVenta]);
     } else if (modal?.item) {
       // Si la imagen cambió y teníamos una subida, borrar la anterior
       if (modal.item.image && modal.item.image !== form.image) {
@@ -41,7 +52,7 @@ export default function ConsolasVenta() {
         toast.info("Imagen anterior eliminada del servidor");
       }
       setConsolas((prev) =>
-        prev.map((c) => (c.id === modal.item!.id ? ({ ...c, ...form } as ConsolaVenta) : c))
+        prev.map((c) => (c.id === modal.item!.id ? ({ ...c, ...dataToSave } as ConsolaVenta) : c))
       );
     }
     setModal(null);
@@ -106,11 +117,11 @@ export default function ConsolasVenta() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {consolas.map((c) => (
           <div
             key={c.id}
-            className="relative rounded-xl border p-5 transition-all duration-200 group"
+            className="relative rounded-xl border p-4 transition-all duration-200 group"
             style={{
               background: "hsl(220 18% 10%)",
               borderColor: "hsl(220 15% 18%)",
@@ -131,32 +142,43 @@ export default function ConsolasVenta() {
               {c.estado}
             </span>
 
-            <div className="mt-3 text-center">
-              <div className="aspect-video w-full overflow-hidden rounded-md mb-3">
+            <div className="text-center mb-3 mt-3">
+              <div className="aspect-video w-[160px] mx-auto overflow-hidden rounded-md mb-3">
                 <img src={c.image} alt={c.name} className="h-full w-full object-cover" />
               </div>
-              <h3 className="font-semibold text-sm" style={{ color: "hsl(210 20% 92%)" }}>
+              <h3 className="font-semibold text-sm line-clamp-1" style={{ color: "hsl(210 20% 92%)" }}>
                 {c.name}
               </h3>
-              <p className="mt-1 text-xs font-bold text-primary">
+              <p className="text-[11px] mt-0.5 font-black uppercase tracking-widest" style={{ color: c.version === "Destrabada" ? "hsl(280 80% 65%)" : "hsl(215 15% 55%)" }}>
+                {c.version || "Original"}
+              </p>
+              <p className="text-[10px] mt-1 font-semibold" style={{ color: "hsl(175 80% 60%)" }}>
+                {c.garantia ? `${c.garantia} de garantía` : "Sin garantía"}
+              </p>
+              {c.info && (
+                <p className="text-[11px] mt-1 line-clamp-1" style={{ color: "hsl(215 15% 70%)" }}>
+                  {c.info}
+                </p>
+              )}
+              <p className="mt-1 text-sm font-bold text-primary" style={{ color: "hsl(175 80% 55%)" }}>
                 {c.precio || "Consultar"}
               </p>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2">
               <button
                 onClick={() => openEdit(c)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all"
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all"
                 style={{ background: "hsl(220 15% 16%)", color: "hsl(215 15% 70%)" }}
                 onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "hsl(220 15% 20%)")}
                 onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "hsl(220 15% 16%)")}
               >
-                <Pencil size={13} /> Editar
+                <Pencil size={12} /> Editar
               </button>
               <button
                 onClick={() => handleDelete(c.id)}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                className="p-1.5 rounded-lg transition-all"
                 style={{ background: "hsl(0 84% 60% / 0.1)", color: "hsl(0 84% 70%)", border: "1px solid hsl(0 84% 60% / 0.2)" }}
                 onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "hsl(0 84% 60% / 0.2)")}
                 onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "hsl(0 84% 60% / 0.1)")}
@@ -205,13 +227,57 @@ export default function ConsolasVenta() {
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>
+                Versión
+              </label>
+              <select
+                className="input-field"
+                value={form.version}
+                onChange={(e) => setForm({ ...form, version: e.target.value as any })}
+              >
+                <option value="Original">Original</option>
+                <option value="Destrabada">Destrabada</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>
+                Información extra
+              </label>
+              <input
+                className="input-field"
+                placeholder="Ej: Incluye SSD 128GB + 2 Controles"
+                value={form.info}
+                onChange={(e) => setForm({ ...form, info: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>
+                Garantía
+              </label>
+              <input
+                className="input-field"
+                placeholder="Ej: 1 año, 6 meses (se autocompleta con 'de garantía')"
+                value={form.garantia}
+                onChange={(e) => setForm({ ...form, garantia: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>
                 Precio
               </label>
               <input
                 className="input-field"
-                placeholder="Ej: $25.900 o dejar vacío para 'Consultar'"
+                placeholder="Ej: 25900 (solo números) o dejar vacío para 'Consultar'"
                 value={form.precio}
-                onChange={(e) => setForm({ ...form, precio: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val !== "" && /\D/.test(val)) {
+                    toast.error("Por favor, ingresa solo números. El $ y el punto se agregan solos.");
+                  }
+                  setForm({ ...form, precio: val.replace(/\D/g, "") });
+                }}
               />
             </div>
 

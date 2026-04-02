@@ -55,7 +55,13 @@ const ServicesSection = () => (
             <div className="mb-3 sm:mb-4 inline-flex rounded-lg bg-primary/10 p-2.5 sm:p-3 text-primary transition-colors group-hover:bg-primary/20">
               <s.icon className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <h3 className="mb-1 sm:mb-2 font-heading text-sm sm:text-lg font-semibold text-foreground line-clamp-2">{s.title}</h3>
+            
+            <div className="flex flex-col justify-center min-h-[2.5rem] sm:min-h-[3.5rem] mb-1 sm:mb-2 w-full">
+              <h3 className="font-heading text-sm sm:text-lg font-semibold text-foreground line-clamp-2">
+                {s.title}
+              </h3>
+            </div>
+            
             <p className="hidden sm:block text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
           </motion.div>
         ))}

@@ -14,6 +14,11 @@ function mapContacto(row: any): ContactoInfo {
     horario: row.horario ?? "",
     whatsapp: row.whatsapp ?? "",
     mapaEmbed: row.mapa_embed ?? "",
+    sobre_nosotros_texto: row.sobre_nosotros_texto ?? "",
+    sobre_nosotros_ticks: row.sobre_nosotros_ticks ?? [],
+    sobre_nosotros_imagen: row.sobre_nosotros_imagen ?? "",
+    facebook: row.facebook ?? "https://www.facebook.com/gamedoctor2004/?locale=es_LA",
+    instagram: row.instagram ?? "https://www.instagram.com/gamedoctor2004?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   };
 }
 
@@ -191,6 +196,11 @@ export async function upsertContacto(info: ContactoInfo): Promise<void> {
     horario: info.horario,
     whatsapp: info.whatsapp,
     mapa_embed: info.mapaEmbed,
+    sobre_nosotros_texto: info.sobre_nosotros_texto,
+    sobre_nosotros_ticks: info.sobre_nosotros_ticks,
+    sobre_nosotros_imagen: info.sobre_nosotros_imagen,
+    facebook: info.facebook,
+    instagram: info.instagram,
   };
   if (existing?.id) {
     await supabase.from("config_contacto").update(payload).eq("id", existing.id);

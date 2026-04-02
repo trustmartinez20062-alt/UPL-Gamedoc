@@ -2,6 +2,8 @@ import { useState } from "react";
 import { DollarSign, Plus, Pencil, Trash2 } from "lucide-react";
 import { useConsolasCompra, genId, type ConsolaCompra } from "../../store";
 import { useAuth } from "../../hooks/useAuth";
+import { formatPriceForDB, parsePriceForForm } from "../../../lib/utils";
+import { toast } from "@/components/ui/sonner";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
@@ -18,18 +20,20 @@ export default function ConsolasCompra() {
   };
 
   const openEdit = (item: ConsolaCompra) => {
-    setForm({ name: item.name, precio: item.precio });
+    setForm({ name: item.name, precio: parsePriceForForm(item.precio) });
     setModal({ mode: "edit", item });
   };
 
   // @DB-CRUD-LOGIC: Sincronizar con base de datos.
   const handleSave = () => {
     if (!form.name.trim()) return;
+    const dataToSave = { ...form, precio: formatPriceForDB(form.precio) };
+
     if (modal?.mode === "add") {
-      setConsolas((prev) => [...prev, { id: genId(), ...form } as ConsolaCompra]);
+      setConsolas((prev) => [...prev, { id: genId(), ...dataToSave } as ConsolaCompra]);
     } else if (modal?.item) {
       setConsolas((prev) =>
-        prev.map((c) => (c.id === modal.item!.id ? ({ ...c, ...form } as ConsolaCompra) : c))
+        prev.map((c) => (c.id === modal.item!.id ? ({ ...c, ...dataToSave } as ConsolaCompra) : c))
       );
     }
     setModal(null);
@@ -165,9 +169,15 @@ export default function ConsolasCompra() {
               </label>
               <input
                 className="input-field"
-                placeholder="Ej: $4.000"
+                placeholder="Ej: 4000 (solo números)"
                 value={form.precio}
-                onChange={(e) => setForm({ ...form, precio: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val !== "" && /\D/.test(val)) {
+                    toast.error("Por favor, ingresa solo números. El $ y el punto se agregan solos.");
+                  }
+                  setForm({ ...form, precio: val.replace(/\D/g, "") });
+                }}
               />
             </div>
 

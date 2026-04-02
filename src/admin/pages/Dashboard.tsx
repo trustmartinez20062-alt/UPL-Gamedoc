@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { logout, getCurrentUser } from "../auth";
 import {
   Monitor, DollarSign, Wrench, Unlock, Gamepad2, Server, CreditCard,
-  Phone, LogOut, Menu, X, ChevronRight, Users, User
+  Phone, LogOut, Menu, X, ChevronRight, Users, User, ExternalLink
 } from "lucide-react";
 
 import ConsolasVenta from "../components/sections/ConsolasVenta";
@@ -23,7 +23,7 @@ const navItems = [
   { to: ".", label: "Consolas en Venta", icon: Monitor, end: true },
   { to: "compra", label: "Compra de Consolas", icon: DollarSign },
   { to: "reparacion", label: "Reparación", icon: Wrench },
-  { to: "destraba", label: "Destraba", icon: Unlock },
+  { to: "destraba", label: "Servicios", icon: Wrench },
   { to: "juegos", label: "Catálogo de Juegos", icon: Gamepad2 },
   { to: "plataformas", label: "Plataformas", icon: Server },
   { to: "gamepass", label: "Game Pass", icon: CreditCard },
@@ -113,8 +113,25 @@ export default function Dashboard() {
         ))}
       </nav>
 
-      {/* Logout */}
-      <div className="px-3 py-4 border-t" style={{ borderColor: "hsl(220 15% 18%)" }}>
+      {/* Footer Actions */}
+      <div className="px-3 py-4 border-t space-y-1" style={{ borderColor: "hsl(220 15% 18%)" }}>
+        <button
+          onClick={() => navigate("/")}
+          className="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"
+          style={{ color: "hsl(215 15% 70%)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "hsl(175 80% 50% / 0.1)";
+            e.currentTarget.style.color = "hsl(175 80% 50%)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "hsl(215 15% 70%)";
+          }}
+        >
+          <ExternalLink size={18} />
+          Ir a la Tienda
+        </button>
+
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"

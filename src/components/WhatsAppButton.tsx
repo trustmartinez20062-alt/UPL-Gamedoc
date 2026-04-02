@@ -1,6 +1,5 @@
 import { MessageCircle } from "lucide-react";
-
-const WHATSAPP_URL = "https://wa.me/59896593154?text=Hola%20Game%20Doctor!%20Quiero%20consultar%20sobre...";
+import { useContacto } from "../admin/store";
 
 interface WhatsAppButtonProps {
   text?: string;
@@ -16,6 +15,9 @@ const sizeClasses = {
 };
 
 const WhatsAppButton = ({ text = "Contactar por WhatsApp", className = "", size = "md", floating = false }: WhatsAppButtonProps) => {
+  const [contacto] = useContacto();
+  const WHATSAPP_URL = contacto.whatsapp || "https://wa.me/59896593154";
+
   if (floating) {
     return (
       <a

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
+import { useContacto } from "@/admin/store";
 
 const reviews = [
   { name: "Martín G.", text: "Excelente servicio, me repararon la PS5 en el mismo día. Súper recomendable.", rating: 5 },

@@ -6,6 +6,9 @@ export interface ConsolaVenta {
   id: string;
   name: string;
   estado: "Nueva" | "Usada" | "Restaurada";
+  version?: "Original" | "Destrabada" | string;
+  info?: string;
+  garantia?: string;
   precio: string;
   image: string;
 }
@@ -52,6 +55,11 @@ export interface ContactoInfo {
   horario: string;
   whatsapp: string;
   mapaEmbed: string;
+  sobre_nosotros_texto?: string;
+  sobre_nosotros_ticks?: string[];
+  sobre_nosotros_imagen?: string;
+  facebook?: string;
+  instagram?: string;
 }
 
 export interface Usuario {
@@ -245,6 +253,18 @@ const SEED_CONTACTO: ContactoInfo = {
   horario: "Lunes a Sábado — Consultá disponibilidad",
   whatsapp: "https://wa.me/59896593154?text=Hola%20Game%20Doctor!%20Quiero%20consultar%20sobre...",
   mapaEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3273.2247270613843!2d-56.13018048791508!3d-34.875702772744795!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x959f81af46cb7f33%3A0xfa038957580c9695!2sTienda%20de%20Juegos%20-%20GAME%20DOCTOR!5e0!3m2!1ses!2suy!4v1774756722738!5m2!1ses!2suy",
+  sobre_nosotros_texto: "Somos una tienda especializada en el mundo gaming ubicada en Montevideo, Uruguay.\nNos dedicamos a la venta y reparación de consolas PlayStation, Xbox y Nintendo, así como a la venta de juegos digitales y suscripciones como Game Pass Ultimate.\n\nNuestro compromiso es ofrecer el mejor servicio, precios justos y atención personalizada. Ya seas un gamer casual o un revendedor, tenemos lo que necesitás.",
+  sobre_nosotros_ticks: [
+    "Años de experiencia en reparación de consolas",
+    "Precios competitivos por mayor y menor",
+    "Atención personalizada y rápida",
+    "Garantía en todos nuestros servicios",
+    "Juegos digitales 100% originales",
+    "Ubicación céntrica en Montevideo"
+  ],
+  sobre_nosotros_imagen: "",
+  facebook: "https://www.facebook.com/gamedoctor2004/?locale=es_LA",
+  instagram: "https://www.instagram.com/gamedoctor2004?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
 };
 
 export const useContacto = () => {
