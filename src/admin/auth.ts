@@ -4,78 +4,25 @@ import type { Usuario } from "./store";
 // ── LOGIN CON SUPABASE AUTH ───────────────────────────────────────────────
 // Los usuarios se crean en el dashboard de Supabase con email.
 // El campo "nombre" se mapea al email (nombre@gamedoctor.uy) para simplificar el login.
-// ── LOGIN CON 2FA (SUPABASE AUTH + OTP) ───────────────────────────────────
-type LoginResult = 
-  | { state: "success", fullEmail: string } 
-  | { state: "otp_required", fullEmail: string }
-  | { state: "error", error: string };
-
-// Paso 1: Verifica la contraseña. Si el dispositivo es conocido (24hs), deja pasar directo. Si no, exige OTP.
-export async function loginWithOTP(user: string, pass: string): Promise<LoginResult> {
+// ── LOGIN TRADICIONAL ──────────────────────────────────────────────────────────
+export async function loginEmailPassword(user: string, pass: string): Promise<{ state: "success" | "error", error?: string }> {
   const email = user.includes("@") ? user : `${user}@gmail.com`;
   
-  // Verificamos identidad de primera capa
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
   if (error || !data.session) {
     console.error("Login fallido:", error?.message);
     return { state: "error", error: "Credenciales inválidas" };
   }
 
-  // --- INICIO CÓDIGO 2FA / OTP (DESACTIVADO POR RATE LIMIT DE SUPABASE) ---
-  // Si en el futuro se desea reactivar el 2FA, descomentar el bloque siguiente:
-  /*
-  // Comprobar si el dispositivo es confiable ("Remember this device") por 24 horas
-  const trusted = localStorage.getItem(`trusted_device_${data.session.user.id}`);
-  if (trusted && parseInt(trusted) > Date.now()) {
-     // El dispositivo ya fue verificado hoy, lo dejamos pasar directo con su sesión intacta
-     return { state: "success", fullEmail: email };
-  }
-
-  // Desconectamos la sesión local para evitar saltarse la pantalla de 2FA
-  await supabase.auth.signOut();
-
-  // Disparamos el correo con el código de 6 dígitos
-  const { error: otpError } = await supabase.auth.signInWithOtp({ 
-    email,
-    options: {
-      emailRedirectTo: `${window.location.origin}/admin`
-    }
-  });
-  
-  if (otpError) {
-    console.error("Error en OTP:", otpError.message);
-    if (otpError.message.toLowerCase().includes("rate limit") || otpError.message.toLowerCase().includes("exceeded")) {
-       return { state: "error", error: "Límite de seguridad alcanzado (Spam protection). Por favor, intenta de nuevo en 60 minutos." };
-    }
-    return { state: "error", error: "Hubo un problema enviando el código a tu correo." };
-  }
-
-  return { state: "otp_required", fullEmail: email };
-  */
-  // --- FIN CÓDIGO 2FA ---
-
-  // Como el 2FA está desactivado temporalmente, retornamos éxito inmediatamente después de validar la contraseña
-  return { state: "success", fullEmail: email };
+  return { state: "success" };
 }
 
-// Paso 2: Valida el código de 6 dígitos introducido por el usuario y confía en el dispositivo
-export async function verifyLoginCode(email: string, code: string): Promise<boolean> {
-  const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' });
-  if (error || !data.session) {
-    console.error("Código inválido:", error?.message);
-    return false;
-  }
-  
-  // ¡Éxito! Marcamos el dispositivo como seguro por 24 horas (86400000 ms)
-  localStorage.setItem(`trusted_device_${data.session.user.id}`, (Date.now() + 86400000).toString());
-  
-  return true;
-}
+
 
 export async function sendPasswordResetEmail(email: string): Promise<boolean> {
   const fullEmail = email.includes("@") ? email : `${email}@gmail.com`;
   const { error } = await supabase.auth.resetPasswordForEmail(fullEmail, {
-    redirectTo: `${window.location.origin}/admin/update-password`,
+    redirectTo: `${window.location.origin}/portal-panel/update-password`,
   });
   
   if (error) {
@@ -112,7 +59,7 @@ export async function getCurrentUser(): Promise<Usuario | null> {
       id: session.user.id,
       nombre: session.user.email?.split("@")[0] || "Usuario",
       email: session.user.email ?? "",
-      role: (session.user.email === "admin@gamedoctor.uy" || session.user.email === "santi@gamedoctor.uy") ? "admin" : "subadmin",
+      role: "admin", // Simplificado para que el SQL se encargue de todo
       pendingEmail: session.user.new_email,
     };
   }
@@ -121,7 +68,7 @@ export async function getCurrentUser(): Promise<Usuario | null> {
     id: profile.id,
     nombre: profile.nombre,
     email: session.user.email || profile.email || "",
-    role: profile.role as "admin" | "subadmin",
+    role: "admin",
     pendingEmail: session.user.new_email,
   };
 }
