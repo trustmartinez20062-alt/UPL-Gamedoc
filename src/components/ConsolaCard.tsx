@@ -35,6 +35,19 @@ const ConsolaCard = ({ name, image, estado, version, info, garantia, precio, ind
     </p>
   );
 
+  const getEstadoStyles = (estado: string) => {
+    switch (estado?.toLowerCase()) {
+      case "nueva":
+        return "bg-cyan-500/20 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]";
+      case "restaurada":
+        return "bg-purple-500/20 text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.2)]";
+      case "usada":
+        return "bg-yellow-500/20 text-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.2)]";
+      default:
+        return "bg-primary/20 text-primary shadow-primary/10";
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -43,7 +56,7 @@ const ConsolaCard = ({ name, image, estado, version, info, garantia, precio, ind
       className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card p-3 sm:p-5 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5"
     >
       {estado && (
-        <div className="absolute right-2 top-2 z-10 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-primary backdrop-blur-md">
+        <div className={`absolute right-2 top-2 z-10 rounded-full px-2 py-0.5 text-[10px] sm:text-xs font-semibold backdrop-blur-md ${getEstadoStyles(estado)}`}>
           {estado}
         </div>
       )}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { User, Key, Save, Shield, Mail, CheckCircle2 } from "lucide-react";
-import { getCurrentUser, updateUsuario, changeMyPassword } from "../../auth";
+import { User, Key, Save, Shield, Mail, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { getCurrentUser, updateUsuario, changeMyPassword, changeMyEmail, cancelEmailChange } from "../../auth";
 import type { Usuario } from "../../store";
 import PageHeader from "../PageHeader";
 import { toast } from "sonner";
@@ -9,34 +9,63 @@ export default function MiPerfil() {
   const [user, setUser] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
-  const [form, setForm] = useState({ nombre: "", email: "", password: "" });
+  const [form, setForm] = useState({ nombre: "", email: "", password: "", confirmPassword: "" });
 
   const load = async () => {
     setLoading(true);
     const u = await getCurrentUser();
     if (u) {
       setUser(u);
-      setForm({ nombre: u.nombre, email: u.email, password: "" });
+      setForm({ nombre: u.nombre, email: u.email, password: "", confirmPassword: "" });
     }
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
 
-  const handleUpdatePerfil = async () => {
-    if (!user || !form.nombre.trim() || !form.email.trim()) {
-      toast.error("El nombre y el correo son obligatorios");
+  const handleUpdateName = async () => {
+    if (!user || !form.nombre.trim()) {
+      toast.error("El nombre no puede estar vacío");
       return;
     }
+    
+    if (form.nombre.trim() === user.nombre) return;
+
     setSaving(true);
-    const ok = await updateUsuario(user.id, form.nombre.trim(), form.email.trim());
+    const ok = await updateUsuario(user.id, form.nombre.trim(), user.email);
     setSaving(false);
+
     if (ok) {
-      toast.success("Perfil actualizado correctamente");
+      toast.success("Nombre de usuario actualizado correctamente");
       await load();
     } else {
-      toast.error("Error al actualizar el perfil");
+      toast.error("Error al actualizar el nombre de usuario");
+    }
+  };
+
+  const handleUpdateEmail = async () => {
+    if (!user || !form.email.trim()) {
+      toast.error("El correo electrónico no puede estar vacío");
+      return;
+    }
+    
+    if (form.email.trim() === user.email) return;
+
+    setSaving(true);
+    const result = await changeMyEmail(form.email.trim());
+    setSaving(false);
+
+    if (result.ok) {
+      toast.success("Se ha enviado un correo de verificación a la nueva dirección. Revisa tu buzón para confirmar.");
+      setForm(prev => ({ ...prev, email: user.email })); 
+    } else {
+      if (result.error?.toLowerCase().includes("rate limit") || result.error?.toLowerCase().includes("exceeded")) {
+        toast.error("Límite de seguridad alcanzado (Spam protection). Por favor, intenta de nuevo en 60 minutos.");
+      } else {
+        toast.error("Error al procesar el cambio de correo.");
+      }
     }
   };
 
@@ -45,14 +74,34 @@ export default function MiPerfil() {
       toast.error("La contraseña debe tener al menos 6 caracteres");
       return;
     }
+    if (form.password !== form.confirmPassword) {
+      toast.error("Las contraseñas no coinciden");
+      return;
+    }
     setSaving(true);
     const ok = await updateUsuario(user.id, form.nombre, form.email, form.password);
     setSaving(false);
     if (ok) {
       toast.success("Contraseña actualizada correctamente");
-      setForm({ ...form, password: "" });
+      setForm({ ...form, password: "", confirmPassword: "" });
     } else {
       toast.error("Error al cambiar la contraseña");
+    }
+  };
+
+  const handleCancelEmailChange = async () => {
+    if (!user) return;
+    setSaving(true);
+    // Llamamos a la función segura de RPC que borra el campo pending_email de auth.users
+    const ok = await cancelEmailChange();
+    setSaving(false);
+    if (ok) {
+      toast.success("Cambio de correo cancelado exitosamente.");
+      // Limpiamos la form local y refrescamos los datos completos del user
+      setForm(prev => ({ ...prev, email: user.email }));
+      await load();
+    } else {
+      toast.error("Error al cancelar el cambio de correo.");
     }
   };
 
@@ -91,45 +140,83 @@ export default function MiPerfil() {
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider mb-2.5 opacity-40">
-                Correo Electrónico (Login)
-              </label>
-              <div className="relative">
-                <input
-                  className="input-field pl-10"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="ejemplo@correo.com"
-                />
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
+          <div className="space-y-6">
+            {/* Correo Electrónico Block */}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider mb-2.5 opacity-40">
+                  Correo Electrónico (Login)
+                </label>
+                <div className="relative">
+                  <input
+                    className="input-field pl-10"
+                    value={form.email}
+                    disabled={!!user?.pendingEmail || user?.role !== 'admin'}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    placeholder="ejemplo@correo.com"
+                    style={user?.pendingEmail || user?.role !== 'admin' ? { borderColor: "hsl(175 80% 50% / 0.5)", color: "hsl(215 15% 50%)", cursor: "not-allowed" } : {}}
+                  />
+                  <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
+                </div>
+                
+                {user?.role !== 'admin' && (
+                  <p className="mt-2 text-[11px] opacity-70" style={{ color: "hsl(175 80% 60%)" }}>
+                    Solo un administrador puede cambiar tu correo electrónico.
+                  </p>
+                )}
+                
+                {user?.pendingEmail && user?.role === 'admin' && (
+                  <div className="mt-3 p-3 rounded-lg border flex flex-col gap-2" style={{ borderColor: "hsl(175 80% 50% / 0.3)", background: "hsl(175 80% 50% / 0.05)" }}>
+                    <p className="text-xs" style={{ color: "hsl(175 80% 80%)" }}>
+                      Verificación pendiente para: <strong className="text-white">{user.pendingEmail}</strong>.<br/>Revise la bandeja de entrada de ese correo.
+                    </p>
+                    <button 
+                      onClick={handleCancelEmailChange}
+                      disabled={saving}
+                      className="text-xs font-bold py-1.5 px-3 rounded bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors self-start mt-1"
+                    >
+                      Cancelar solicitud
+                    </button>
+                  </div>
+                )}
               </div>
+              <button
+                onClick={handleUpdateEmail}
+                disabled={saving || form.email === user?.email || !!user?.pendingEmail || user?.role !== 'admin'}
+                className="btn-primary w-full flex items-center justify-center gap-2 py-2.5 text-sm"
+              >
+                <Save size={16} />
+                Actualizar Correo
+              </button>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider mb-2.5 opacity-40">
-                Nombre de Usuario
-              </label>
-              <div className="relative">
-                <input
-                  className="input-field pl-10"
-                  placeholder="Tu nombre de usuario"
-                  value={form.nombre}
-                  onChange={(e) => setForm({ ...form, nombre: e.target.value.toLowerCase().replace(/\s/g, '') })}
-                />
-                <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
-              </div>
-            </div>
+            <div className="h-px w-full" style={{ background: "hsl(0 0% 100% / 0.05)" }} />
 
-            <button
-              onClick={handleUpdatePerfil}
-              disabled={saving || (form.nombre === user?.nombre && form.email === user?.email)}
-              className="btn-primary w-full flex items-center justify-center gap-2 py-3"
-            >
-              <Save size={18} />
-              Guardar Cambios
-            </button>
+            {/* Nombre Block */}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider mb-2.5 opacity-40">
+                  Nombre de Usuario
+                </label>
+                <div className="relative">
+                  <input
+                    className="input-field pl-10"
+                    placeholder="Tu nombre de usuario"
+                    value={form.nombre}
+                    onChange={(e) => setForm({ ...form, nombre: e.target.value.toLowerCase().replace(/\s/g, '') })}
+                  />
+                  <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
+                </div>
+              </div>
+              <button
+                onClick={handleUpdateName}
+                disabled={saving || form.nombre === user?.nombre}
+                className="btn-primary w-full flex items-center justify-center gap-2 py-2.5 text-sm"
+              >
+                <Save size={16} />
+                Actualizar Nombre
+              </button>
+            </div>
           </div>
         </div>
 
@@ -152,19 +239,49 @@ export default function MiPerfil() {
               </label>
               <div className="relative">
                 <input
-                  className="input-field pl-10"
-                  type="password"
+                  className="input-field pl-10 pr-10"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Mínimo 6 caracteres"
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                 />
                 <Key size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition-opacity"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider mb-2.5 opacity-40">
+                Confirmar Contraseña
+              </label>
+              <div className="relative">
+                <input
+                  className="input-field pl-10 pr-10"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Repite la nueva contraseña"
+                  value={form.confirmPassword}
+                  onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                />
+                <Key size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition-opacity"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
 
             <button
               onClick={handleChangePassword}
-              disabled={saving || !form.password}
+              disabled={saving || !form.password || !form.confirmPassword}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border font-bold text-sm transition-all hover:bg-[hsl(0_0%_100%/0.05)]"
               style={{ borderColor: "hsl(220 15% 20%)", color: "hsl(175 80% 50%)" }}
             >

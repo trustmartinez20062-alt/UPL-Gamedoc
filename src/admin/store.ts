@@ -66,7 +66,9 @@ export interface Usuario {
   id: string;
   nombre: string;
   email: string;
+  password?: string;
   role: "admin" | "subadmin";
+  pendingEmail?: string;
 }
 
 // ── ID generator (kept for compatibility, Supabase generates real UUIDs) ──

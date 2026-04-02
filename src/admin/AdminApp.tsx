@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import UpdatePassword from "./pages/UpdatePassword";
 import "./admin.css";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -36,6 +37,7 @@ export default function AdminApp() {
     <div id="admin-root">
       <Routes>
         <Route path="login" element={<Login />} />
+        <Route path="update-password" element={<UpdatePassword />} />
         <Route
           path="*"
           element={

@@ -1,27 +1,73 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../auth";
-import { Eye, EyeOff, Gamepad2, Lock, User, Mail } from "lucide-react";
+import { loginWithOTP, verifyLoginCode, sendPasswordResetEmail } from "../auth";
+import { Eye, EyeOff, Gamepad2, Lock, User, Mail, ArrowLeft, KeySquare } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [verifiedEmail, setVerifiedEmail] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"login" | "recover" | "otp">("login");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
 
-    const ok = await login(user, pass);
-    if (ok) {
-      navigate("/admin", { replace: true });
-    } else {
-      setError("Correo o contraseña incorrectos.");
+    if (mode === "recover") {
+      if (!user) {
+        setError("Ingresa el correo de tu cuenta.");
+        setLoading(false);
+        return;
+      }
+      
+      const ok = await sendPasswordResetEmail(user);
+      if (ok) {
+        setSuccess("Te enviamos un enlace especial a tu correo. Revisa tu buzón.");
+      } else {
+        setError("Error al solicitar el enlace. Verifica tu correo e intentalo nuevamente.");
+      }
       setLoading(false);
+      return;
+    }
+
+    if (mode === "login") {
+      const result = await loginWithOTP(user, pass);
+      if (result.state === "success") {
+        // Dispositivo confiable, pasamos directo
+        navigate("/admin", { replace: true });
+        return;
+      } else if (result.state === "otp_required") {
+        setVerifiedEmail(result.fullEmail!);
+        setMode("otp");
+        setSuccess("Te hemos enviado un código a tu correo.");
+      } else {
+        setError(result.error || "Correo o contraseña incorrectos.");
+      }
+      setLoading(false);
+      return;
+    }
+
+    if (mode === "otp") {
+      if (otpCode.length < 6) {
+        setError("El código debe tener al menos 6 caracteres.");
+        setLoading(false);
+        return;
+      }
+      const ok = await verifyLoginCode(verifiedEmail, otpCode);
+      if (ok) {
+        navigate("/admin", { replace: true });
+      } else {
+        setError("Código incorrecto o expirado.");
+        setLoading(false);
+      }
     }
   };
 
@@ -69,54 +115,94 @@ export default function Login() {
             boxShadow: "0 25px 50px hsl(0 0% 0% / 0.5)"
           }}>
           <h2 className="text-xl font-bold text-center mb-6" style={{ fontFamily: "Orbitron, sans-serif", color: "hsl(210 20% 92%)" }}>
-            Iniciar Sesión
+            {mode === "recover" ? "Recuperar Acceso" : mode === "otp" ? "Verificación 2FA" : "Iniciar Sesión"}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Usuario */}
-            <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "hsl(215 15% 55%)" }}>
-                Correo Electrónico
-              </label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "hsl(215 15% 55%)" }} />
-                <input
-                  type="email"
-                  value={user}
-                  onChange={(e) => setUser(e.target.value)}
-                  placeholder="ejemplo@correo.com"
-                  className="input-field pl-12"
-                  required
-                  autoComplete="email"
-                />
+            {/* OTP Mode */}
+            {mode === "otp" && (
+              <div>
+                <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "hsl(215 15% 55%)" }}>
+                  Código de acceso
+                </label>
+                <div className="relative">
+                  <KeySquare size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "hsl(215 15% 55%)" }} />
+                  <input
+                    type="text"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9a-zA-Z]/g, '').toUpperCase())}
+                    placeholder="Ingrese su código"
+                    className="input-field pl-12 tracking-widest text-lg font-bold"
+                    maxLength={10}
+                    required
+                    autoFocus
+                  />
+                </div>
+                <p className="text-xs text-center mt-3" style={{ color: "hsl(215 15% 45%)" }}>
+                  Por tu seguridad, enviamos un código a <strong>{verifiedEmail}</strong>
+                </p>
               </div>
-            </div>
+            )}
 
-            {/* Contraseña */}
-            <div>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "hsl(215 15% 55%)" }}>
-                Contraseña
-              </label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "hsl(215 15% 55%)" }} />
-                <input
-                  type={showPass ? "text" : "password"}
-                  value={pass}
-                  onChange={(e) => setPass(e.target.value)}
-                  placeholder="Ingresá tu contraseña"
-                  className="input-field pl-12 pr-12"
-                  required
-                  autoComplete="current-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70"
-                  style={{ color: "hsl(215 15% 55%)" }}>
-                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
+            {/* Normal Login/Recover Mode */}
+            {mode !== "otp" && (
+              <>
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "hsl(215 15% 55%)" }}>
+                    Correo Electrónico
+                  </label>
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "hsl(215 15% 55%)" }} />
+                    <input
+                      type="email"
+                      value={user}
+                      onChange={(e) => setUser(e.target.value)}
+                      placeholder="ejemplo@correo.com"
+                      className="input-field pl-12"
+                      required
+                      autoComplete="email"
+                    />
+                  </div>
+                </div>
+
+                {mode === "login" && (
+                  <div>
+                    <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "hsl(215 15% 55%)" }}>
+                      Contraseña
+                    </label>
+                    <div className="relative">
+                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "hsl(215 15% 55%)" }} />
+                      <input
+                        type={showPass ? "text" : "password"}
+                        value={pass}
+                        onChange={(e) => setPass(e.target.value)}
+                        placeholder="Ingresá tu contraseña"
+                        className="input-field pl-12 pr-12"
+                        required
+                        autoComplete="current-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPass(!showPass)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70"
+                        style={{ color: "hsl(215 15% 55%)" }}>
+                        {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                    <div className="mt-2 text-right">
+                      <button 
+                        type="button" 
+                        onClick={() => { setMode("recover"); setError(""); setSuccess(""); }}
+                        className="text-xs transition-colors hover:underline hover:text-primary"
+                        style={{ color: "hsl(215 15% 55%)" }}
+                      >
+                        ¿Olvidaste tu contraseña?
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
 
             {/* Error */}
             {error && (
@@ -126,8 +212,16 @@ export default function Login() {
                 {error}
               </div>
             )}
+            
+            {/* Exito */}
+            {success && (
+              <div className="flex items-center gap-2 text-sm px-4 py-3 rounded-lg animate-fade-in"
+                style={{ background: "hsl(142 71% 45% / 0.1)", border: "1px solid hsl(142 71% 45% / 0.25)", color: "hsl(142 71% 45%)" }}>
+                <span>✅</span>
+                {success}
+              </div>
+            )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -142,10 +236,23 @@ export default function Login() {
                 <span className="flex items-center justify-center gap-2">
                   <span className="inline-block w-4 h-4 border-2 rounded-full animate-spin"
                     style={{ borderColor: "hsl(220 20% 6%) transparent hsl(220 20% 6%) transparent" }} />
-                  Verificando...
+                  Procesando...
                 </span>
-              ) : "Ingresar al Panel"}
+              ) : mode === "recover" ? "Enviar Enlace Recup." : mode === "otp" ? "Verificar Código" : "Ingresar al Panel"}
             </button>
+            
+            {mode !== "login" && (
+              <div className="text-center mt-2">
+                <button 
+                  type="button" 
+                  onClick={() => { setMode("login"); setError(""); setSuccess(""); if(mode==="otp"){ setOtpCode(""); setPass(""); } }}
+                  className="inline-flex items-center gap-2 text-xs transition-colors hover:text-primary"
+                  style={{ color: "hsl(215 15% 55%)" }}
+                >
+                  <ArrowLeft size={14} /> Volver a {mode === "otp" ? "Login" : "Ingresar"}
+                </button>
+              </div>
+            )}
           </form>
         </div>
 
