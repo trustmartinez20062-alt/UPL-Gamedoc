@@ -64,20 +64,6 @@ const JuegosDigitales = () => {
               </p>
             </motion.div>
 
-            {/* @SEO Contenido descriptivo para crawlers (~160 palabras) */}
-            <div className="mb-12 max-w-4xl">
-              <p className="text-sm leading-relaxed text-muted-foreground/80">
-                <strong>Game Doctor</strong> es tu tienda de <strong>juegos digitales en Uruguay</strong>. Ofrecemos un catálogo actualizado 
-                de títulos para <strong>PlayStation 4, PlayStation 5, Xbox One, Xbox Series X|S y PC</strong> a precios accesibles. 
-                Todos los juegos se entregan de forma inmediata mediante activación digital, sin necesidad de esperar envíos físicos. 
-                Trabajamos con cuentas primarias y secundarias según la plataforma, siempre garantizando la seguridad de tu cuenta. 
-                Además de juegos individuales, podés consultar nuestras <Link to="/game-pass" className="text-primary hover:underline font-medium">suscripciones Game Pass</Link> para 
-                acceder a cientos de títulos con una sola activación. Si buscás un juego específico que no ves en el catálogo, 
-                <Link to="/#contacto" className="text-primary hover:underline font-medium"> escribinos por WhatsApp</Link> y te lo 
-                conseguimos. Atendemos desde <strong>La Unión, Montevideo</strong> con envíos digitales a todo el país.
-              </p>
-            </div>
-
             {/* Grid Juegos */}
             {juegos.length > 0 ? (
               <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
@@ -107,6 +93,20 @@ const JuegosDigitales = () => {
               </p>
               <WhatsAppButton size="lg" text="Consultar por WhatsApp" />
             </motion.div>
+
+            {/* @SEO Contenido descriptivo para crawlers — posicionado al final de la página */}
+            <div className="mt-16 max-w-4xl mx-auto">
+              <p className="text-sm leading-relaxed text-muted-foreground/60">
+                <strong>Game Doctor</strong> es tu tienda de <strong>juegos digitales en Uruguay</strong>. Ofrecemos un catálogo actualizado 
+                de títulos para <strong>PlayStation 4, PlayStation 5, Xbox One, Xbox Series X|S y PC</strong> a precios accesibles. 
+                Todos los juegos se entregan de forma inmediata mediante activación digital, sin necesidad de esperar envíos físicos. 
+                Trabajamos con cuentas primarias y secundarias según la plataforma, siempre garantizando la seguridad de tu cuenta. 
+                Además de juegos individuales, podés consultar nuestras <Link to="/game-pass" className="text-primary hover:underline font-medium">suscripciones Game Pass</Link> para 
+                acceder a cientos de títulos con una sola activación. Si buscás un juego específico que no ves en el catálogo,
+                <Link to="/#contacto" className="text-primary hover:underline font-medium"> escribinos por WhatsApp</Link> y te lo 
+                conseguimos. Atendemos desde <strong>La Unión, Montevideo</strong> con envíos digitales a todo el país.
+              </p>
+            </div>
           </div>
         </section>
       </main>

@@ -64,22 +64,6 @@ const GamePassCatalog = () => {
               </p>
             </motion.div>
 
-            {/* @SEO Contenido descriptivo para crawlers (~170 palabras) */}
-            <div className="mb-12 max-w-4xl">
-              <p className="text-sm leading-relaxed text-muted-foreground/80">
-                En <strong>Game Doctor</strong> ofrecemos la activación de <strong>Game Pass Ultimate, Game Pass Core y PlayStation Plus</strong> al 
-                mejor precio en <strong>Uruguay</strong>. Nuestras suscripciones se activan de forma inmediata en tu consola, 
-                sin esperas ni complicaciones. Con Game Pass Ultimate accedés a un catálogo de más de 400 juegos para 
-                Xbox y PC, incluyendo lanzamientos del día uno. También activamos <strong>PlayStation Plus Essential, Extra y Premium</strong> para 
-                que disfrutes de juegos online, títulos gratuitos mensuales y streaming de clásicos. 
-                Cada activación incluye <strong>garantía</strong> y soporte personalizado. Si necesitás un plan que no ves en nuestro 
-                catálogo, <Link to="/#contacto" className="text-primary hover:underline font-medium">consultanos por WhatsApp</Link> y 
-                armamos la mejor opción para vos. Además, podés explorar nuestro <Link to="/juegos-digitales" className="text-primary hover:underline font-medium">catálogo de juegos digitales</Link> o 
-                ver las <Link to="/consolas" className="text-primary hover:underline font-medium">consolas disponibles</Link>. 
-                Atendemos desde <strong>La Unión, Montevideo</strong>.
-              </p>
-            </div>
-
             {/* Grid Game Pass */}
             {gamePassPlanes.length > 0 ? (
               <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -109,6 +93,22 @@ const GamePassCatalog = () => {
               </p>
               <WhatsAppButton size="lg" text="Consultar Planes Custom" />
             </motion.div>
+
+            {/* @SEO Contenido descriptivo para crawlers — posicionado al final de la página */}
+            <div className="mt-16 max-w-4xl mx-auto">
+              <p className="text-sm leading-relaxed text-muted-foreground/60">
+                En <strong>Game Doctor</strong> ofrecemos la activación de <strong>Game Pass Ultimate, Game Pass Core y PlayStation Plus</strong> al 
+                mejor precio en <strong>Uruguay</strong>. Nuestras suscripciones se activan de forma inmediata en tu consola, 
+                sin esperas ni complicaciones. Con Game Pass Ultimate accedés a un catálogo de más de 400 juegos para 
+                Xbox y PC, incluyendo lanzamientos del día uno. También activamos <strong>PlayStation Plus Essential, Extra y Premium</strong> para 
+                que disfrutes de juegos online, títulos gratuitos mensuales y streaming de clásicos. 
+                Cada activación incluye <strong>garantía</strong> y soporte personalizado. Si necesitás un plan que no ves en nuestro 
+                catálogo, <Link to="/#contacto" className="text-primary hover:underline font-medium">consultanos por WhatsApp</Link> y 
+                armamos la mejor opción para vos. Además, podés explorar nuestro <Link to="/juegos-digitales" className="text-primary hover:underline font-medium">catálogo de juegos digitales</Link> o 
+                ver las <Link to="/consolas" className="text-primary hover:underline font-medium">consolas disponibles</Link>. 
+                Atendemos desde <strong>La Unión, Montevideo</strong>.
+              </p>
+            </div>
           </div>
         </section>
       </main>

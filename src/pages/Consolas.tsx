@@ -85,19 +85,6 @@ const Consolas = () => {
               </div>
             </motion.div>
 
-            {/* @SEO Contenido descriptivo para crawlers (~150 palabras) */}
-            <div className="mb-12 max-w-4xl">
-              <p className="text-sm leading-relaxed text-muted-foreground/80">
-                En <strong>Game Doctor</strong> ofrecemos la mejor selección de consolas de videojuegos en <strong>La Unión, Montevideo</strong>. 
-                Trabajamos con <strong>PlayStation 3, PlayStation 4, PlayStation 5, Xbox One, Xbox Series S, Xbox Series X y Nintendo Switch</strong>. 
-                Todas nuestras consolas restauradas pasan por un proceso completo de diagnóstico, limpieza interna, cambio de pasta térmica 
-                y pruebas de funcionamiento antes de la venta. Ofrecemos <strong>garantía</strong> en cada equipo y aceptamos consolas como 
-                parte de pago. También contamos con stock de consolas nuevas selladas a precios competitivos tanto para venta minorista como 
-                mayorista. Si buscás una consola específica que no ves en nuestro catálogo, <Link to="/#contacto" className="text-primary hover:underline font-medium">contactanos por WhatsApp</Link> y 
-                te la conseguimos. Hacemos envíos a todo Uruguay.
-              </p>
-            </div>
-
             {/* Grid */}
             {filtered.length > 0 ? (
               <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
@@ -130,6 +117,19 @@ const Consolas = () => {
               </p>
               <WhatsAppButton size="lg" text="Consultar por Consolas" />
             </motion.div>
+
+            {/* @SEO Contenido descriptivo para crawlers — posicionado al final de la página */}
+            <div className="mt-16 max-w-4xl mx-auto">
+              <p className="text-sm leading-relaxed text-muted-foreground/60">
+                En <strong>Game Doctor</strong> ofrecemos la mejor selección de consolas de videojuegos en <strong>La Unión, Montevideo</strong>. 
+                Trabajamos con <strong>PlayStation 3, PlayStation 4, PlayStation 5, Xbox One, Xbox Series S, Xbox Series X y Nintendo Switch</strong>. 
+                Todas nuestras consolas restauradas pasan por un proceso completo de diagnóstico, limpieza interna, cambio de pasta térmica 
+                y pruebas de funcionamiento antes de la venta. Ofrecemos <strong>garantía</strong> en cada equipo y aceptamos consolas como 
+                parte de pago. También contamos con stock de consolas nuevas selladas a precios competitivos tanto para venta minorista como 
+                mayorista. Si buscás una consola específica que no ves en nuestro catálogo, <Link to="/#contacto" className="text-primary hover:underline font-medium">contactanos por WhatsApp</Link> y 
+                te la conseguimos. Hacemos envíos a todo Uruguay.
+              </p>
+            </div>
           </div>
         </section>
       </main>
