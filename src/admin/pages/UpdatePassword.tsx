@@ -48,7 +48,7 @@ export default function UpdatePassword() {
     if (ok) {
       setSuccess("¡Contraseña actualizada exitosamente!");
       setTimeout(() => {
-        navigate("/admin/login", { replace: true });
+        navigate("/paneladmin/login", { replace: true });
       }, 2000);
     } else {
       setError("Ocurrió un error al actualizar la contraseña o el enlace es inválido.");

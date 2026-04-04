@@ -52,7 +52,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/admin/login", { replace: true });
+    navigate("/paneladmin/login", { replace: true });
   };
 
   const activeLinkStyle = ({ isActive }: { isActive: boolean }) =>
@@ -227,7 +227,7 @@ export default function Dashboard() {
             <Route path="perfil" element={<MiPerfil />} />
             {user?.role === "admin" && <Route path="usuarios" element={<Usuarios />} />}
             {/* Si no es admin y trata de entrar a usuarios, redirigir a dashboard */}
-            <Route path="usuarios" element={<Navigate to="/admin" replace />} />
+            <Route path="usuarios" element={<Navigate to="/paneladmin" replace />} />
           </Routes>
         </main>
       </div>

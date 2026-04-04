@@ -22,7 +22,7 @@ export async function loginEmailPassword(user: string, pass: string): Promise<{ 
 export async function sendPasswordResetEmail(email: string): Promise<boolean> {
   const fullEmail = email.includes("@") ? email : `${email}@gmail.com`;
   const { error } = await supabase.auth.resetPasswordForEmail(fullEmail, {
-    redirectTo: `${window.location.origin}/portal-panel/update-password`,
+    redirectTo: `${window.location.origin}/paneladmin/update-password`,
   });
   
   if (error) {

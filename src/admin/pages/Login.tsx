@@ -64,7 +64,7 @@ export default function Login() {
       const result = await loginEmailPassword(user, pass);
       if (result.state === "success") {
         setFailedAttempts(0);
-        navigate("/portal-panel", { replace: true });
+        navigate("/paneladmin", { replace: true });
         return;
       } else {
         const newAttempts = failedAttempts + 1;

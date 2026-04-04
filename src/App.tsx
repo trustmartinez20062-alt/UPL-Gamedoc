@@ -21,7 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/juegos-digitales" element={<JuegosDigitales />} />
           <Route path="/consolas" element={<Consolas />} />
-          <Route path="/portal-panel/*" element={<AdminApp />} />
+          <Route path="/paneladmin/*" element={<AdminApp />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

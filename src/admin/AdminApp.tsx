@@ -29,7 +29,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return status === "auth" ? <>{children}</> : <Navigate to="/portal-panel/login" replace />;
+  return status === "auth" ? <>{children}</> : <Navigate to="/paneladmin/login" replace />;
 }
 
 export default function AdminApp() {
