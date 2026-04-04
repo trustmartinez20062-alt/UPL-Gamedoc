@@ -35,8 +35,9 @@ const HeroSection = () => (
         }}
         className="max-w-2xl"
       >
+        {/* @SEO Ubicación visible para SEO local */}
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-          <Zap className="h-4 w-4" /> Montevideo, Uruguay
+          <Zap className="h-4 w-4" /> La Unión, Montevideo, Uruguay
         </div>
 
         <h1 className="mb-6 font-heading text-4xl font-black leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
@@ -44,8 +45,9 @@ const HeroSection = () => (
           <span className="text-primary text-glow">consolas</span> en Montevideo
         </h1>
 
+        {/* @SEO Párrafo descriptivo con keywords principales */}
         <p className="mb-8 max-w-lg text-lg text-muted-foreground">
-          PlayStation, Xbox, Nintendo — venta de juegos digitales, Game Pass Ultimate, reparaciones profesionales y precios por mayor.
+          Servicio técnico especializado en PlayStation, Xbox y Nintendo. Venta de consolas nuevas y restauradas, juegos digitales y activación de Game Pass en La Unión, Montevideo.
         </p>
 
         <div className="flex flex-wrap gap-4">
@@ -65,8 +67,8 @@ const HeroSection = () => (
           transition={{ delay: 0.5 }}
           className="mt-12 flex flex-wrap gap-6 text-sm text-muted-foreground"
         >
-          <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary" /> Garantía en reparaciones</span>
-          <span className="flex items-center gap-2"><Gamepad2 className="h-4 w-4 text-primary" /> +300 clientes satisfechos</span>
+          <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary" /> Garantía en cada reparación de consolas</span>
+          <span className="flex items-center gap-2"><Gamepad2 className="h-4 w-4 text-primary" /> +300 clientes en Montevideo</span>
         </motion.div>
       </motion.div>
     </div>

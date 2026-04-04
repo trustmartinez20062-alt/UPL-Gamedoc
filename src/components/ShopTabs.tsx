@@ -4,13 +4,13 @@ import { Gamepad2, Monitor, Wrench, ChevronRight, ShoppingCart, DollarSign, Cred
 import { useConsolasVenta, useConsolasCompra, useGamePass, useJuegos, usePlataformas, useDestraba, useReparacion } from "../admin/store";
 import JuegoCard from "./JuegoCard";
 import ConsolaCard from "./ConsolaCard";
+import GamePassCard from "./GamePassCard";
 import WhatsAppButton from "./WhatsAppButton";
 import { Link } from "react-router-dom";
 
 const ShopTabs = () => {
   const [activeTab, setActiveTab] = useState("juegos");
   
-  // @DB-DYNAMIC-DATA: Hooks listos para conectarse a Supabase en el store.
   const [juegos] = useJuegos();
   const [consolasVenta] = useConsolasVenta();
   const [consolasCompra] = useConsolasCompra();
@@ -20,7 +20,10 @@ const ShopTabs = () => {
   
   const displayedJuegos = juegos.slice(0, 4);
   const displayedConsolas = consolasVenta.slice(0, 8);
+  const displayedGamePass = gamePassPlanes.slice(0, 4);
+
   const hasMultipleConsolas = consolasVenta.length > 8;
+  const hasMultipleGamePass = gamePassPlanes.length > 4;
 
   const tabs = [
     { id: "juegos", label: "Juegos", icon: Gamepad2 },
@@ -28,6 +31,7 @@ const ShopTabs = () => {
     { id: "passes", label: "Pases", icon: CreditCard },
     { id: "servicios", label: "Servicios", icon: Wrench },
   ];
+
 
   return (
     <section id="tienda" className="py-24 gradient-dark overflow-hidden">
@@ -126,35 +130,23 @@ const ShopTabs = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.4 }}
               >
-                <div className="mx-auto max-w-2xl space-y-8">
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="h-6 w-6 text-primary" />
-                    <h3 className="font-heading text-2xl font-bold text-foreground">Suscripciones & Pases</h3>
-                  </div>
-                  <div className="max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
-                    <div className="overflow-hidden rounded-2xl border border-border bg-card/40 shadow-xl backdrop-blur-sm">
-                      <table className="w-full text-left text-sm sm:text-base">
-                        <thead className="bg-muted/40 font-heading text-xs uppercase tracking-wider text-muted-foreground">
-                          <tr>
-                            <th className="px-6 py-4 font-semibold">Plan / Suscripción</th>
-                            <th className="px-6 py-4 text-right font-semibold">Precio</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                          {gamePassPlanes.map((g, i) => (
-                            <tr key={g.id || g.plan} className="group transition-colors hover:bg-muted/10">
-                              <td className="px-6 py-4 font-medium text-foreground">{g.plan}</td>
-                              <td className="px-6 py-4 text-right font-bold text-primary">
-                                {g.precio || "Consultar"}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                <div className="space-y-8">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <CreditCard className="h-6 w-6 text-primary" />
+                      <h3 className="font-heading text-xl font-bold text-foreground sm:text-2xl">Suscripciones & Pases</h3>
                     </div>
+                    {hasMultipleGamePass && (
+                      <Link to="/game-pass" className="group flex items-center gap-1 text-sm font-semibold text-primary">
+                        Ver todos <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </Link>
+                    )}
                   </div>
-                  <div className="text-center">
-                    <WhatsAppButton size="lg" text="Activar mi Pase" />
+                  
+                  <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                    {displayedGamePass.map((g, i) => (
+                      <GamePassCard key={g.id} {...g} index={i} />
+                    ))}
                   </div>
                 </div>
               </motion.div>

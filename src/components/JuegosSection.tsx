@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { Gamepad2, CreditCard } from "lucide-react";
+import { Gamepad2, CreditCard, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useJuegos, usePlataformas } from "../admin/store";
+import { useJuegos, useGamePass } from "../admin/store";
 import JuegoCard from "./JuegoCard";
+import GamePassCard from "./GamePassCard";
 import WhatsAppButton from "./WhatsAppButton";
 
 const sectionVariant = {
@@ -11,24 +12,17 @@ const sectionVariant = {
 };
 
 const JuegosSection = () => {
-  // @DB-DYNAMIC-DATA: Este hook ya está preparado para consumir datos, solo falta conectar useJuegos() a Supabase en store.ts.
   const [juegos] = useJuegos();
-  const [allPlataformas] = usePlataformas();
+  const [gamePassPlanes] = useGamePass();
   const displayedJuegos = juegos.slice(0, 4);
-  const hasMore = juegos.length > 4;
-
-  // @DB-DYNAMIC-DATA: Los precios de Game Pass deberían ser gestionados desde la base de datos.
-  const gamePassPlanes = [
-    { plan: "Game Pass Core (1 mes)", precio: "$350" },
-    { plan: "Game Pass Core (3 meses)", precio: "$900" },
-    { plan: "Game Pass Core (12 meses)", precio: "$2.500" },
-    { plan: "Game Pass Ultimate (1 mes)", precio: "$600" },
-    { plan: "Game Pass Ultimate (3 meses)", precio: "$1.600" },
-  ];
+  const hasMoreJuegos = juegos.length > 4;
+  
+  const displayedGamePass = gamePassPlanes.slice(0, 4);
+  const hasMorePasses = gamePassPlanes.length > 4;
 
   return (
     <section id="juegos" className="py-12 gradient-dark">
-      <div className="container space-y-8">
+      <div className="container space-y-16">
         {/* ──────────── Título principal ──────────── */}
         <motion.div
           initial="hidden"
@@ -38,11 +32,10 @@ const JuegosSection = () => {
           className="text-center"
         >
           <h2 className="mb-4 font-heading text-3xl font-bold text-foreground sm:text-4xl">
-            <span className="text-primary text-glow">Juegos</span>
+            Catálogo <span className="text-primary text-glow">Digital</span>
           </h2>
           <p className="mx-auto max-w-lg text-muted-foreground">
-            Catálogo de juegos digitales y suscripciones Game Pass a los mejores
-            precios.
+            Explorá nuestra selección de juegos digitales y suscripciones premium para Xbox y PlayStation.
           </p>
         </motion.div>
 
@@ -53,33 +46,33 @@ const JuegosSection = () => {
           viewport={{ once: true }}
           variants={sectionVariant}
         >
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-8 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="inline-flex rounded-lg bg-primary/10 p-2 text-primary">
                 <Gamepad2 className="h-5 w-5" />
               </div>
               <h3 className="font-heading text-2xl font-bold text-foreground">
-                Venta de Juegos Digitales
+                Juegos Digitales
               </h3>
             </div>
             
-            {hasMore && (
+            {hasMoreJuegos && (
               <Link 
                 to="/juegos-digitales" 
-                className="text-sm font-medium text-primary hover:text-primary/80 transition-all hidden sm:block underline-offset-4 hover:underline"
+                className="text-sm font-bold text-primary hover:text-primary/80 transition-all hidden sm:flex items-center gap-1 group"
               >
-                Ver catálogo completo →
+                Ver catálogo completo <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             )}
           </div>
 
-          <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
             {displayedJuegos.map((j, i) => (
               <JuegoCard key={j.id} {...j} index={i} />
             ))}
           </div>
           
-          {hasMore && (
+          {hasMoreJuegos && (
             <div className="mt-12 flex justify-center">
               <Link 
                 to="/juegos-digitales" 
@@ -88,13 +81,6 @@ const JuegosSection = () => {
                 Ver todos los juegos
               </Link>
             </div>
-          )}
-          
-          {!hasMore && (
-            <p className="mt-8 text-center text-sm text-muted-foreground">
-              Tenemos muchos más títulos disponibles. ¡Preguntanos por el que
-              buscás!
-            </p>
           )}
         </motion.div>
 
@@ -106,57 +92,31 @@ const JuegosSection = () => {
           viewport={{ once: true }}
           variants={sectionVariant}
         >
-          <div className="mb-4 flex items-center gap-3">
-            <div className="inline-flex rounded-lg bg-primary/10 p-2 text-primary">
-              <CreditCard className="h-5 w-5" />
+          <div className="mb-8 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="inline-flex rounded-lg bg-primary/10 p-2 text-primary">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <h3 className="font-heading text-2xl font-bold text-foreground">
+                Game Pass & Suscripciones
+              </h3>
             </div>
-            <h3 className="font-heading text-2xl font-bold text-foreground">
-              Game Pass
-            </h3>
+            
+            {hasMorePasses && (
+              <Link 
+                to="/game-pass" 
+                className="text-sm font-bold text-primary hover:text-primary/80 transition-all hidden sm:flex items-center gap-1 group"
+              >
+                Ver todos los pases <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            )}
           </div>
-          <p className="mb-6 max-w-xl text-muted-foreground">
-            Activamos tu suscripción Game Pass al mejor precio. Accedé a cientos
-            de juegos en Xbox y PC.
-          </p>
 
-          <div className="overflow-hidden rounded-xl border border-border">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-muted/40">
-                <tr>
-                  <th className="px-5 py-3 font-heading font-semibold text-foreground">
-                    Plan
-                  </th>
-                  <th className="px-5 py-3 text-right font-heading font-semibold text-foreground">
-                    Precio
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {gamePassPlanes.map((g, i) => (
-                  <tr
-                    key={g.plan}
-                    className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}
-                  >
-                    <td className="px-5 py-3 text-foreground">{g.plan}</td>
-                    <td className="px-5 py-3 text-right font-semibold text-primary">
-                      {g.precio}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {displayedGamePass.map((g, i) => (
+              <GamePassCard key={g.id} {...g} index={i} />
+            ))}
           </div>
-        </motion.div>
-
-        {/* ──────────── CTA WhatsApp ──────────── */}
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={sectionVariant}
-          className="text-center"
-        >
-          <WhatsAppButton size="lg" text="Consultá por WhatsApp" />
         </motion.div>
       </div>
     </section>

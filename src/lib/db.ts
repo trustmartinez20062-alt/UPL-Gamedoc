@@ -3,7 +3,7 @@
 import { supabase } from "./supabase";
 import type {
   Juego, ConsolaVenta, ConsolaCompra, ReparacionModelo,
-  DestrabaModelo, GamePassPlan, ContactoInfo, Plataforma
+  DestrabaModelo, GamePassPlan, ContactoInfo, Plataforma, GamePassType
 } from "../admin/store";
 
 // ── Helper para mapear contacto desde snake_case de DB ──────────────
@@ -110,9 +110,35 @@ export async function deleteConsolaCompra(id: string): Promise<void> {
   if (error) console.error(error);
 }
 
+// ── GAME PASS TYPES ──────────────────────────────────────────────────
+export async function fetchGamePassTypes(): Promise<GamePassType[]> {
+  const { data, error } = await supabase.from("game_pass_types").select("*").order("name");
+  if (error) { console.error(error); return []; }
+  return data as GamePassType[];
+}
+
+export async function insertGamePassType(t: Omit<GamePassType, "id">): Promise<GamePassType | null> {
+  const { data, error } = await supabase.from("game_pass_types").insert(t).select().single();
+  if (error) { console.error(error); return null; }
+  return data as GamePassType;
+}
+
+export async function updateGamePassType(id: string, t: Partial<Omit<GamePassType, "id">>): Promise<void> {
+  const { error } = await supabase.from("game_pass_types").update(t).eq("id", id);
+  if (error) console.error(error);
+}
+
+export async function deleteGamePassType(id: string): Promise<void> {
+  const { error } = await supabase.from("game_pass_types").delete().eq("id", id);
+  if (error) console.error(error);
+}
+
 // ── GAME PASS ─────────────────────────────────────────────────────────
 export async function fetchGamePass(): Promise<GamePassPlan[]> {
-  const { data, error } = await supabase.from("game_pass").select("*").order("created_at");
+  const { data, error } = await supabase
+    .from("game_pass")
+    .select("*, type:game_pass_types(*)")
+    .order("created_at");
   if (error) { console.error(error); return []; }
   return data as GamePassPlan[];
 }

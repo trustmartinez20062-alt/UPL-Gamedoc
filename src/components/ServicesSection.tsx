@@ -1,27 +1,32 @@
 import { motion } from "framer-motion";
 import { Wrench, Gamepad2, CreditCard, Monitor } from "lucide-react";
+import { Link } from "react-router-dom";
 
 // @DB-DYNAMIC-DATA: Esta lista de servicios principales debería ser editable desde el panel/BD.
 const services = [
   {
     icon: Wrench,
     title: "Reparación y Destraba de consolas",
-    desc: "Servicio técnico profesional para PlayStation, Xbox y Nintendo. Diagnóstico rápido y garantía en cada reparación.",
+    desc: "Servicio técnico profesional para PlayStation, Xbox y Nintendo en Montevideo. Diagnóstico rápido y garantía en cada reparación.",
+    link: null,
   },
   {
     icon: Gamepad2,
     title: "Juegos Digitales",
-    desc: "Amplio catálogo de juegos digitales para todas las plataformas. Los mejores precios del mercado.",
+    desc: "Amplio catálogo de juegos digitales para todas las plataformas. Los mejores precios de Uruguay.",
+    link: "/juegos-digitales",
   },
   {
     icon: CreditCard,
-    title: "Game Pass Ultimate",
-    desc: "Activación de Game Pass Ultimate al mejor precio. Accedé a cientos de juegos en Xbox y PC.",
+    title: "Game Pass y Suscripciones",
+    desc: "Activación de Game Pass Ultimate, Core y PlayStation Plus al mejor precio en Uruguay.",
+    link: "/game-pass",
   },
   {
     icon: Monitor,
     title: "Venta y Compra de consolas",
-    desc: "Consolas nuevas y reacondicionadas. PlayStation 5, Xbox Series X|S, Nintendo Switch y más.",
+    desc: "Consolas nuevas y restauradas con garantía. PlayStation, Xbox, Nintendo Switch y más.",
+    link: "/consolas",
   },
 ];
 
@@ -35,7 +40,7 @@ const ServicesSection = () => (
         className="mb-16 text-center"
       >
         <h2 className="mb-4 font-heading text-3xl font-bold text-foreground sm:text-4xl">
-          Nuestros <span className="text-primary text-glow">Servicios</span>
+          Nuestros <span className="text-primary text-glow">Servicios</span> en Montevideo
         </h2>
         <p className="mx-auto max-w-md text-muted-foreground">
           Todo lo que necesitás para tu experiencia gaming, en un solo lugar.
@@ -43,29 +48,62 @@ const ServicesSection = () => (
       </motion.div>
 
       <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
-        {services.map((s, i) => (
-          <motion.div
-            key={s.title}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1 }}
-            className="group flex flex-col items-center justify-center text-center rounded-xl border border-border bg-card p-4 sm:p-6 transition-all hover:border-primary/20 aspect-square sm:aspect-auto"
-          >
-            <div className="mb-3 sm:mb-4 inline-flex rounded-lg bg-primary/10 p-2.5 sm:p-3 text-primary transition-colors group-hover:bg-primary/20">
-              <s.icon className="h-5 w-5 sm:h-6 sm:w-6" />
-            </div>
-            
-            <div className="flex flex-col justify-center min-h-[2.5rem] sm:min-h-[3.5rem] mb-1 sm:mb-2 w-full">
-              <h3 className="font-heading text-sm sm:text-lg font-semibold text-foreground line-clamp-2">
-                {s.title}
-              </h3>
-            </div>
-            
-            <p className="hidden sm:block text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
-          </motion.div>
-        ))}
+        {services.map((s, i) => {
+          const content = (
+            <motion.div
+              key={s.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="group flex flex-col items-center justify-center text-center rounded-xl border border-border bg-card p-4 sm:p-6 transition-all hover:border-primary/20 aspect-square sm:aspect-auto"
+            >
+              <div className="mb-3 sm:mb-4 inline-flex rounded-lg bg-primary/10 p-2.5 sm:p-3 text-primary transition-colors group-hover:bg-primary/20">
+                <s.icon className="h-5 w-5 sm:h-6 sm:w-6" />
+              </div>
+              
+              <div className="flex flex-col justify-center min-h-[2.5rem] sm:min-h-[3.5rem] mb-1 sm:mb-2 w-full">
+                <h3 className="font-heading text-sm sm:text-lg font-semibold text-foreground line-clamp-2">
+                  {s.title}
+                </h3>
+              </div>
+              
+              <p className="hidden sm:block text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+            </motion.div>
+          );
+
+          // @SEO Internal linking — las cards de servicios enlazan a sus páginas correspondientes
+          return s.link ? (
+            <Link key={s.title} to={s.link} className="block">
+              {content}
+            </Link>
+          ) : (
+            content
+          );
+        })}
       </div>
+
+      {/* @SEO Bloque de texto enriquecido para crawlers (~200 palabras) — prioriza reparación en Montevideo */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-16 max-w-4xl mx-auto text-center"
+      >
+        <p className="text-sm leading-relaxed text-muted-foreground/70">
+          <strong>Game Doctor</strong> es tu centro especializado en <strong>reparación de consolas en Montevideo</strong>. 
+          Ubicados en <strong>La Unión</strong>, ofrecemos servicio técnico profesional para <strong>PlayStation 3, PS4, PS5, 
+          Xbox 360, Xbox One, Xbox Series X|S y Nintendo Switch</strong>. Realizamos reparaciones de puerto HDMI, 
+          fallas de placa, errores de disco, limpieza interna profunda, cambio de pasta térmica y 
+          reemplazo de componentes. También brindamos servicio de <strong>destraba y liberación de consolas</strong> con 
+          software actualizado y garantía. Además de nuestro taller, contamos con una{" "}
+          <Link to="/consolas" className="text-primary hover:underline font-medium">tienda de consolas nuevas y restauradas</Link>, 
+          un amplio <Link to="/juegos-digitales" className="text-primary hover:underline font-medium">catálogo de juegos digitales</Link> y 
+          activación de <Link to="/game-pass" className="text-primary hover:underline font-medium">Game Pass y suscripciones</Link> al 
+          mejor precio. Todos nuestros trabajos incluyen garantía y diagnóstico sin costo. Consultanos por WhatsApp 
+          para presupuestos personalizados. Atendemos venta mayorista y minorista con envíos a todo Uruguay.
+        </p>
+      </motion.div>
     </div>
   </section>
 );

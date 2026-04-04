@@ -14,6 +14,7 @@ import Destraba from "../components/sections/Destraba";
 import Juegos from "../components/sections/Juegos";
 import Plataformas from "../components/sections/Plataformas";
 import GamePass from "../components/sections/GamePass";
+import GamePassTypes from "../components/sections/GamePassTypes";
 import Contacto from "../components/sections/Contacto";
 import Usuarios from "../components/sections/Usuarios";
 import MiPerfil from "../components/sections/MiPerfil";
@@ -26,7 +27,8 @@ const navItems = [
   { to: "destraba", label: "Servicios", icon: Wrench },
   { to: "juegos", label: "Catálogo de Juegos", icon: Gamepad2 },
   { to: "plataformas", label: "Plataformas", icon: Server },
-  { to: "gamepass", label: "Game Pass", icon: CreditCard },
+  { to: "gamepass", label: "Catálogo Game Pass", icon: CreditCard },
+  { to: "gamepass-types", label: "Tipos de Game Pass", icon: Server },
   { to: "contacto", label: "Contacto", icon: Phone },
   { to: "usuarios", label: "Usuarios", icon: Users },
   { to: "perfil", label: "Mi Perfil", icon: User },
@@ -223,6 +225,7 @@ export default function Dashboard() {
             <Route path="juegos" element={<Juegos />} />
             <Route path="plataformas" element={<Plataformas />} />
             <Route path="gamepass" element={<GamePass />} />
+            <Route path="gamepass-types" element={<GamePassTypes />} />
             <Route path="contacto" element={<Contacto />} />
             <Route path="perfil" element={<MiPerfil />} />
             {user?.role === "admin" && <Route path="usuarios" element={<Usuarios />} />}

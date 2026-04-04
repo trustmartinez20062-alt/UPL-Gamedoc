@@ -6,6 +6,7 @@ import ConsolaCard from "@/components/ConsolaCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import SEOHead from "@/components/SEOHead";
 import { useEffect, useState } from "react";
 
 const Consolas = () => {
@@ -24,6 +25,12 @@ const Consolas = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* @SEO Metadata única para /consolas */}
+      <SEOHead
+        title="Venta de Consolas en Montevideo — PlayStation, Xbox, Nintendo | Game Doctor"
+        description="Comprá consolas PlayStation, Xbox y Nintendo nuevas, restauradas y usadas con garantía en La Unión, Montevideo, Uruguay. Precios mayoristas y minoristas. Tomamos tu consola como parte de pago."
+        canonical="https://gamedoctor.uy/consolas"
+      />
       <Navbar />
       
       <main className="pt-24 pb-20">
@@ -44,7 +51,7 @@ const Consolas = () => {
               </Link>
             </motion.div>
 
-            {/* Header */}
+            {/* Header — @SEO H1 optimizado con ubicación */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -57,11 +64,11 @@ const Consolas = () => {
                       <Monitor className="h-8 w-8" />
                     </div>
                     <h1 className="font-heading text-4xl font-bold text-foreground sm:text-5xl">
-                      Venta de <span className="text-primary text-glow">Consolas</span>
+                      Venta de <span className="text-primary text-glow">Consolas</span> en Montevideo
                     </h1>
                   </div>
                   <p className="max-w-2xl text-lg text-muted-foreground">
-                    Encontrá tu próxima consola al mejor precio. Nuevas y usadas con garantía oficial y service especializado.
+                    Encontrá tu próxima consola al mejor precio. Nuevas, restauradas y usadas con garantía
                   </p>
                 </div>
 
@@ -77,6 +84,19 @@ const Consolas = () => {
                 </div>
               </div>
             </motion.div>
+
+            {/* @SEO Contenido descriptivo para crawlers (~150 palabras) */}
+            <div className="mb-12 max-w-4xl">
+              <p className="text-sm leading-relaxed text-muted-foreground/80">
+                En <strong>Game Doctor</strong> ofrecemos la mejor selección de consolas de videojuegos en <strong>La Unión, Montevideo</strong>. 
+                Trabajamos con <strong>PlayStation 3, PlayStation 4, PlayStation 5, Xbox One, Xbox Series S, Xbox Series X y Nintendo Switch</strong>. 
+                Todas nuestras consolas restauradas pasan por un proceso completo de diagnóstico, limpieza interna, cambio de pasta térmica 
+                y pruebas de funcionamiento antes de la venta. Ofrecemos <strong>garantía</strong> en cada equipo y aceptamos consolas como 
+                parte de pago. También contamos con stock de consolas nuevas selladas a precios competitivos tanto para venta minorista como 
+                mayorista. Si buscás una consola específica que no ves en nuestro catálogo, <Link to="/#contacto" className="text-primary hover:underline font-medium">contactanos por WhatsApp</Link> y 
+                te la conseguimos. Hacemos envíos a todo Uruguay.
+              </p>
+            </div>
 
             {/* Grid */}
             {filtered.length > 0 ? (

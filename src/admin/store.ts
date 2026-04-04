@@ -47,6 +47,15 @@ export interface GamePassPlan {
   id: string;
   plan: string;
   precio: string;
+  type_id?: string;
+  type?: GamePassType;
+}
+
+export interface GamePassType {
+  id: string;
+  name: string;
+  image: string;
+  prefix: string;
 }
 
 export interface ContactoInfo {
@@ -182,6 +191,32 @@ export const useConsolasCompra = () => {
   return [items, setItems] as const;
 };
 
+// ── GAME PASS TYPES ──────────────────────────────────────────────────
+export const useGamePassTypes = () => {
+  const qc = useQueryClient();
+  const { data: items = [] } = useQuery<GamePassType[]>({ 
+    queryKey: ["game_pass_types"], 
+    queryFn: db.fetchGamePassTypes 
+  });
+
+  const setItems = async (val: GamePassType[] | ((prev: GamePassType[]) => GamePassType[])) => {
+    const next = typeof val === "function" ? val(items) : val;
+    const existingIds = new Set(items.map(i => i.id));
+    const nextIds = new Set(next.map(i => i.id));
+    for (const i of items) { if (!nextIds.has(i.id)) await db.deleteGamePassType(i.id); }
+    for (const i of next) {
+      if (!existingIds.has(i.id)) { const { id, ...rest } = i; await db.insertGamePassType(rest); }
+      else {
+        const orig = items.find(o => o.id === i.id);
+        if (orig && JSON.stringify(orig) !== JSON.stringify(i)) { const { id, ...rest } = i; await db.updateGamePassType(id, rest); }
+      }
+    }
+    qc.invalidateQueries({ queryKey: ["game_pass_types"] });
+    qc.invalidateQueries({ queryKey: ["game_pass"] }); // Re-fetch because relation might change
+  };
+  return [items, setItems] as const;
+};
+
 // ── GAME PASS ──────────────────────────────────────────────────────────
 export const useGamePass = () => {
   const qc = useQueryClient();
@@ -193,10 +228,16 @@ export const useGamePass = () => {
     const nextIds = new Set(next.map(i => i.id));
     for (const i of items) { if (!nextIds.has(i.id)) await db.deleteGamePass(i.id); }
     for (const i of next) {
-      if (!existingIds.has(i.id)) { const { id, ...rest } = i; await db.insertGamePass(rest); }
+      if (!existingIds.has(i.id)) { 
+        const { id, type, ...rest } = i; 
+        await db.insertGamePass(rest as any); 
+      }
       else {
         const orig = items.find(o => o.id === i.id);
-        if (orig && JSON.stringify(orig) !== JSON.stringify(i)) { const { id, ...rest } = i; await db.updateGamePass(id, rest); }
+        if (orig && JSON.stringify(orig) !== JSON.stringify(i)) { 
+          const { id, type, ...rest } = i; 
+          await db.updateGamePass(id, rest as any); 
+        }
       }
     }
     qc.invalidateQueries({ queryKey: ["game_pass"] });
