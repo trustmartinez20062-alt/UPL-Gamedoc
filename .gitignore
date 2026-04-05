@@ -1,4 +1,12 @@
-# Logs
+# 📦 Dependencias y Build
+node_modules/
+dist/
+dist-ssr/
+.vercel
+.output
+.turbo
+
+# 📁 Temporales y Logs
 logs
 *.log
 npm-debug.log*
@@ -6,19 +14,50 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+.eslintcache
+.stylelintcache
+.cache
+.parcel-cache
 
-node_modules
-dist
-dist-ssr
+# 🔐 Seguridad y Configuración Local (CRÍTICO)
+.env
+.env.local
+.env.*.local
 *.local
+.env.admin
 
-# Editor directories and files
+# 🛠️ Editores e IDEs
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+!.vscode/launch.json
+!.vscode/settings.json
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.vimspector.json
+
+# 🍎 🏁 Sistema Operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Tt]humbs.db
+
+# 🧪 Testing y Reportes (Playwright/Vitest)
+coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# 📜 Otros
+*.tmp
+*.temp
+.temp/
+.tmp/

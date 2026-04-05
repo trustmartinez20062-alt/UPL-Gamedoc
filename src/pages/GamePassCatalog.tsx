@@ -8,9 +8,10 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import SEOHead from "@/components/SEOHead";
 import { useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const GamePassCatalog = () => {
-  const [gamePassPlanes] = useGamePass();
+  const [gamePassPlanes, , query] = useGamePass();
 
   // Scroll to top on mount
   useEffect(() => {
@@ -66,7 +67,17 @@ const GamePassCatalog = () => {
             </motion.div>
 
             {/* Grid Game Pass */}
-            {gamePassPlanes.length > 0 ? (
+            {query.isLoading ? (
+              <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="rounded-3xl border border-border bg-card p-6 space-y-4">
+                    <Skeleton className="h-8 w-1/2 mx-auto" />
+                    <Skeleton className="h-24 w-full rounded-2xl" />
+                    <Skeleton className="h-10 w-full rounded-xl" />
+                  </div>
+                ))}
+              </div>
+            ) : gamePassPlanes.length > 0 ? (
               <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {gamePassPlanes.map((g, i) => (
                   <GamePassCard key={g.id} {...g} index={i} />

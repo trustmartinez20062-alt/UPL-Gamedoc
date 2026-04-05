@@ -5,6 +5,7 @@ import { useJuegos, useGamePass } from "../admin/store";
 import JuegoCard from "./JuegoCard";
 import GamePassCard from "./GamePassCard";
 import WhatsAppButton from "./WhatsAppButton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const sectionVariant = {
   hidden: { opacity: 0, y: 20 },
@@ -12,8 +13,11 @@ const sectionVariant = {
 };
 
 const JuegosSection = () => {
-  const [juegos] = useJuegos();
-  const [gamePassPlanes] = useGamePass();
+  const [juegos, , queryJuegos] = useJuegos();
+  const [gamePassPlanes, , queryPass] = useGamePass();
+  
+  const isLoading = queryJuegos.isLoading || queryPass.isLoading;
+
   const displayedJuegos = juegos.slice(0, 4);
   const hasMoreJuegos = juegos.length > 4;
   
@@ -67,12 +71,22 @@ const JuegosSection = () => {
           </div>
 
           <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
-            {displayedJuegos.map((j, i) => (
-              <JuegoCard key={j.id} {...j} index={i} />
-            ))}
+            {isLoading ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="space-y-3 rounded-2xl border border-border bg-card p-2">
+                  <Skeleton className="aspect-[3/4] w-full rounded-xl" />
+                  <Skeleton className="h-4 w-2/3 mx-auto" />
+                  <Skeleton className="h-4 w-1/2 mx-auto" />
+                </div>
+              ))
+            ) : (
+              displayedJuegos.map((j, i) => (
+                <JuegoCard key={j.id} {...j} index={i} />
+              ))
+            )}
           </div>
           
-          {hasMoreJuegos && (
+          {hasMoreJuegos && !isLoading && (
             <div className="mt-12 flex justify-center">
               <Link 
                 to="/juegos-digitales" 
@@ -102,7 +116,7 @@ const JuegosSection = () => {
               </h3>
             </div>
             
-            {hasMorePasses && (
+            {hasMorePasses && !isLoading && (
               <Link 
                 to="/game-pass" 
                 className="text-sm font-bold text-primary hover:text-primary/80 transition-all hidden sm:flex items-center gap-1 group"
@@ -113,9 +127,19 @@ const JuegosSection = () => {
           </div>
 
           <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            {displayedGamePass.map((g, i) => (
-              <GamePassCard key={g.id} {...g} index={i} />
-            ))}
+            {isLoading ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="space-y-4 rounded-3xl border border-border bg-card p-6">
+                  <Skeleton className="h-6 w-1/2 mx-auto" />
+                  <Skeleton className="h-24 w-full rounded-2xl" />
+                  <Skeleton className="h-10 w-full rounded-xl" />
+                </div>
+              ))
+            ) : (
+              displayedGamePass.map((g, i) => (
+                <GamePassCard key={g.id} {...g} index={i} />
+              ))
+            )}
           </div>
         </motion.div>
       </div>

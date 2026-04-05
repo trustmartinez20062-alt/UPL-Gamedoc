@@ -8,9 +8,10 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import SEOHead from "@/components/SEOHead";
 import { useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const JuegosDigitales = () => {
-  const [juegos] = useJuegos();
+  const [juegos, , query] = useJuegos();
 
   // Scroll to top on mount
   useEffect(() => {
@@ -66,7 +67,17 @@ const JuegosDigitales = () => {
             </motion.div>
 
             {/* Grid Juegos */}
-            {juegos.length > 0 ? (
+            {query.isLoading ? (
+              <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                {[...Array(10)].map((_, i) => (
+                  <div key={i} className="rounded-2xl border border-border bg-card p-2 space-y-3">
+                    <Skeleton className="aspect-[3/4] w-full rounded-xl" />
+                    <Skeleton className="h-4 w-2/3 mx-auto" />
+                    <Skeleton className="h-4 w-1/2 mx-auto" />
+                  </div>
+                ))}
+              </div>
+            ) : juegos.length > 0 ? (
               <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                 {juegos.map((j, i) => (
                   <JuegoCard key={j.id} {...j} index={i} />
@@ -111,7 +122,6 @@ const JuegosDigitales = () => {
           </div>
         </section>
       </main>
-
 
       <Footer />
       <WhatsAppButton floating />

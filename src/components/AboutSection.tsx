@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { useContacto } from "@/admin/store";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AboutSection = () => {
-  const [contacto] = useContacto();
+  const [contacto, , query] = useContacto();
 
   const handleTextFormat = (text: string) => {
     return text.split('\n').map((paragraph, index) => (
@@ -14,6 +15,37 @@ const AboutSection = () => {
       ) : null
     ));
   };
+
+  if (query.isLoading) {
+    return (
+      <section id="nosotros" className="py-24 gradient-dark">
+        <div className="container">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div>
+              <Skeleton className="h-10 w-1/2 mb-6" />
+              <div className="space-y-4 mb-8">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-[90%]" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-[80%]" />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {[...Array(6)].map((_, i) => (
+                   <div key={i} className="flex items-center gap-3">
+                     <Skeleton className="h-6 w-6 rounded-full" />
+                     <Skeleton className="h-4 w-32" />
+                   </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <Skeleton className="h-[400px] w-full max-w-[400px] rounded-[36px]" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const points = contacto.sobre_nosotros_ticks || [];
   const text = contacto.sobre_nosotros_texto || "";

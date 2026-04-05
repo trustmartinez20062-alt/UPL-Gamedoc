@@ -88,7 +88,8 @@ export function genId(): string {
 // ── PLATAFORMAS ───────────────────────────────────────────────────────
 export const usePlataformas = () => {
   const qc = useQueryClient();
-  const { data: plataformas = [] } = useQuery({ queryKey: ["plataformas"], queryFn: db.fetchPlataformas, staleTime: Infinity });
+  const query = useQuery({ queryKey: ["plataformas"], queryFn: db.fetchPlataformas, staleTime: Infinity });
+  const plataformas = query.data ?? [];
 
   const setPlataformas = async (val: Plataforma[] | ((prev: Plataforma[]) => Plataforma[])) => {
     const next = typeof val === "function" ? val(plataformas) : val;
@@ -109,13 +110,14 @@ export const usePlataformas = () => {
     qc.invalidateQueries({ queryKey: ["plataformas"] });
   };
 
-  return [plataformas, setPlataformas] as const;
+  return [plataformas, setPlataformas, query] as const;
 };
 
 // ── JUEGOS ────────────────────────────────────────────────────────────
 export const useJuegos = () => {
   const qc = useQueryClient();
-  const { data: juegos = [] } = useQuery({ queryKey: ["juegos"], queryFn: db.fetchJuegos });
+  const query = useQuery({ queryKey: ["juegos"], queryFn: db.fetchJuegos });
+  const juegos = query.data ?? [];
 
   const setJuegos = async (val: Juego[] | ((prev: Juego[]) => Juego[])) => {
     const next = typeof val === "function" ? val(juegos) : val;
@@ -144,13 +146,14 @@ export const useJuegos = () => {
     qc.invalidateQueries({ queryKey: ["juegos"] });
   };
 
-  return [juegos, setJuegos] as const;
+  return [juegos, setJuegos, query] as const;
 };
 
 // ── CONSOLAS VENTA ─────────────────────────────────────────────────────
 export const useConsolasVenta = () => {
   const qc = useQueryClient();
-  const { data: items = [] } = useQuery({ queryKey: ["consolas_venta"], queryFn: db.fetchConsolasVenta });
+  const query = useQuery({ queryKey: ["consolas_venta"], queryFn: db.fetchConsolasVenta });
+  const items = query.data ?? [];
 
   const setItems = async (val: ConsolaVenta[] | ((prev: ConsolaVenta[]) => ConsolaVenta[])) => {
     const next = typeof val === "function" ? val(items) : val;
@@ -166,13 +169,14 @@ export const useConsolasVenta = () => {
     }
     qc.invalidateQueries({ queryKey: ["consolas_venta"] });
   };
-  return [items, setItems] as const;
+  return [items, setItems, query] as const;
 };
 
 // ── CONSOLAS COMPRA ────────────────────────────────────────────────────
 export const useConsolasCompra = () => {
   const qc = useQueryClient();
-  const { data: items = [] } = useQuery({ queryKey: ["consolas_compra"], queryFn: db.fetchConsolasCompra });
+  const query = useQuery({ queryKey: ["consolas_compra"], queryFn: db.fetchConsolasCompra });
+  const items = query.data ?? [];
 
   const setItems = async (val: ConsolaCompra[] | ((prev: ConsolaCompra[]) => ConsolaCompra[])) => {
     const next = typeof val === "function" ? val(items) : val;
@@ -188,16 +192,17 @@ export const useConsolasCompra = () => {
     }
     qc.invalidateQueries({ queryKey: ["consolas_compra"] });
   };
-  return [items, setItems] as const;
+  return [items, setItems, query] as const;
 };
 
 // ── GAME PASS TYPES ──────────────────────────────────────────────────
 export const useGamePassTypes = () => {
   const qc = useQueryClient();
-  const { data: items = [] } = useQuery<GamePassType[]>({ 
+  const query = useQuery<GamePassType[]>({ 
     queryKey: ["game_pass_types"], 
     queryFn: db.fetchGamePassTypes 
   });
+  const items = query.data ?? [];
 
   const setItems = async (val: GamePassType[] | ((prev: GamePassType[]) => GamePassType[])) => {
     const next = typeof val === "function" ? val(items) : val;
@@ -214,13 +219,14 @@ export const useGamePassTypes = () => {
     qc.invalidateQueries({ queryKey: ["game_pass_types"] });
     qc.invalidateQueries({ queryKey: ["game_pass"] }); // Re-fetch because relation might change
   };
-  return [items, setItems] as const;
+  return [items, setItems, query] as const;
 };
 
 // ── GAME PASS ──────────────────────────────────────────────────────────
 export const useGamePass = () => {
   const qc = useQueryClient();
-  const { data: items = [] } = useQuery({ queryKey: ["game_pass"], queryFn: db.fetchGamePass });
+  const query = useQuery({ queryKey: ["game_pass"], queryFn: db.fetchGamePass });
+  const items = query.data ?? [];
 
   const setItems = async (val: GamePassPlan[] | ((prev: GamePassPlan[]) => GamePassPlan[])) => {
     const next = typeof val === "function" ? val(items) : val;
@@ -242,13 +248,14 @@ export const useGamePass = () => {
     }
     qc.invalidateQueries({ queryKey: ["game_pass"] });
   };
-  return [items, setItems] as const;
+  return [items, setItems, query] as const;
 };
 
 // ── REPARACION ─────────────────────────────────────────────────────────
 export const useReparacion = () => {
   const qc = useQueryClient();
-  const { data: items = [] } = useQuery({ queryKey: ["reparacion"], queryFn: db.fetchReparacion });
+  const query = useQuery({ queryKey: ["reparacion"], queryFn: db.fetchReparacion });
+  const items = query.data ?? [];
 
   const setItems = async (val: ReparacionModelo[] | ((prev: ReparacionModelo[]) => ReparacionModelo[])) => {
     const next = typeof val === "function" ? val(items) : val;
@@ -264,13 +271,14 @@ export const useReparacion = () => {
     }
     qc.invalidateQueries({ queryKey: ["reparacion"] });
   };
-  return [items, setItems] as const;
+  return [items, setItems, query] as const;
 };
 
 // ── DESTRABA ───────────────────────────────────────────────────────────
 export const useDestraba = () => {
   const qc = useQueryClient();
-  const { data: items = [] } = useQuery({ queryKey: ["destraba"], queryFn: db.fetchDestraba });
+  const query = useQuery({ queryKey: ["destraba"], queryFn: db.fetchDestraba });
+  const items = query.data ?? [];
 
   const setItems = async (val: DestrabaModelo[] | ((prev: DestrabaModelo[]) => DestrabaModelo[])) => {
     const next = typeof val === "function" ? val(items) : val;
@@ -286,7 +294,7 @@ export const useDestraba = () => {
     }
     qc.invalidateQueries({ queryKey: ["destraba"] });
   };
-  return [items, setItems] as const;
+  return [items, setItems, query] as const;
 };
 
 // ── CONTACTO ───────────────────────────────────────────────────────────
@@ -312,12 +320,12 @@ const SEED_CONTACTO: ContactoInfo = {
 
 export const useContacto = () => {
   const qc = useQueryClient();
-  const { data } = useQuery({
+  const query = useQuery({
     queryKey: ["contacto"],
     queryFn: db.fetchContacto,
   });
 
-  const contacto = data ?? SEED_CONTACTO;
+  const contacto = query.data ?? SEED_CONTACTO;
 
   const setContacto = async (val: ContactoInfo | ((prev: ContactoInfo) => ContactoInfo)) => {
     const next = typeof val === "function" ? val(contacto) : val;
@@ -325,7 +333,7 @@ export const useContacto = () => {
     qc.invalidateQueries({ queryKey: ["contacto"] });
   };
 
-  return [contacto, setContacto] as const;
+  return [contacto, setContacto, query] as const;
 };
 
 // ── USUARIOS (via Supabase Auth + profiles) ────────────────────────────

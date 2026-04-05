@@ -2,9 +2,35 @@ import { motion } from "framer-motion";
 import { MapPin, Phone, Clock } from "lucide-react";
 import WhatsAppButton from "./WhatsAppButton";
 import { useContacto } from "../admin/store";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ContactSection = () => {
-  const [contacto] = useContacto();
+  const [contacto, , query] = useContacto();
+
+  if (query.isLoading) {
+    return (
+      <section id="contacto" className="py-24 gradient-dark">
+        <div className="container">
+          <Skeleton className="mx-auto h-10 w-48 mb-16" />
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="space-y-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-start gap-4 rounded-xl border border-border bg-card p-5">
+                  <Skeleton className="h-6 w-6 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                </div>
+              ))}
+              <Skeleton className="h-12 w-full rounded-md" />
+            </div>
+            <Skeleton className="h-[450px] w-full rounded-xl" />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="contacto" className="py-24 gradient-dark">
