@@ -25,6 +25,7 @@ lerna-debug.log*
 .env.*.local
 *.local
 .env.admin
+CLONE_DATABASE.sql
 
 # 🛠️ Editores e IDEs
 .vscode/*
