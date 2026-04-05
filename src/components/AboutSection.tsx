@@ -70,11 +70,13 @@ const AboutSection = () => {
 
             {imageUrl ? (
               <div className="relative z-10 p-2 sm:p-3 rounded-2xl sm:rounded-[36px] bg-gradient-to-br from-card/80 to-card/20 backdrop-blur-lg border border-primary/20 box-glow overflow-hidden group w-full max-w-[400px]">
-                 <img 
+                  <img 
                     src={imageUrl} 
                     alt="Game Doctor — tienda de reparación y venta de consolas en La Unión, Montevideo" 
                     className="relative z-10 w-full aspect-[4/5] sm:aspect-square object-cover rounded-xl sm:rounded-[24px] shadow-2xl transition-transform duration-700 group-hover:scale-105"
-                 />
+                    loading="lazy"
+                    decoding="async"
+                  />
                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 rounded-[36px] pointer-events-none z-20" />
               </div>
             ) : (

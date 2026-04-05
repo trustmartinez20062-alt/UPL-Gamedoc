@@ -23,6 +23,7 @@ const GamePassCard = ({ plan, precio, type, index }: GamePassCardProps) => {
             alt={type.name}
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="h-full w-full bg-muted/20 flex items-center justify-center">
@@ -41,9 +42,9 @@ const GamePassCard = ({ plan, precio, type, index }: GamePassCardProps) => {
         <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
           {type?.prefix || "Game Pass"}
         </div>
-        <h4 className="mb-4 font-heading text-lg font-black text-foreground group-hover:text-primary transition-colors">
+        <h3 className="mb-4 font-heading text-lg font-black text-foreground group-hover:text-primary transition-colors">
           {type?.name || "Plan"} <span className="text-muted-foreground/50 font-medium lowercase">({plan})</span>
-        </h4>
+        </h3>
         
         <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
           <span className={`font-black text-primary text-glow ${isConsultar ? "text-sm" : "text-xl sm:text-2xl"}`}>

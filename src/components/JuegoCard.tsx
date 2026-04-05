@@ -33,7 +33,7 @@ const JuegoCard = ({ name, plataformas, image, precio, index }: JuegoCardProps) 
         />
       </div>
       <div className="flex flex-1 flex-col p-2.5 sm:p-4">
-        <h4 className="mb-0.5 sm:mb-1 font-heading text-sm sm:text-lg font-bold text-foreground line-clamp-1">{name}</h4>
+        <h3 className="mb-0.5 sm:mb-1 font-heading text-sm sm:text-lg font-bold text-foreground line-clamp-1">{name}</h3>
         <p className="mb-2 sm:mb-4 text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {platformNames || "Sin plataforma"}
         </p>

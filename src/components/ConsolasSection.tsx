@@ -100,11 +100,11 @@ const ConsolasSection = () => (
                 {c.estado}
               </div>
               <div className="mb-3 sm:mb-4 aspect-video overflow-hidden rounded-md">
-                <img src={c.image} alt={c.name} className="h-full w-full object-cover" />
+                <img src={c.image} alt={c.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
               </div>
-              <h4 className="font-heading text-sm sm:text-lg font-semibold text-foreground line-clamp-1">
+              <h3 className="font-heading text-sm sm:text-lg font-semibold text-foreground line-clamp-1">
                 {c.name}
-              </h4>
+              </h3>
               <p className="mt-1 text-xs sm:text-sm font-bold text-primary">
                 {(!c.precio || c.precio.toLowerCase().includes("consultar")) ? "Consultar precio" : c.precio}
               </p>

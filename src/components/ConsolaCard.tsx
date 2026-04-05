@@ -65,12 +65,14 @@ const ConsolaCard = ({ name, image, estado, version, info, garantia, precio, ind
           src={image} 
           alt={name} 
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" 
+          loading="lazy"
+          decoding="async"
         />
       </div>
       <div className="flex-1 flex flex-col">
-        <h4 className="text-sm sm:text-base font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+        <h3 className="text-sm sm:text-base font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
           {name}
-        </h4>
+        </h3>
         <div className="flex items-center gap-2 mt-0.5">
           <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest" style={{ color: version === "Destrabada" ? "hsl(280 80% 65%)" : "hsl(215 15% 55%)" }}>
             {version || "Original"}
@@ -98,7 +100,7 @@ const ConsolaCard = ({ name, image, estado, version, info, garantia, precio, ind
               >
                 <div className="space-y-2 relative z-10">
                   <div>
-                    <h4 className="text-sm font-bold text-foreground leading-tight">{name}</h4>
+                    <h3 className="text-sm font-bold text-foreground leading-tight">{name}</h3>
                     <p className="text-[10px] mt-1 font-black uppercase tracking-widest" style={{ color: version === "Destrabada" ? "hsl(280 80% 65%)" : "hsl(215 15% 55%)" }}>
                       {version || "Original"} - {estado}
                     </p>

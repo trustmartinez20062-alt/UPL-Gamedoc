@@ -24,6 +24,7 @@ const GamePassCatalog = () => {
         title="Game Pass Uruguay — Suscripciones Xbox y PlayStation | Game Doctor"
         description="Activá Game Pass Ultimate, Core y suscripciones PlayStation Plus al mejor precio en Uruguay. Activación inmediata con garantía. Game Doctor, La Unión, Montevideo."
         canonical="https://gamedoctor.uy/game-pass"
+        ogImage="https://gamedoctor.uy/assets/hero-bg.jpg"
       />
       <Navbar />
       
