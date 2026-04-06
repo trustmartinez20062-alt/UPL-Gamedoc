@@ -16,7 +16,7 @@ const GamePassCard = ({ plan, precio, type, index }: GamePassCardProps) => {
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
     >
-      <div className="aspect-[16/10] overflow-hidden relative">
+      <div className="aspect-[16/13] overflow-hidden relative">
         {type?.image ? (
           <img
             src={type.image}
@@ -50,9 +50,6 @@ const GamePassCard = ({ plan, precio, type, index }: GamePassCardProps) => {
           <span className={`font-black text-primary text-glow ${isConsultar ? "text-sm" : "text-xl sm:text-2xl"}`}>
             {isConsultar ? "Consultar" : precio}
           </span>
-          <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground group-hover:rotate-12 transition-all duration-300">
-            <span className="text-lg font-black">+</span>
-          </div>
         </div>
       </div>
     </motion.div>

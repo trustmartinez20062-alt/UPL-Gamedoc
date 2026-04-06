@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Monitor, ArrowLeft, ShoppingCart } from "lucide-react";
+import { Monitor, ArrowLeft, ShoppingCart, Search, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useConsolasVenta } from "../admin/store";
 import ConsolaCard from "@/components/ConsolaCard";
@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import SEOHead from "@/components/SEOHead";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 const Consolas = () => {
   const [consolas] = useConsolasVenta();
@@ -18,10 +18,12 @@ const Consolas = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const filtered = consolas.filter(c => 
-    c.name.toLowerCase().includes(search.toLowerCase()) || 
-    c.estado?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = useMemo(() => {
+    return consolas.filter(c => 
+      c.name.toLowerCase().includes(search.toLowerCase()) || 
+      c.estado?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [consolas, search]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,15 +82,26 @@ const Consolas = () => {
                     placeholder="Buscar consola..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-card/50 px-5 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/40 backdrop-blur-sm"
+                    className="w-full rounded-xl border border-border bg-card/50 pl-11 pr-10 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/40 backdrop-blur-sm transition-all shadow-sm"
                   />
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                    <Search size={18} />
+                  </div>
+                  {search && (
+                    <button 
+                      onClick={() => setSearch("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground/40 hover:bg-muted hover:text-foreground transition-all"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
                 </div>
               </div>
             </motion.div>
 
             {/* Grid */}
             {filtered.length > 0 ? (
-              <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {filtered.map((c, i) => (
                   <ConsolaCard key={c.id || c.name} {...c} index={i} />
                 ))}

@@ -14,10 +14,12 @@ const HeroSection = () => (
     >
       <img
         src={heroBg}
-        alt="Consolas de videojuegos"
+        alt="Consolas de videojuegos — Reparación y Venta en Montevideo"
         className="h-full w-full object-cover"
         width={1920}
         height={1080}
+        loading="eager"
+        fetchPriority="high"
       />
     </motion.div>
     <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/80 to-background" />

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Gamepad2, ArrowLeft } from "lucide-react";
+import { Gamepad2, ArrowLeft, Search, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useJuegos } from "../admin/store";
 import JuegoCard from "@/components/JuegoCard";
@@ -7,16 +7,24 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import SEOHead from "@/components/SEOHead";
-import { useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const JuegosDigitales = () => {
   const [juegos, , query] = useJuegos();
+  const [search, setSearch] = useState("");
 
   // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const filtered = useMemo(() => {
+    return juegos.filter(j => 
+      j.name.toLowerCase().includes(search.toLowerCase()) ||
+      j.plataformas.some(p => p.toLowerCase().includes(search.toLowerCase()))
+    );
+  }, [juegos, search]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -53,17 +61,43 @@ const JuegosDigitales = () => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-12"
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="inline-flex rounded-xl bg-primary/10 p-3 text-primary shadow-lg shadow-primary/20">
-                  <Gamepad2 className="h-8 w-8" />
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="inline-flex rounded-xl bg-primary/10 p-3 text-primary shadow-lg shadow-primary/20">
+                      <Gamepad2 className="h-8 w-8" />
+                    </div>
+                    <h1 className="font-heading text-4xl font-bold text-foreground sm:text-5xl">
+                      <span className="text-primary text-glow">Juegos Digitales</span> en Uruguay
+                    </h1>
+                  </div>
+                  <p className="max-w-2xl text-lg text-muted-foreground">
+                    Explorá nuestra selección completa de juegos digitales para varias consolas
+                  </p>
                 </div>
-                <h1 className="font-heading text-4xl font-bold text-foreground sm:text-5xl">
-                  <span className="text-primary text-glow">Juegos Digitales</span> en Uruguay
-                </h1>
+
+                {/* Search */}
+                <div className="relative w-full max-w-sm">
+                  <input
+                    type="text"
+                    placeholder="Buscar juego o consola..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-card/50 pl-11 pr-10 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/40 backdrop-blur-sm transition-all shadow-sm"
+                  />
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                    <Search size={18} />
+                  </div>
+                  {search && (
+                    <button 
+                      onClick={() => setSearch("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground/40 hover:bg-muted hover:text-foreground transition-all"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
-              <p className="max-w-2xl text-lg text-muted-foreground">
-                Explorá nuestra selección completa de juegos digitales para varias consolas
-              </p>
             </motion.div>
 
             {/* Grid Juegos */}
@@ -77,16 +111,18 @@ const JuegosDigitales = () => {
                   </div>
                 ))}
               </div>
-            ) : juegos.length > 0 ? (
+            ) : filtered.length > 0 ? (
               <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-                {juegos.map((j, i) => (
+                {filtered.map((j, i) => (
                   <JuegoCard key={j.id} {...j} index={i} />
                 ))}
               </div>
             ) : (
               <div className="text-center py-20 bg-card/40 rounded-2xl border border-border">
                 <Gamepad2 size={48} className="mx-auto mb-4 opacity-20" />
-                <p className="text-muted-foreground">No hay juegos disponibles en este momento.</p>
+                <p className="text-muted-foreground">
+                  {search ? "No se encontraron juegos que coincidan con tu búsqueda." : "No hay juegos disponibles en este momento."}
+                </p>
               </div>
             )}
 

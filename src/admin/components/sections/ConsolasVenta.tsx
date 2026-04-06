@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Monitor, Plus, Pencil, Trash2, Upload, Loader2 } from "lucide-react";
+import { useState, useRef, useMemo } from "react";
+import { Monitor, Plus, Pencil, Trash2, Upload, Loader2, Search, X } from "lucide-react";
 import { useConsolasVenta, genId, type ConsolaVenta } from "../../store";
 import { uploadImage, deleteImageFromStorage } from "../../../lib/db";
 import { useAuth } from "../../hooks/useAuth";
@@ -14,9 +14,19 @@ export default function ConsolasVenta() {
   const { user } = useAuth();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: ConsolaVenta } | null>(null);
   const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", image: "" });
+  const [search, setSearch] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const filtered = useMemo(() => {
+    return consolas.filter(c => 
+      c.name.toLowerCase().includes(search.toLowerCase()) || 
+      c.estado?.toLowerCase().includes(search.toLowerCase()) ||
+      c.info?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [consolas, search]);
 
   const openAdd = () => {
     setForm({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", image: "" });
@@ -38,24 +48,30 @@ export default function ConsolasVenta() {
     setModal({ mode: "edit", item });
   };
 
-  // @DB-CRUD-LOGIC: Migrar a supabase.from('products').upsert().
   const handleSave = async () => {
     if (!form.name.trim()) return;
-    const dataToSave = { ...form, precio: formatPriceForDB(form.precio) };
+    setSaving(true);
+    try {
+      const dataToSave = { ...form, precio: formatPriceForDB(form.precio) };
 
-    if (modal?.mode === "add") {
-      setConsolas((prev) => [...prev, { id: genId(), ...dataToSave } as ConsolaVenta]);
-    } else if (modal?.item) {
-      // Si la imagen cambió y teníamos una subida, borrar la anterior
-      if (modal.item.image && modal.item.image !== form.image) {
-        await deleteImageFromStorage(modal.item.image);
-        toast.info("Imagen anterior eliminada del servidor");
+      if (modal?.mode === "add") {
+        await setConsolas((prev) => [...prev, { id: genId(), ...dataToSave } as ConsolaVenta]);
+        toast.success("Consola agregada con éxito");
+      } else if (modal?.item) {
+        if (modal.item.image && modal.item.image !== form.image) {
+          await deleteImageFromStorage(modal.item.image);
+        }
+        await setConsolas((prev) =>
+          prev.map((c) => (c.id === modal.item!.id ? ({ ...c, ...dataToSave } as ConsolaVenta) : c))
+        );
+        toast.success("Consola actualizada con éxito");
       }
-      setConsolas((prev) =>
-        prev.map((c) => (c.id === modal.item!.id ? ({ ...c, ...dataToSave } as ConsolaVenta) : c))
-      );
+      setModal(null);
+    } catch (error) {
+      toast.error("Error al guardar los cambios");
+    } finally {
+      setSaving(false);
     }
-    setModal(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -117,74 +133,78 @@ export default function ConsolasVenta() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {consolas.map((c) => (
+      {/* Search Bar */}
+      <div className="mb-6 relative max-w-md">
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
+          <Search size={18} />
+        </div>
+        <input
+          type="text"
+          placeholder="Buscar consola por nombre, estado o info..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="input-field pl-11 pr-10"
+        />
+        {search && (
+          <button 
+            onClick={() => setSearch("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground/30 hover:bg-muted/10 hover:text-foreground transition-all"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {filtered.map((c) => (
           <div
             key={c.id}
-            className="relative rounded-xl border p-4 transition-all duration-200 group"
-            style={{
-              background: "hsl(220 18% 10%)",
-              borderColor: "hsl(220 15% 18%)",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLDivElement).style.borderColor = "hsl(175 80% 50% / 0.35)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLDivElement).style.borderColor = "hsl(220 15% 18%)";
-            }}
+            className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
           >
-            {/* Estado Badge */}
-            <span className={
-              c.estado === "Nueva" ? "badge-new" : 
-              c.estado === "Usada" ? "badge-used" : 
-              "badge-refurbished"
-            }>
-              {c.estado}
-            </span>
-
-            <div className="text-center mb-3 mt-3">
-              <div className="aspect-video w-[160px] mx-auto overflow-hidden rounded-md mb-3">
-                <img src={c.image} alt={c.name} className="h-full w-full object-cover" />
+            <div className="aspect-[16/13] overflow-hidden relative">
+              <img src={c.image} alt={c.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent" />
+              
+              <div className={`absolute top-3 left-3 z-10 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-xl ${
+                c.estado === "Nueva" ? "bg-cyan-500/20 text-cyan-400" : 
+                c.estado === "Usada" ? "bg-yellow-500/20 text-yellow-500" : 
+                "bg-purple-500/20 text-purple-400"
+              }`}>
+                {c.estado}
               </div>
-              <h3 className="font-semibold text-sm line-clamp-1" style={{ color: "hsl(210 20% 92%)" }}>
-                {c.name}
-              </h3>
-              <p className="text-[11px] mt-0.5 font-black uppercase tracking-widest" style={{ color: c.version === "Destrabada" ? "hsl(280 80% 65%)" : "hsl(215 15% 55%)" }}>
-                {c.version || "Original"}
-              </p>
-              <p className="text-[10px] mt-1 font-semibold" style={{ color: "hsl(175 80% 60%)" }}>
-                {c.garantia ? `${c.garantia} de garantía` : "Sin garantía"}
-              </p>
-              {c.info && (
-                <p className="text-[11px] mt-1 line-clamp-1" style={{ color: "hsl(215 15% 70%)" }}>
-                  {c.info}
-                </p>
-              )}
-              <p className="mt-1 text-sm font-bold text-primary" style={{ color: "hsl(175 80% 55%)" }}>
-                {c.precio || "Consultar"}
-              </p>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => openEdit(c)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all"
-                style={{ background: "hsl(220 15% 16%)", color: "hsl(215 15% 70%)" }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "hsl(220 15% 20%)")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "hsl(220 15% 16%)")}
-              >
-                <Pencil size={12} /> Editar
-              </button>
-              <button
-                onClick={() => handleDelete(c.id)}
-                className="p-1.5 rounded-lg transition-all"
-                style={{ background: "hsl(0 84% 60% / 0.1)", color: "hsl(0 84% 70%)", border: "1px solid hsl(0 84% 60% / 0.2)" }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "hsl(0 84% 60% / 0.2)")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "hsl(0 84% 60% / 0.1)")}
-              >
-                <Trash2 size={13} />
-              </button>
+            <div className="flex flex-1 flex-col p-4">
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                {c.version || "Consola"} {c.garantia && `• ${c.garantia}`}
+              </div>
+              
+              <h3 className="mb-3 font-heading text-base font-black text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                {c.name}
+              </h3>
+              
+              <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
+                <span className="font-black text-primary text-glow text-lg">
+                  {c.precio || "Consultar"}
+                </span>
+                
+                <div className="flex gap-1 ml-2">
+                  <button
+                    onClick={() => openEdit(c)}
+                    className="p-1.5 rounded-lg text-muted-foreground hover:bg-primary/20 hover:text-primary transition-all"
+                    title="Editar"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(c.id)}
+                    className="p-1.5 rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-all"
+                    title="Eliminar"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ))}
@@ -335,15 +355,28 @@ export default function ConsolasVenta() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setModal(null)} className="btn-ghost flex-1 text-sm">
+              <button 
+                onClick={() => setModal(null)} 
+                disabled={saving}
+                className="btn-ghost flex-1 text-sm disabled:opacity-50"
+              >
                 Cancelar
               </button>
               <button 
                 onClick={handleSave} 
-                disabled={uploading}
-                className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={uploading || saving}
+                className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed group"
               >
-                {uploading ? "Subiendo..." : (modal.mode === "add" ? "Agregar" : "Guardar")}
+                {saving ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Guardando...</span>
+                  </div>
+                ) : uploading ? (
+                  "Subiendo..."
+                ) : (
+                  modal.mode === "add" ? "Agregar" : "Guardar"
+                )}
               </button>
             </div>
           </div>

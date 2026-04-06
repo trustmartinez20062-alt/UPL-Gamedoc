@@ -19,10 +19,10 @@ const ShopTabs = () => {
   const [reparacionModelos] = useReparacion();
   
   const displayedJuegos = juegos.slice(0, 4);
-  const displayedConsolas = consolasVenta.slice(0, 8);
+  const displayedConsolas = consolasVenta.slice(0, 4);
   const displayedGamePass = gamePassPlanes.slice(0, 4);
 
-  const hasMultipleConsolas = consolasVenta.length > 8;
+  const hasMultipleConsolas = consolasVenta.length > 4;
   const hasMultipleGamePass = gamePassPlanes.length > 4;
 
   const tabs = [
@@ -69,7 +69,7 @@ const ShopTabs = () => {
           </div>
         </div>
 
-        <div className="min-h-[500px]">
+        <div className="min-h-[680px]">
           <AnimatePresence mode="wait">
             {activeTab === "juegos" && (
               <motion.div

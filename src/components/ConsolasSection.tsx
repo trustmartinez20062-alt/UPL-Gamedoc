@@ -8,6 +8,7 @@ import {
   useDestraba 
 } from "../admin/store";
 import { Skeleton } from "@/components/ui/skeleton";
+import ConsolaCard from "./ConsolaCard";
 import { useEffect, useState } from "react";
 
 // Helper for skeleton loading
@@ -36,7 +37,7 @@ const LoadingSkeleton = ({ count = 3, type = "card" }: { count?: number, type?: 
   }
 
   return (
-    <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4">
       {[...Array(count)].map((_, i) => (
         <div key={i} className="rounded-xl border border-border bg-card p-3 sm:p-6 space-y-4">
           <Skeleton className="aspect-video w-full rounded-md" />
@@ -101,43 +102,9 @@ const ConsolasSection = () => {
           {isLoading ? (
             <LoadingSkeleton count={6} />
           ) : consolasVenta.length > 0 ? (
-            <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-3">
-              {consolasVenta.map((c, i) => (
-                <motion.div
-                  key={c.id || i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.06 }}
-                  className="group relative overflow-hidden rounded-xl border border-border bg-card p-3 sm:p-6 text-center transition-all hover:border-primary/40"
-                >
-                  {c.estado && (
-                    <div className="absolute right-2 top-2 z-10 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-primary">
-                      {c.estado}
-                    </div>
-                  )}
-                  <div className="mb-3 sm:mb-4 aspect-video overflow-hidden rounded-md bg-muted">
-                    {c.image ? (
-                      <img 
-                        src={c.image} 
-                        alt={c.name} 
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" 
-                        loading="lazy" 
-                        decoding="async" 
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                        Sin imagen
-                      </div>
-                    )}
-                  </div>
-                  <h3 className="font-heading text-sm sm:text-lg font-semibold text-foreground line-clamp-1">
-                    {c.name}
-                  </h3>
-                  <p className="mt-1 text-xs sm:text-sm font-bold text-primary">
-                    {(!c.precio || c.precio.toLowerCase().includes("consultar")) ? "Consultar precio" : c.precio}
-                  </p>
-                </motion.div>
+            <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4">
+              {consolasVenta.slice(0, 4).map((c, i) => (
+                <ConsolaCard key={c.id || i} {...c} index={i} />
               ))}
             </div>
           ) : (

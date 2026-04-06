@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as db from "../lib/db";
+import { logActivity } from "../lib/activity-logs";
 
 // ── Types ──────────────────────────────────────────────────────────
 export interface ConsolaVenta {
@@ -99,12 +100,16 @@ export const usePlataformas = () => {
 
     // Deleted
     for (const p of plataformas) {
-      if (!nextIds.has(p.id)) await db.deletePlataforma(p.id);
+      if (!nextIds.has(p.id)) {
+        await db.deletePlataforma(p.id);
+        logActivity("DELETE", "Plataforma", p.name);
+      }
     }
     // Added
     for (const p of next) {
       if (!existingIds.has(p.id)) {
         await db.insertPlataforma(p);
+        logActivity("CREATE", "Plataforma", p.name);
       }
     }
     qc.invalidateQueries({ queryKey: ["plataformas"] });
@@ -127,19 +132,24 @@ export const useJuegos = () => {
 
     // Deleted
     for (const j of juegos) {
-      if (!nextIds.has(j.id)) await db.deleteJuego(j.id);
+      if (!nextIds.has(j.id)) {
+        await db.deleteJuego(j.id);
+        logActivity("DELETE", "Juego", j.name);
+      }
     }
     // Added
     for (const j of next) {
       if (!existingIds.has(j.id)) {
         const { id, ...rest } = j;
         await db.insertJuego(rest);
+        logActivity("CREATE", "Juego", j.name);
       } else {
         // Updated
         const orig = juegos.find(o => o.id === j.id);
         if (orig && JSON.stringify(orig) !== JSON.stringify(j)) {
           const { id, ...rest } = j;
           await db.updateJuego(id, rest);
+          logActivity("UPDATE", "Juego", j.name);
         }
       }
     }
@@ -159,12 +169,12 @@ export const useConsolasVenta = () => {
     const next = typeof val === "function" ? val(items) : val;
     const existingIds = new Set(items.map(i => i.id));
     const nextIds = new Set(next.map(i => i.id));
-    for (const i of items) { if (!nextIds.has(i.id)) await db.deleteConsolaVenta(i.id); }
+    for (const i of items) { if (!nextIds.has(i.id)) { await db.deleteConsolaVenta(i.id); logActivity("DELETE", "Consola Venta", i.name); } }
     for (const i of next) {
-      if (!existingIds.has(i.id)) { const { id, ...rest } = i; await db.insertConsolaVenta(rest); }
+      if (!existingIds.has(i.id)) { const { id, ...rest } = i; await db.insertConsolaVenta(rest); logActivity("CREATE", "Consola Venta", i.name); }
       else {
         const orig = items.find(o => o.id === i.id);
-        if (orig && JSON.stringify(orig) !== JSON.stringify(i)) { const { id, ...rest } = i; await db.updateConsolaVenta(id, rest); }
+        if (orig && JSON.stringify(orig) !== JSON.stringify(i)) { const { id, ...rest } = i; await db.updateConsolaVenta(id, rest); logActivity("UPDATE", "Consola Venta", i.name); }
       }
     }
     qc.invalidateQueries({ queryKey: ["consolas_venta"] });
@@ -208,12 +218,12 @@ export const useGamePassTypes = () => {
     const next = typeof val === "function" ? val(items) : val;
     const existingIds = new Set(items.map(i => i.id));
     const nextIds = new Set(next.map(i => i.id));
-    for (const i of items) { if (!nextIds.has(i.id)) await db.deleteGamePassType(i.id); }
+    for (const i of items) { if (!nextIds.has(i.id)) { await db.deleteGamePassType(i.id); logActivity("DELETE", "Tipo de Pase", i.name); } }
     for (const i of next) {
-      if (!existingIds.has(i.id)) { const { id, ...rest } = i; await db.insertGamePassType(rest); }
+      if (!existingIds.has(i.id)) { const { id, ...rest } = i; await db.insertGamePassType(rest); logActivity("CREATE", "Tipo de Pase", i.name); }
       else {
         const orig = items.find(o => o.id === i.id);
-        if (orig && JSON.stringify(orig) !== JSON.stringify(i)) { const { id, ...rest } = i; await db.updateGamePassType(id, rest); }
+        if (orig && JSON.stringify(orig) !== JSON.stringify(i)) { const { id, ...rest } = i; await db.updateGamePassType(id, rest); logActivity("UPDATE", "Tipo de Pase", i.name); }
       }
     }
     qc.invalidateQueries({ queryKey: ["game_pass_types"] });
@@ -232,17 +242,19 @@ export const useGamePass = () => {
     const next = typeof val === "function" ? val(items) : val;
     const existingIds = new Set(items.map(i => i.id));
     const nextIds = new Set(next.map(i => i.id));
-    for (const i of items) { if (!nextIds.has(i.id)) await db.deleteGamePass(i.id); }
+    for (const i of items) { if (!nextIds.has(i.id)) { await db.deleteGamePass(i.id); logActivity("DELETE", "Plan Game Pass", i.plan); } }
     for (const i of next) {
       if (!existingIds.has(i.id)) { 
         const { id, type, ...rest } = i; 
         await db.insertGamePass(rest as any); 
+        logActivity("CREATE", "Plan Game Pass", i.plan);
       }
       else {
         const orig = items.find(o => o.id === i.id);
         if (orig && JSON.stringify(orig) !== JSON.stringify(i)) { 
           const { id, type, ...rest } = i; 
           await db.updateGamePass(id, rest as any); 
+          logActivity("UPDATE", "Plan Game Pass", i.plan);
         }
       }
     }
@@ -330,6 +342,7 @@ export const useContacto = () => {
   const setContacto = async (val: ContactoInfo | ((prev: ContactoInfo) => ContactoInfo)) => {
     const next = typeof val === "function" ? val(contacto) : val;
     await db.upsertContacto(next);
+    logActivity("UPDATE", "Contacto/Sobre Nosotros", "Configuración");
     qc.invalidateQueries({ queryKey: ["contacto"] });
   };
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CreditCard, Plus, Pencil, Trash2, HelpCircle, Filter, ChevronDown } from "lucide-react";
+import { CreditCard, Plus, Pencil, Trash2, HelpCircle, Filter, ChevronDown, Loader2 } from "lucide-react";
 import { useGamePass, genId, type GamePassPlan, useGamePassTypes } from "../../store";
 import { useAuth } from "../../hooks/useAuth";
 import { formatPriceForDB, parsePriceForForm } from "../../../lib/utils";
@@ -13,6 +13,7 @@ export default function GamePass() {
   const { user } = useAuth();
   const [filterType, setFilterType] = useState<string>("all");
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: GamePassPlan } | null>(null);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<{ plan: string; precio: string; type_id: string }>({ 
     plan: "", 
     precio: "",
@@ -33,23 +34,31 @@ export default function GamePass() {
     setModal({ mode: "edit", item });
   };
 
-  const handleSave = () => {
-    if (!form.plan.trim()) return;
-    
-    const data = { 
-      plan: form.plan, 
-      precio: formatPriceForDB(form.precio),
-      type_id: form.type_id || null
-    };
+  const handleSave = async () => {
+    if (!form.plan.trim() || !form.type_id) return;
+    setSaving(true);
+    try {
+      const data = { 
+        plan: form.plan, 
+        precio: formatPriceForDB(form.precio),
+        type_id: form.type_id || null
+      };
 
-    if (modal?.mode === "add") {
-      setPlanes((prev) => [...prev, { id: genId(), ...data } as any]);
-    } else if (modal?.item) {
-      setPlanes((prev) =>
-        prev.map((p) => (p.id === modal.item!.id ? { ...p, ...data } : p))
-      );
+      if (modal?.mode === "add") {
+        await setPlanes((prev) => [...prev, { id: genId(), ...data } as any]);
+        toast.success("Plan agregado con éxito");
+      } else if (modal?.item) {
+        await setPlanes((prev) =>
+          prev.map((p) => (p.id === modal.item!.id ? { ...p, ...data } : p))
+        );
+        toast.success("Plan actualizado con éxito");
+      }
+      setModal(null);
+    } catch (error) {
+      toast.error("Error al guardar los cambios");
+    } finally {
+      setSaving(false);
     }
-    setModal(null);
   };
 
   const handleDelete = (id: string) => {
@@ -81,7 +90,7 @@ export default function GamePass() {
               >
                 <option value="all">Todos los tipos</option>
                 {types.map(t => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
+                  <option key={t.id} value={t.id}>{t.prefix} {t.name}</option>
                 ))}
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -105,7 +114,7 @@ export default function GamePass() {
                   key={p.id}
                   className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
                 >
-                  <div className="aspect-[16/10] overflow-hidden relative">
+                  <div className="aspect-[16/13] overflow-hidden relative">
                     {type?.image ? (
                       <img
                         src={type.image}
@@ -239,13 +248,26 @@ export default function GamePass() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setModal(null)} className="btn-ghost flex-1 text-sm">Cancelar</button>
+              <button 
+                onClick={() => setModal(null)} 
+                disabled={saving}
+                className="btn-ghost flex-1 text-sm disabled:opacity-50"
+              >
+                Cancelar
+              </button>
               <button 
                 onClick={handleSave} 
-                disabled={!form.plan.trim() || !form.type_id}
-                className="btn-primary flex-1 text-sm"
+                disabled={!form.plan.trim() || !form.type_id || saving}
+                className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed group"
               >
-                {modal.mode === "add" ? "Agregar" : "Guardar"}
+                {saving ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Guardando...</span>
+                  </div>
+                ) : (
+                  modal.mode === "add" ? "Agregar" : "Guardar"
+                )}
               </button>
             </div>
           </div>

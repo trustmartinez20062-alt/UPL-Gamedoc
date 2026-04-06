@@ -22,6 +22,7 @@ export default function Juegos() {
   });
   const [search, setSearch] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -55,24 +56,30 @@ export default function Juegos() {
     setModal({ mode: "edit", item });
   };
 
-// @DB-CRUD-LOGIC: Estas operaciones deben llamar a supabase.from('products').insert() o .update().
   const handleSave = async () => {
     if (!form.name.trim()) return;
-    const dataToSave = { ...form, precio: formatPriceForDB(form.precio) };
+    setSaving(true);
+    try {
+      const dataToSave = { ...form, precio: formatPriceForDB(form.precio) };
 
-    if (modal?.mode === "add") {
-      setJuegos((prev) => [...prev, { id: genId(), ...dataToSave } as Juego]);
-    } else if (modal?.item) {
-      // Si la imagen cambió y teníamos una subida, borrar la anterior
-      if (modal.item.image && modal.item.image !== form.image) {
-        await deleteImageFromStorage(modal.item.image);
-        toast.info("Imagen anterior eliminada del servidor");
+      if (modal?.mode === "add") {
+        await setJuegos((prev) => [...prev, { id: genId(), ...dataToSave } as Juego]);
+        toast.success("Juego agregado con éxito");
+      } else if (modal?.item) {
+        if (modal.item.image && modal.item.image !== form.image) {
+          await deleteImageFromStorage(modal.item.image);
+        }
+        await setJuegos((prev) =>
+          prev.map((j) => (j.id === modal.item!.id ? ({ ...j, ...dataToSave } as Juego) : j))
+        );
+        toast.success("Juego actualizado con éxito");
       }
-      setJuegos((prev) =>
-        prev.map((j) => (j.id === modal.item!.id ? ({ ...j, ...dataToSave } as Juego) : j))
-      );
+      setModal(null);
+    } catch (error) {
+      toast.error("Error al guardar los cambios");
+    } finally {
+      setSaving(false);
     }
-    setModal(null);
   };
 
   const togglePlataforma = (id: string) => {
@@ -342,13 +349,28 @@ export default function Juegos() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setModal(null)} className="btn-ghost flex-1 text-sm">Cancelar</button>
+              <button 
+                onClick={() => setModal(null)} 
+                disabled={saving}
+                className="btn-ghost flex-1 text-sm disabled:opacity-50"
+              >
+                Cancelar
+              </button>
               <button 
                 onClick={handleSave} 
-                disabled={uploading}
-                className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={uploading || saving}
+                className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed group"
               >
-                {uploading ? "Subiendo..." : (modal.mode === "add" ? "Agregar" : "Guardar")}
+                {saving ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Guardando...</span>
+                  </div>
+                ) : uploading ? (
+                  "Subiendo..."
+                ) : (
+                  modal.mode === "add" ? "Agregar" : "Guardar"
+                )}
               </button>
             </div>
           </div>

@@ -28,8 +28,9 @@ const JuegoCard = ({ name, plataformas, image, precio, index }: JuegoCardProps) 
         <img
           src={image}
           alt={name}
-          className="h-full w-full object-cover transition-transform duration-500"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
+          decoding="async"
         />
       </div>
       <div className="flex flex-1 flex-col p-2.5 sm:p-4">

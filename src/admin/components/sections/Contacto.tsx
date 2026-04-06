@@ -18,6 +18,7 @@ export default function Contacto() {
   });
 
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,10 +40,17 @@ export default function Contacto() {
     });
   }, [contacto]);
 
-  const handleSave = () => {
-    setContacto(form);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await setContacto(form);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleAddTick = () => {
@@ -98,16 +106,33 @@ export default function Contacto() {
         action={
           <button
             onClick={handleSave}
-            disabled={!hasChanges && !saved}
+            disabled={( !hasChanges && !saved ) || saving}
             className={`flex items-center gap-2 py-2 px-6 rounded-lg font-semibold text-sm transition-all duration-300 ${
               saved 
                 ? "bg-emerald-500 text-emerald-950" 
-                : hasChanges 
-                  ? "bg-[hsl(175_80%_50%)] text-[hsl(220_20%_6%)] shadow-[0_0_20px_hsl(175_80%_50%_/_0.3)]" 
-                  : "bg-[hsl(220_15%_18%)] text-[hsl(215_15%_45%)] cursor-not-allowed"
+                : saving
+                  ? "bg-primary/20 text-primary border border-primary/30"
+                  : hasChanges 
+                    ? "bg-[hsl(175_80%_50%)] text-[hsl(220_20%_6%)] shadow-[0_0_20px_hsl(175_80%_50%_/_0.3)]" 
+                    : "bg-[hsl(220_15%_18%)] text-[hsl(215_15%_45%)] cursor-not-allowed"
             }`}
           >
-            <Save size={16} /> {saved ? "¡Cambios Guardados!" : "Guardar Cambios"}
+            {saving ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Guardando...</span>
+              </>
+            ) : saved ? (
+              <>
+                <Phone size={16} className="hidden" /> {/* Keep layout stable if needed, though simple icon change is fine */}
+                <span>¡Cambios Guardados!</span>
+              </>
+            ) : (
+              <>
+                <Save size={16} /> 
+                <span>Guardar Cambios</span>
+              </>
+            )}
           </button>
         }
       />

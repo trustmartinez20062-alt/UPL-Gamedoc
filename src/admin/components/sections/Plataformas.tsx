@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Server, Plus, Trash2, Pencil } from "lucide-react";
+import { Server, Plus, Trash2, Pencil, Loader2 } from "lucide-react";
 import { usePlataformas, genId, type Plataforma, useJuegos } from "../../store";
 import { useAuth } from "../../hooks/useAuth";
+import { toast } from "@/components/ui/sonner";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
@@ -11,6 +12,7 @@ export default function Plataformas() {
   const [juegos, setJuegos] = useJuegos();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: Plataforma } | null>(null);
   const [form, setForm] = useState<Omit<Plataforma, "id">>({ name: "" });
+  const [saving, setSaving] = useState(false);
 
   const openAdd = () => {
     setForm({ name: "" });
@@ -22,19 +24,26 @@ export default function Plataformas() {
     setModal({ mode: "edit", item });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) return;
-    
-    if (modal?.mode === "add") {
-      setPlataformas((prev) => [...prev, { id: genId(), ...form }]);
-    } else if (modal?.item) {
-      setPlataformas((prev) =>
-        prev.map((p) => (p.id === modal.item!.id ? { ...p, ...form } : p))
-      );
+    setSaving(true);
+    try {
+      if (modal?.mode === "add") {
+        await setPlataformas((prev) => [...prev, { id: genId(), ...form }]);
+        toast.success("Plataforma agregada");
+      } else if (modal?.item) {
+        await setPlataformas((prev) =>
+          prev.map((p) => (p.id === modal.item!.id ? { ...p, ...form } : p))
+        );
+        toast.success("Plataforma actualizada");
+      }
+      setForm({ name: "" });
+      setModal(null);
+    } catch (error) {
+      toast.error("Error al guardar los cambios");
+    } finally {
+      setSaving(false);
     }
-    
-    setForm({ name: "" });
-    setModal(null);
   };
 
   const handleDelete = (id: string) => {
@@ -146,9 +155,26 @@ export default function Plataformas() {
               />
             </div>
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setModal(null)} className="btn-ghost flex-1 text-sm">Cancelar</button>
-              <button onClick={handleSave} className="btn-primary flex-1 text-sm">
-                {modal.mode === "add" ? "Guardar" : "Actualizar"}
+              <button 
+                onClick={() => setModal(null)} 
+                disabled={saving}
+                className="btn-ghost flex-1 text-sm disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleSave} 
+                disabled={saving || !form.name.trim()}
+                className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                {saving ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Guardando...</span>
+                  </div>
+                ) : (
+                  modal.mode === "add" ? "Guardar" : "Actualizar"
+                )}
               </button>
             </div>
           </div>

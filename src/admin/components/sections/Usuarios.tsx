@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Plus, Trash2, Shield, User, Key, AlertCircle, RefreshCw, Edit2, Mail } from "lucide-react";
+import { Users, Plus, Trash2, Shield, User, Key, AlertCircle, RefreshCw, Edit2, Mail, Loader2 } from "lucide-react";
 import { getCurrentUser, fetchUsuarios, createUsuario, deleteUsuario, updateUsuario, adminChangePassword } from "../../auth";
 import type { Usuario } from "../../store";
 import Modal from "../Modal";
@@ -320,11 +320,26 @@ export default function Usuarios() {
             )}
 
             <div className="flex gap-3 pt-4">
-              <button onClick={() => setModal(null)} className="flex-1 py-3.5 rounded-2xl font-bold transition-all hover:bg-[hsl(220_15%_14%)] text-[hsl(215_15%_50%)]">
+              <button 
+                onClick={() => setModal(null)} 
+                disabled={saving}
+                className="flex-1 py-3.5 rounded-2xl font-bold transition-all hover:bg-[hsl(220_15%_14%)] text-[hsl(215_15%_50%)] disabled:opacity-50"
+              >
                 Cancelar
               </button>
-              <button onClick={handleEdit} disabled={saving} className="btn-primary flex-1 py-3.5 rounded-2xl text-sm">
-                {saving ? "Guardando..." : "Guardar Cambios"}
+              <button 
+                onClick={handleEdit} 
+                disabled={saving} 
+                className="btn-primary flex-1 py-3.5 rounded-2xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Guardando...</span>
+                  </div>
+                ) : (
+                  "Guardar Cambios"
+                )}
               </button>
             </div>
           </div>

@@ -2,15 +2,17 @@ import { useState } from "react";
 import { Server, Plus, Trash2, Pencil, Image as ImageIcon, Loader2 } from "lucide-react";
 import { useGamePassTypes, genId, type GamePassType, useGamePass } from "../../store";
 import { uploadImage, deleteImageFromStorage } from "../../../lib/db";
+import { toast } from "@/components/ui/sonner";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
 
 export default function GamePassTypes() {
   const [types, setTypes] = useGamePassTypes();
-  const [planes] = useGamePass();
+  const [planes, setPlanes] = useGamePass();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: GamePassType } | null>(null);
   const [form, setForm] = useState<Omit<GamePassType, "id">>({ name: "", prefix: "Game Pass", image: "" });
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const openAdd = () => {
     setForm({ name: "", prefix: "Game Pass", image: "" });
@@ -22,18 +24,25 @@ export default function GamePassTypes() {
     setModal({ mode: "edit", item });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) return;
-    
-    if (modal?.mode === "add") {
-      setTypes((prev) => [...prev, { id: genId(), ...form }]);
-    } else if (modal?.item) {
-      setTypes((prev) =>
-        prev.map((t) => (t.id === modal.item!.id ? { ...t, ...form } : t))
-      );
+    setSaving(true);
+    try {
+      if (modal?.mode === "add") {
+        await setTypes((prev) => [...prev, { id: genId(), ...form }]);
+        toast.success("Tipo de Game Pass agregado");
+      } else if (modal?.item) {
+        await setTypes((prev) =>
+          prev.map((t) => (t.id === modal.item!.id ? { ...t, ...form } : t))
+        );
+        toast.success("Tipo de Game Pass actualizado");
+      }
+      setModal(null);
+    } catch (error) {
+      toast.error("Error al guardar los cambios");
+    } finally {
+      setSaving(false);
     }
-    
-    setModal(null);
   };
 
   const handleDelete = async (item: GamePassType) => {
@@ -41,12 +50,17 @@ export default function GamePassTypes() {
     
     let message = "¿Eliminar este tipo de pase?";
     if (affectedPlanes.length > 0) {
-      message = `Este tipo está asignado a ${affectedPlanes.length} planes. Si lo eliminas, los planes se quedarán sin tipo asociado. ¿Continuar?`;
+      message = `Atención: Este tipo tiene ${affectedPlanes.length} planes vinculados (precios). Si lo eliminas, TODOS esos planes se borrarán permanentemente del sistema. ¿Deseas continuar?`;
     }
 
     if (confirm(message)) {
       if (item.image) {
         await deleteImageFromStorage(item.image);
+      }
+      
+      // Actualizamos ambos estados localmente para un feedback instantáneo
+      if (affectedPlanes.length > 0) {
+        setPlanes((prev) => prev.filter((p) => p.type_id !== item.id));
       }
       setTypes((prev) => prev.filter((t) => t.id !== item.id));
     }
@@ -188,13 +202,26 @@ export default function GamePassTypes() {
             </div>
 
             <div className="flex gap-3 pt-4">
-              <button onClick={() => setModal(null)} className="btn-ghost flex-1 text-sm">Cancelar</button>
+              <button 
+                onClick={() => setModal(null)} 
+                disabled={saving}
+                className="btn-ghost flex-1 text-sm disabled:opacity-50"
+              >
+                Cancelar
+              </button>
               <button 
                 onClick={handleSave} 
-                disabled={uploading || !form.name.trim()}
-                className="btn-primary flex-1 text-sm"
+                disabled={uploading || saving || !form.name.trim()}
+                className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed group"
               >
-                {modal.mode === "add" ? "Guardar" : "Actualizar"}
+                {saving ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Guardando...</span>
+                  </div>
+                ) : (
+                  modal.mode === "add" ? "Guardar" : "Actualizar"
+                )}
               </button>
             </div>
           </div>
