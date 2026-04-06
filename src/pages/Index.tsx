@@ -10,6 +10,7 @@ import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import SEOHead from "@/components/SEOHead";
+import SEOSection from "@/components/SEOSection";
 
 import { useContacto } from "../admin/store";
 
@@ -75,6 +76,7 @@ const Index = () => {
       <ReviewsSection />
       <FacebookSection />
       <ContactSection />
+      <SEOSection />
       <Footer />
       <WhatsAppButton floating />
     </>

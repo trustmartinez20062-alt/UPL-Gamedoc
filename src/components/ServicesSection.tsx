@@ -40,7 +40,7 @@ const ServicesSection = () => (
         className="mb-16 text-center"
       >
         <h2 className="mb-4 font-heading text-3xl font-bold text-foreground sm:text-4xl">
-          Nuestros <span className="text-primary text-glow">Servicios</span> en Montevideo
+          Nuestros <span className="text-primary text-glow">Servicios</span>
         </h2>
         <p className="mx-auto max-w-md text-muted-foreground">
           Todo lo que necesitás para tu experiencia gaming, en un solo lugar.
@@ -83,27 +83,7 @@ const ServicesSection = () => (
         })}
       </div>
 
-      {/* @SEO Bloque de texto enriquecido para crawlers (~200 palabras) — prioriza reparación en Montevideo */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mt-16 max-w-4xl mx-auto text-center"
-      >
-        <p className="text-sm leading-relaxed text-muted-foreground/70">
-          <strong>Game Doctor</strong> es tu centro especializado en <strong>reparación de consolas en Montevideo</strong>. 
-          Ubicados en <strong>La Unión</strong>, ofrecemos servicio técnico profesional para <strong>PlayStation 3, PS4, PS5, 
-          Xbox 360, Xbox One, Xbox Series X|S y Nintendo Switch</strong>. Realizamos reparaciones de puerto HDMI, 
-          fallas de placa, errores de disco, limpieza interna profunda, cambio de pasta térmica y 
-          reemplazo de componentes. También brindamos servicio de <strong>destraba y liberación de consolas</strong> con 
-          software actualizado y garantía. Además de nuestro taller, contamos con una{" "}
-          <Link to="/consolas" className="text-primary hover:underline font-medium">tienda de consolas nuevas y restauradas</Link>, 
-          un amplio <Link to="/juegos-digitales" className="text-primary hover:underline font-medium">catálogo de juegos digitales</Link> y 
-          activación de <Link to="/game-pass" className="text-primary hover:underline font-medium">Game Pass y suscripciones</Link> al 
-          mejor precio. Todos nuestros trabajos incluyen garantía y diagnóstico sin costo. Consultanos por WhatsApp 
-          para presupuestos personalizados. Atendemos venta mayorista y minorista con envíos a todo Uruguay.
-        </p>
-      </motion.div>
+
     </div>
   </section>
 );

@@ -69,7 +69,6 @@ const AboutSection = () => {
                 {handleTextFormat(text)}
               </div>
             ) : null}
-
             {points.length > 0 && (
               <ul className="grid gap-4 sm:grid-cols-2 mt-6">
                 {points.map((p, idx) => (

@@ -91,7 +91,7 @@ const GamePassCard = ({ plan, precio, type, mercadolibre_url, index }: GamePassC
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-lg bg-card border border-primary/20 rounded-[2rem] overflow-hidden shadow-2xl shadow-primary/20"
+              className="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-card border border-primary/20 rounded-[2rem] overflow-hidden shadow-2xl shadow-primary/20"
             >
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -100,61 +100,61 @@ const GamePassCard = ({ plan, precio, type, mercadolibre_url, index }: GamePassC
                 <X size={20} />
               </button>
 
-              <div className="max-h-[85vh] overflow-y-auto custom-scrollbar">
-                <div className="aspect-[16/9] w-full relative">
-                   {type?.image ? (
-                     <img src={type.image} alt={type.name} className="w-full h-full object-cover" />
-                   ) : (
-                     <div className="h-full w-full bg-primary/10" />
-                   )}
-                   <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
-                   
-                   <div className="absolute bottom-6 left-6 flex items-center gap-2">
-                       <div className="px-3 py-1 rounded-full bg-primary text-black text-[10px] font-black uppercase tracking-widest shadow-xl">
-                          {type?.name || "Game Pass"}
-                       </div>
-                   </div>
+              {/* Flex Child 1: Image container */}
+              <div className="h-44 sm:h-60 w-full shrink-0 relative">
+                 {type?.image ? (
+                   <img src={type.image} alt={type.name} className="w-full h-full object-cover" />
+                 ) : (
+                   <div className="h-full w-full bg-primary/10" />
+                 )}
+                 <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+                 
+                 <div className="absolute bottom-4 left-6 flex items-center gap-2">
+                     <div className="px-3 py-1 rounded-full bg-primary text-black text-[10px] font-black uppercase tracking-widest shadow-xl">
+                        {type?.name || "Game Pass"}
+                     </div>
+                 </div>
+              </div>
+
+              {/* Flex Child 2: Content */}
+              <div className="flex flex-col flex-1 p-5 sm:p-7 overflow-hidden min-h-0">
+                <div className="flex items-center gap-2 mb-2 text-primary shrink-0">
+                  <Zap size={14} fill="currentColor" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{type?.prefix || "Xbox Gaming"}</span>
                 </div>
 
-                <div className="p-6 sm:p-8">
-                  <div className="flex items-center gap-2 mb-2 text-primary">
-                    <Zap size={16} fill="currentColor" />
-                    <span className="text-xs font-bold uppercase tracking-[0.2em]">{type?.prefix || "Xbox Gaming"}</span>
+                <h2 className="text-xl sm:text-2xl font-heading font-black text-foreground mb-6 leading-none shrink-0">
+                  {type?.name || "Plan"} <span className="text-muted-foreground/40 font-medium lowercase">({plan})</span>
+                </h2>
+
+                <div className="mt-auto border-t border-border pt-5 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-5">
+                  <div className="text-center sm:text-left">
+                     <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Precio por {plan}</p>
+                     <p className="text-xl sm:text-2xl font-black text-primary text-glow leading-none">
+                       {isConsultar ? "Consulte Precio" : precio}
+                     </p>
                   </div>
 
-                  <h2 className="text-2xl sm:text-3xl font-heading font-black text-foreground mb-8 leading-none">
-                    {type?.name || "Plan"} <span className="text-muted-foreground/40 font-medium lowercase">({plan})</span>
-                  </h2>
+                  <div className="flex flex-col gap-2.5 w-full sm:w-auto">
+                    <a
+                      href={`https://wa.me/59896593154?text=${encodeURIComponent(whatsappMessage)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full px-6 py-3 bg-[#25D366] text-white text-xs font-black uppercase tracking-tighter rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(37,211,102,0.3)] text-center"
+                    >
+                      Consultar por WhatsApp
+                    </a>
 
-                  <div className="border-t border-border pt-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <div className="text-center sm:text-left">
-                       <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Precio por {plan}</p>
-                       <p className="text-3xl font-black text-primary text-glow leading-none">
-                         {isConsultar ? "Consulte Precio" : precio}
-                       </p>
-                    </div>
-
-                    <div className="flex flex-col gap-3 w-full sm:w-auto">
+                    {mercadolibre_url && (
                       <a
-                        href={`https://wa.me/59896593154?text=${encodeURIComponent(whatsappMessage)}`}
+                        href={mercadolibre_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full px-8 py-4 bg-[#25D366] text-white font-black uppercase tracking-tighter rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(37,211,102,0.3)] text-center"
+                        className="w-full px-6 py-3 bg-[#FFE600] text-[#333333] text-xs font-black uppercase tracking-tighter rounded-xl hover:scale-105 active:scale-95 transition-all text-center"
                       >
-                        Consultar por WhatsApp
+                        Ver en Mercado Libre
                       </a>
-
-                      {mercadolibre_url && (
-                        <a
-                          href={mercadolibre_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full px-8 py-4 bg-[#FFE600] text-[#333333] font-black uppercase tracking-tighter rounded-2xl hover:scale-105 active:scale-95 transition-all text-center"
-                        >
-                          Ver en Mercado Libre
-                        </a>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>

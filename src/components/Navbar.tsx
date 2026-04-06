@@ -2,6 +2,8 @@ import { useState, useCallback } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { NavLink } from "./NavLink";
 
 const links = [
   { label: "Inicio", href: "/#inicio" },
@@ -20,21 +22,23 @@ const Navbar = () => {
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-      // Only handle hash links that point to the index page (/#section)
-      if (!href.startsWith("/#")) return; // let normal links work normally
+      // Only handle hash links that point to sections
+      if (!href.includes("#")) return; 
 
       e.preventDefault();
-      const hash = href.replace("/", ""); // e.g. "#nosotros"
+      const hash = href.split("#")[1]; // e.g. "nosotros"
 
       if (location.pathname === "/") {
-        // Already on index – just scroll
-        const el = document.querySelector(hash);
+        // Use navigate to update the hash so react-router-dom detects it and re-renders
+        navigate(href, { replace: true });
+        
+        const el = document.getElementById(hash);
         if (el) el.scrollIntoView({ behavior: "smooth" });
       } else {
-        // Navigate to index first, then scroll after render
-        navigate("/");
+        navigate(href);
+        // Timeout to wait for navigation and then scroll
         setTimeout(() => {
-          const el = document.querySelector(hash);
+          const el = document.getElementById(hash);
           if (el) el.scrollIntoView({ behavior: "smooth" });
         }, 350);
       }
@@ -44,28 +48,50 @@ const Navbar = () => {
     [location.pathname, navigate]
   );
 
+  const activeStyles = "text-primary text-glow after:w-full after:opacity-100";
+  const baseLinkStyles = "relative text-sm font-medium text-muted-foreground transition-all hover:text-primary py-2 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-primary after:shadow-[0_0_10px_rgba(34,211,238,0.8)] after:transition-all after:duration-300 after:opacity-0";
+
+  const isAnchorActive = (href: string) => {
+    if (location.pathname !== "/") return false;
+    const hash = href.split("#")[1];
+    if (hash === "inicio") return location.hash === "" || location.hash === "#inicio";
+    return location.hash === `#${hash}`;
+  };
+
   return (
     <nav className="fixed top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between">
-        <a
-          href="/#inicio"
+        <NavLink
+          to="/"
           onClick={(e) => handleClick(e, "/#inicio")}
           className="font-heading text-xl font-bold tracking-wider text-primary text-glow"
+          isActive={() => isAnchorActive("/#inicio")}
+          activeClassName="text-primary text-glow"
         >
           GAME DOCTOR
-        </a>
+        </NavLink>
 
         {/* Desktop */}
         <ul className="hidden items-center gap-8 md:flex">
           {links.map((l) => (
             <li key={l.label}>
-              <a
-                href={l.href}
-                onClick={(e) => handleClick(e, l.href)}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-              >
-                {l.label}
-              </a>
+              {l.href.includes("#") ? (
+                <a
+                  href={l.href}
+                  onClick={(e) => handleClick(e, l.href)}
+                  className={cn(baseLinkStyles, isAnchorActive(l.href) && activeStyles)}
+                >
+                  {l.label}
+                </a>
+              ) : (
+                <NavLink
+                  to={l.href}
+                  className={baseLinkStyles}
+                  activeClassName={activeStyles}
+                >
+                  {l.label}
+                </NavLink>
+              )}
             </li>
           ))}
         </ul>
@@ -89,13 +115,27 @@ const Navbar = () => {
             <ul className="container flex flex-col gap-4 py-6">
               {links.map((l) => (
                 <li key={l.label}>
-                  <a
-                    href={l.href}
-                    onClick={(e) => handleClick(e, l.href)}
-                    className="block text-lg font-medium text-foreground transition-colors hover:text-primary"
-                  >
-                    {l.label}
-                  </a>
+                  {l.href.includes("#") ? (
+                    <a
+                      href={l.href}
+                      onClick={(e) => handleClick(e, l.href)}
+                      className={cn(
+                        "block text-lg font-medium transition-colors",
+                        isAnchorActive(l.href) ? "text-primary" : "text-foreground"
+                      )}
+                    >
+                      {l.label}
+                    </a>
+                  ) : (
+                    <NavLink
+                      to={l.href}
+                      className="block text-lg font-medium text-foreground transition-colors"
+                      activeClassName="text-primary text-glow"
+                      onClick={() => setOpen(false)}
+                    >
+                      {l.label}
+                    </NavLink>
+                  )}
                 </li>
               ))}
             </ul>
