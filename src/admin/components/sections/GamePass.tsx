@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { CreditCard, Plus, Pencil, Trash2, HelpCircle, Filter, ChevronDown, Loader2 } from "lucide-react";
+import { CreditCard, Plus, Pencil, Trash2, HelpCircle, Filter, ChevronDown, Loader2, GripVertical } from "lucide-react";
 import { useGamePass, genId, type GamePassPlan, useGamePassTypes } from "../../store";
+import { ReactSortable } from "react-sortablejs";
 import { useAuth } from "../../hooks/useAuth";
 import { formatPriceForDB, parsePriceForForm } from "../../../lib/utils";
+import { updateGamePassOrder } from "../../../lib/db";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
 import Modal from "../Modal";
 import PageHeader from "../PageHeader";
@@ -10,19 +13,21 @@ import PageHeader from "../PageHeader";
 export default function GamePass() {
   const [planes, setPlanes] = useGamePass();
   const [types] = useGamePassTypes();
+  const queryCache = useQueryClient();
   const { user } = useAuth();
   const [filterType, setFilterType] = useState<string>("all");
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: GamePassPlan } | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<{ plan: string; precio: string; type_id: string; mercadolibre_url: string }>({ 
+  const [form, setForm] = useState<{ plan: string; precio: string; moneda: "UYU" | "USD"; type_id: string; mercadolibre_url: string }>({ 
     plan: "", 
     precio: "",
+    moneda: "UYU",
     type_id: "",
     mercadolibre_url: ""
   });
 
   const openAdd = () => {
-    setForm({ plan: "", precio: "", type_id: types[0]?.id || "", mercadolibre_url: "" });
+    setForm({ plan: "", precio: "", moneda: "UYU", type_id: types[0]?.id || "", mercadolibre_url: "" });
     setModal({ mode: "add" });
   };
 
@@ -30,6 +35,7 @@ export default function GamePass() {
     setForm({ 
       plan: item.plan, 
       precio: parsePriceForForm(item.precio),
+      moneda: item.moneda || "UYU",
       type_id: item.type_id || "",
       mercadolibre_url: item.mercadolibre_url || ""
     });
@@ -42,7 +48,8 @@ export default function GamePass() {
     try {
       const data = { 
         plan: form.plan, 
-        precio: formatPriceForDB(form.precio),
+        precio: formatPriceForDB(form.precio, form.moneda),
+        moneda: form.moneda,
         type_id: form.type_id || null,
         mercadolibre_url: form.mercadolibre_url || null
       };
@@ -109,69 +116,151 @@ export default function GamePass() {
       {/* Single Grid for all planes */}
       <div className="space-y-6">
         {filteredPlanes.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredPlanes.map((p) => {
-              const type = types.find(t => t.id === p.type_id);
-              return (
-                <div
-                  key={p.id}
-                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
-                >
-                  <div className="aspect-[16/13] overflow-hidden relative">
-                    {type?.image ? (
-                      <img
-                        src={type.image}
-                        alt={type.name}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-muted/20 flex items-center justify-center">
-                        <span className="text-muted-foreground/10 font-black text-6xl italic tracking-tighter">GP</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent" />
-                    
-                    {/* Badge flotante de tipo */}
-                    <div className="absolute top-3 left-3 px-2 py-1 rounded bg-primary/90 text-[10px] font-black text-white uppercase tracking-wider backdrop-blur-sm shadow-xl">
-                      {type?.name || "Sin tipo"}
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-1 flex-col p-4 sm:p-5">
-                    <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                      {type?.prefix || "Suscripción"}
-                    </div>
-                    <h4 className="mb-4 font-heading text-lg font-black text-foreground group-hover:text-primary transition-colors">
-                      {type?.name || "Pase"} <span className="text-muted-foreground/50 font-medium lowercase">({p.plan})</span>
-                    </h4>
-                    
-                    <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
-                      <span className="font-black text-primary text-glow text-xl">
-                        {p.precio || "Consultar"}
-                      </span>
+          filterType !== "all" ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredPlanes.map((p) => {
+                const type = types.find(t => t.id === p.type_id);
+                return (
+                  <div
+                    key={p.id}
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
+                  >
+                    <div className="aspect-[16/13] overflow-hidden relative">
+                      {type?.image ? (
+                        <img src={type.image} alt={type.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      ) : (
+                        <div className="h-full w-full bg-muted/20 flex items-center justify-center">
+                          <span className="text-muted-foreground/10 font-black text-6xl italic tracking-tighter">GP</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent" />
                       
-                      <div className="flex bg-background/50 rounded-xl p-1 gap-1 border border-border/50">
-                        <button
-                          onClick={() => openEdit(p)}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:bg-primary/20 hover:text-primary transition-all"
-                          title="Editar"
-                        >
-                          <Pencil size={15} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(p.id)}
-                          className="p-1.5 rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-all"
-                          title="Eliminar"
-                        >
-                          <Trash2 size={15} />
-                        </button>
+                      {/* Badge flotante de tipo */}
+                      <div className="absolute top-3 left-3 px-2 py-1 rounded bg-primary/90 text-[10px] font-black text-white uppercase tracking-wider backdrop-blur-sm shadow-xl">
+                        {type?.name || "Sin tipo"}
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-1 flex-col p-4 sm:p-5">
+                      <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                        {type?.prefix || "Suscripción"}
+                      </div>
+                      <h4 className="mb-4 font-heading text-lg font-black text-foreground group-hover:text-primary transition-colors">
+                        {type?.name || "Pase"} <span className="text-muted-foreground/50 font-medium lowercase">({p.plan})</span>
+                      </h4>
+                      
+                      <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
+                        <span className="font-black text-primary text-glow text-xl">
+                          {p.precio || "Consultar"}
+                        </span>
+                        
+                        <div className="flex bg-background/50 rounded-xl p-1 gap-1 border border-border/50">
+                          <button
+                            onClick={() => openEdit(p)}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:bg-primary/20 hover:text-primary transition-all"
+                            title="Editar"
+                          >
+                            <Pencil size={15} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(p.id)}
+                            className="p-1.5 rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-all"
+                            title="Eliminar"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <ReactSortable 
+              list={planes as any[]}
+              setList={async (newList) => {
+                const updated = newList.map((item, index) => ({ ...item, orden: index }));
+                const hasChanges = planes.some((p, index) => p.id !== updated[index].id);
+                if (!hasChanges) return;
+
+                // Actualización optimista ultra rápida sin bloqueos
+                queryCache.setQueryData(["game_pass"], updated);
+
+                // Sincronización en bulk con Supabase
+                const updates = updated.map((p) => ({ id: p.id, orden: p.orden }));
+                await updateGamePassOrder(updates);
+              }}
+              animation={200}
+              delay={2}
+              handle=".drag-handle"
+              ghostClass="opacity-30"
+              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            >
+              {planes.map((p) => {
+                const type = types.find(t => t.id === p.type_id);
+                return (
+                  <div
+                    key={p.id}
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5 origin-center"
+                  >
+                    <div className="drag-handle absolute top-2 right-2 z-20 p-2 rounded-lg bg-black/60 text-white/70 opacity-0 group-hover:opacity-100 transition-all cursor-grab active:cursor-grabbing backdrop-blur-md shadow-lg border border-white/5 hover:bg-black/80 hover:text-white">
+                      <GripVertical size={18} />
+                    </div>
+                    <div className="aspect-[16/13] overflow-hidden relative pointer-events-none">
+                      {type?.image ? (
+                        <img src={type.image} alt={type.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      ) : (
+                        <div className="h-full w-full bg-muted/20 flex items-center justify-center">
+                          <span className="text-muted-foreground/10 font-black text-6xl italic tracking-tighter">GP</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent" />
+                      
+                      {/* Badge flotante de tipo */}
+                      <div className="absolute top-3 left-3 px-2 py-1 rounded bg-primary/90 text-[10px] font-black text-white uppercase tracking-wider backdrop-blur-sm shadow-xl">
+                        {type?.name || "Sin tipo"}
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-1 flex-col p-4 sm:p-5">
+                      <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                        {type?.prefix || "Suscripción"}
+                      </div>
+                      <h4 className="mb-4 font-heading text-lg font-black text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                        {type?.name || "Pase"} <span className="text-muted-foreground/50 font-medium lowercase">({p.plan})</span>
+                      </h4>
+                      
+                      <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
+                        <span className="font-black text-primary text-glow text-xl">
+                          {p.precio || "Consultar"}
+                        </span>
+                        
+                        <div className="flex gap-1 ml-2">
+                          <button
+                            onClick={() => openEdit(p)}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:bg-primary/20 hover:text-primary transition-all"
+                            title="Editar"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(p.id)}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            className="p-1.5 rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-all"
+                            title="Eliminar"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </ReactSortable>
+          )
         ) : (
           <div className="py-20 text-center rounded-3xl border border-dashed border-border/50 bg-card/30">
             <CreditCard size={48} className="mx-auto mb-4 opacity-10" />
@@ -239,16 +328,28 @@ export default function GamePass() {
               </div>
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-muted-foreground">
-                  Precio (solo números)
+                  Precio y Moneda
                 </label>
-                <input
-                  className="input-field"
-                  placeholder="Ej: 600"
-                  value={form.precio}
-                  onChange={(e) => setForm({ ...form, precio: e.target.value.replace(/\D/g, "") })}
-                />
+                <div className="flex gap-2">
+                  <select
+                    className="input-field max-w-[125px] text-center px-1 font-bold bg-black/50 border-primary/30 text-primary cursor-pointer hover:bg-primary/10 hover:border-primary/50 transition-all shadow-[0_0_10px_rgba(0,255,170,0.05)] appearance-none"
+                    value={form.moneda}
+                    onChange={(e) => setForm({ ...form, moneda: e.target.value as "UYU" | "USD" })}
+                  >
+                    <option value="UYU" className="bg-zinc-900 text-white">Pesos $</option>
+                    <option value="USD" className="bg-zinc-900 text-white">Dólares US$</option>
+                  </select>
+                  <input
+                    className="input-field flex-1"
+                    placeholder="Ej: 600"
+                    value={form.precio}
+                    onChange={(e) => setForm({ ...form, precio: e.target.value.replace(/\D/g, "") })}
+                  />
+                </div>
               </div>
             </div>
+
+
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-muted-foreground">

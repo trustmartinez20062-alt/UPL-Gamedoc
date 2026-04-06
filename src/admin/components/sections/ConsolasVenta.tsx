@@ -1,8 +1,10 @@
 import { useState, useRef, useMemo } from "react";
-import { Monitor, Plus, Pencil, Trash2, Upload, Loader2, Search, X } from "lucide-react";
+import { Monitor, Plus, Pencil, Trash2, Upload, Loader2, Search, X, GripVertical } from "lucide-react";
+import { ReactSortable } from "react-sortablejs";
 import { useConsolasVenta, genId, type ConsolaVenta } from "../../store";
-import { uploadImage, deleteImageFromStorage } from "../../../lib/db";
+import { uploadImage, deleteImageFromStorage, updateConsolasVentaOrder } from "../../../lib/db";
 import { useAuth } from "../../hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
 import { formatPriceForDB, parsePriceForForm } from "../../../lib/utils";
 import Modal from "../Modal";
@@ -11,9 +13,10 @@ import PageHeader from "../PageHeader";
 export default function ConsolasVenta() {
   // @DB-CRUD-STATE: Sincronizar con tabla 'products' (categoría consolas_venta).
   const [consolas, setConsolas] = useConsolasVenta();
+  const queryCache = useQueryClient();
   const { user } = useAuth();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: ConsolaVenta } | null>(null);
-  const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", image: "", mercadolibre_url: "" });
+  const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", moneda: "UYU", image: "", mercadolibre_url: "" });
   const [search, setSearch] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -29,7 +32,7 @@ export default function ConsolasVenta() {
   }, [consolas, search]);
 
   const openAdd = () => {
-    setForm({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", image: "", mercadolibre_url: "" });
+    setForm({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", moneda: "UYU", image: "", mercadolibre_url: "" });
     setLocalPreview(null);
     setModal({ mode: "add" });
   };
@@ -42,6 +45,7 @@ export default function ConsolasVenta() {
       info: item.info || "", 
       garantia: item.garantia || "", 
       precio: parsePriceForForm(item.precio), 
+      moneda: item.moneda || "UYU",
       image: item.image,
       mercadolibre_url: item.mercadolibre_url || ""
     });
@@ -53,7 +57,7 @@ export default function ConsolasVenta() {
     if (!form.name.trim()) return;
     setSaving(true);
     try {
-      const dataToSave = { ...form, precio: formatPriceForDB(form.precio) };
+      const dataToSave = { ...form, precio: formatPriceForDB(form.precio, form.moneda) };
 
       if (modal?.mode === "add") {
         await setConsolas((prev) => [...prev, { id: genId(), ...dataToSave } as ConsolaVenta]);
@@ -156,59 +160,142 @@ export default function ConsolasVenta() {
         )}
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filtered.map((c) => (
-          <div
-            key={c.id}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
-          >
-            <div className="aspect-[16/13] overflow-hidden relative">
-              <img src={c.image} alt={c.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent" />
-              
-              <div className={`absolute top-3 left-3 z-10 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-xl ${
-                c.estado === "Nueva" ? "bg-cyan-500/20 text-cyan-400" : 
-                c.estado === "Usada" ? "bg-yellow-500/20 text-yellow-500" : 
-                "bg-purple-500/20 text-purple-400"
-              }`}>
-                {c.estado}
-              </div>
-            </div>
+      <div className="mb-8">
+        {search ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map((c) => (
+              <div
+                key={c.id}
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
+              >
+                <div className="aspect-[16/13] overflow-hidden relative">
+                  <img src={c.image} alt={c.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent" />
+                  
+                  <div className={`absolute top-3 left-3 z-10 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-xl ${
+                    c.estado === "Nueva" ? "bg-cyan-500/20 text-cyan-400" : 
+                    c.estado === "Usada" ? "bg-yellow-500/20 text-yellow-500" : 
+                    "bg-purple-500/20 text-purple-400"
+                  }`}>
+                    {c.estado}
+                  </div>
+                </div>
 
-            <div className="flex flex-1 flex-col p-4">
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                {c.version || "Consola"} {c.garantia && `• ${c.garantia}`}
-              </div>
-              
-              <h3 className="mb-3 font-heading text-base font-black text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                {c.name}
-              </h3>
-              
-              <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
-                <span className="font-black text-primary text-glow text-lg">
-                  {c.precio || "Consultar"}
-                </span>
-                
-                <div className="flex gap-1 ml-2">
-                  <button
-                    onClick={() => openEdit(c)}
-                    className="p-1.5 rounded-lg text-muted-foreground hover:bg-primary/20 hover:text-primary transition-all"
-                    title="Editar"
-                  >
-                    <Pencil size={14} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(c.id)}
-                    className="p-1.5 rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-all"
-                    title="Eliminar"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                <div className="flex flex-1 flex-col p-4">
+                  <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    {c.version || "Consola"} {c.garantia && `• ${c.garantia}`}
+                  </div>
+                  
+                  <h3 className="mb-3 font-heading text-base font-black text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                    {c.name}
+                  </h3>
+                  
+                  <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
+                    <span className="font-black text-primary text-glow text-lg">
+                      {c.precio || "Consultar"}
+                    </span>
+                    
+                    <div className="flex gap-1 ml-2">
+                      <button
+                        onClick={() => openEdit(c)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:bg-primary/20 hover:text-primary transition-all"
+                        title="Editar"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(c.id)}
+                        className="p-1.5 rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-all"
+                        title="Eliminar"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
+        ) : (
+          <ReactSortable
+            list={consolas as any[]}
+            setList={async (newList) => {
+              const updated = newList.map((item, index) => ({ ...item, orden: index }));
+              const hasChanges = consolas.some((c, index) => c.id !== updated[index].id);
+              if (!hasChanges) return;
+
+              // Actualización optimista instantánea
+              queryCache.setQueryData(["consolas_venta"], updated);
+
+              // Sincronización en bulk con Supabase (rápido y 1 sola llamada)
+              const updates = updated.map((c) => ({ id: c.id, orden: c.orden }));
+              await updateConsolasVentaOrder(updates);
+            }}
+            animation={200}
+            delay={2}
+            handle=".drag-handle"
+            ghostClass="opacity-30"
+            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          >
+            {consolas.map((c) => (
+              <div
+                key={c.id}
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5 origin-center"
+              >
+                <div className="drag-handle absolute top-2 right-2 z-20 p-2 rounded-lg bg-black/60 text-white/70 opacity-0 group-hover:opacity-100 transition-all cursor-grab active:cursor-grabbing backdrop-blur-md shadow-lg border border-white/5 hover:bg-black/80 hover:text-white">
+                  <GripVertical size={18} />
+                </div>
+                <div className="aspect-[16/13] overflow-hidden relative">
+                  <img src={c.image} alt={c.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent pointer-events-none" />
+                  
+                  <div className={`absolute top-3 left-3 z-10 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-xl ${
+                    c.estado === "Nueva" ? "bg-cyan-500/20 text-cyan-400" : 
+                    c.estado === "Usada" ? "bg-yellow-500/20 text-yellow-500" : 
+                    "bg-purple-500/20 text-purple-400"
+                  }`}>
+                    {c.estado}
+                  </div>
+                </div>
+
+                <div className="flex flex-1 flex-col p-4">
+                  <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    {c.version || "Consola"} {c.garantia && `• ${c.garantia}`}
+                  </div>
+                  
+                  <h3 className="mb-3 font-heading text-base font-black text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                    {c.name}
+                  </h3>
+                  
+                  <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
+                    <span className="font-black text-primary text-glow text-lg">
+                      {c.precio || "Consultar"}
+                    </span>
+                    
+                    <div className="flex gap-1 ml-2">
+                      <button
+                        onClick={() => openEdit(c)}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:bg-primary/20 hover:text-primary transition-all"
+                        title="Editar"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(c.id)}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        className="p-1.5 rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-all"
+                        title="Eliminar"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </ReactSortable>
+        )}
       </div>
 
       {/* Modal */}
@@ -286,21 +373,33 @@ export default function ConsolasVenta() {
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>
-                Precio
+                Precio y Moneda
               </label>
-              <input
-                className="input-field"
-                placeholder="Ej: 25900 (solo números) o dejar vacío para 'Consultar'"
-                value={form.precio}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val !== "" && /\D/.test(val)) {
-                    toast.error("Por favor, ingresa solo números. El $ y el punto se agregan solos.");
-                  }
-                  setForm({ ...form, precio: val.replace(/\D/g, "") });
-                }}
-              />
+              <div className="flex gap-2">
+                <select
+                  className="input-field max-w-[125px] text-center px-1 font-bold bg-black/50 border-primary/30 text-primary cursor-pointer hover:bg-primary/10 hover:border-primary/50 transition-all shadow-[0_0_10px_rgba(0,255,170,0.05)] appearance-none"
+                  value={form.moneda}
+                  onChange={(e) => setForm({ ...form, moneda: e.target.value as "UYU" | "USD" })}
+                >
+                  <option value="UYU" className="bg-zinc-900 text-white">Pesos $</option>
+                  <option value="USD" className="bg-zinc-900 text-white">Dólares US$</option>
+                </select>
+                <input
+                  className="input-field flex-1"
+                  placeholder="Ej: 25900 (solo números) o dejar vacío para 'Consultar'"
+                  value={form.precio}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val !== "" && /\D/.test(val)) {
+                      toast.error("Por favor, ingresa solo números. El símbolo y el punto se agregan solos.");
+                    }
+                    setForm({ ...form, precio: val.replace(/\D/g, "") });
+                  }}
+                />
+              </div>
             </div>
+
+
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>

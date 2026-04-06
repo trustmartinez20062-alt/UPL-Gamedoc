@@ -5,13 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Convert "1000" into "$1.000"
-export function formatPriceForDB(price: string): string {
+// Convert "1000" into "$ 1.000" or "US$ 1.000"
+export function formatPriceForDB(price: string, moneda: "UYU" | "USD" = "UYU"): string {
   if (!price.trim()) return "";
   const num = parseInt(price.replace(/\D/g, ""));
   if (isNaN(num)) return "";
+  const symbol = moneda === "USD" ? "US$" : "$";
   // es-AR usa puntos para miles y coma para decimales
-  return `$${num.toLocaleString("es-AR")}`;
+  return `${symbol} ${num.toLocaleString("es-AR")}`;
 }
 
 // Convert "$1.000" into "1000"

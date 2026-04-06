@@ -11,8 +11,10 @@ export interface ConsolaVenta {
   info?: string;
   garantia?: string;
   precio: string;
+  moneda: "UYU" | "USD";
   image: string;
   mercadolibre_url?: string;
+  orden?: number;
 }
 
 export interface ConsolaCompra {
@@ -49,9 +51,11 @@ export interface GamePassPlan {
   id: string;
   plan: string;
   precio: string;
+  moneda: "UYU" | "USD";
   type_id?: string;
   type?: GamePassType;
   mercadolibre_url?: string;
+  orden?: number;
 }
 
 export interface GamePassType {

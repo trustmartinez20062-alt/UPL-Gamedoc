@@ -96,7 +96,7 @@ export async function deleteJuego(id: string): Promise<void> {
 
 // ── CONSOLAS VENTA ───────────────────────────────────────────────────
 export async function fetchConsolasVenta(): Promise<ConsolaVenta[]> {
-  const { data, error } = await supabase.from("consolas_venta").select("*").order("created_at", { ascending: false });
+  const { data, error } = await supabase.from("consolas_venta").select("*").order("orden", { ascending: true }).order("created_at", { ascending: false });
   if (error) {
     console.error("Error fetching consolas venta:", error);
     return [];
@@ -121,6 +121,15 @@ export async function updateConsolaVenta(id: string, c: Partial<Omit<ConsolaVent
 export async function deleteConsolaVenta(id: string): Promise<void> {
   const { error } = await supabase.from("consolas_venta").delete().eq("id", id);
   if (error) console.error("Error deleting consola venta:", error);
+}
+
+export async function updateConsolasVentaOrder(updates: { id: string; orden: number }[]): Promise<void> {
+  const promises = updates.map((u) => 
+    supabase.from("consolas_venta").update({ orden: u.orden }).eq("id", u.id)
+  );
+  const results = await Promise.all(promises);
+  const errors = results.filter((r) => r.error);
+  if (errors.length > 0) console.error("Error updating consolas_venta order:", errors);
 }
 
 // ── CONSOLAS COMPRA ──────────────────────────────────────────────────
@@ -186,7 +195,8 @@ export async function fetchGamePass(): Promise<GamePassPlan[]> {
   const { data, error } = await supabase
     .from("game_pass")
     .select("*, type:game_pass_types(*)")
-    .order("created_at");
+    .order("orden", { ascending: true })
+    .order("created_at", { ascending: true });
   if (error) {
     console.error("Error fetching game pass plans:", error);
     return [];
@@ -211,6 +221,15 @@ export async function updateGamePass(id: string, g: Partial<Omit<GamePassPlan, "
 export async function deleteGamePass(id: string): Promise<void> {
   const { error } = await supabase.from("game_pass").delete().eq("id", id);
   if (error) console.error("Error deleting game pass plan:", error);
+}
+
+export async function updateGamePassOrder(updates: { id: string; orden: number }[]): Promise<void> {
+  const promises = updates.map((u) => 
+    supabase.from("game_pass").update({ orden: u.orden }).eq("id", u.id)
+  );
+  const results = await Promise.all(promises);
+  const errors = results.filter((r) => r.error);
+  if (errors.length > 0) console.error("Error updating game_pass order:", errors);
 }
 
 // ── REPARACION ────────────────────────────────────────────────────────
