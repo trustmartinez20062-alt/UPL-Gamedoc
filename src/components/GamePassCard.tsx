@@ -7,7 +7,7 @@ interface GamePassCardProps extends GamePassPlan {
   index: number;
 }
 
-const GamePassCard = ({ plan, precio, type, index }: GamePassCardProps) => {
+const GamePassCard = ({ plan, precio, type, mercadolibre_url, index }: GamePassCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isConsultar = !precio || precio.toLowerCase().includes("consultar");
 
@@ -134,14 +134,27 @@ const GamePassCard = ({ plan, precio, type, index }: GamePassCardProps) => {
                        </p>
                     </div>
 
-                    <a
-                      href={`https://wa.me/59896593154?text=${encodeURIComponent(whatsappMessage)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full sm:w-auto px-8 py-4 bg-primary text-black font-black uppercase tracking-tighter rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(14,165,233,0.3)] text-center"
-                    >
-                      Solicitar por WhatsApp
-                    </a>
+                    <div className="flex flex-col gap-3 w-full sm:w-auto">
+                      <a
+                        href={`https://wa.me/59896593154?text=${encodeURIComponent(whatsappMessage)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full px-8 py-4 bg-[#25D366] text-white font-black uppercase tracking-tighter rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(37,211,102,0.3)] text-center"
+                      >
+                        Consultar por WhatsApp
+                      </a>
+
+                      {mercadolibre_url && (
+                        <a
+                          href={mercadolibre_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full px-8 py-4 bg-[#FFE600] text-[#333333] font-black uppercase tracking-tighter rounded-2xl hover:scale-105 active:scale-95 transition-all text-center"
+                        >
+                          Ver en Mercado Libre
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

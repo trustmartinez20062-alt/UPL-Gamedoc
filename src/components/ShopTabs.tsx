@@ -9,7 +9,7 @@ import WhatsAppButton from "./WhatsAppButton";
 import { Link } from "react-router-dom";
 
 const ShopTabs = () => {
-  const [activeTab, setActiveTab] = useState("juegos");
+  const [activeTab, setActiveTab] = useState("consolas");
   
   const [juegos] = useJuegos();
   const [consolasVenta] = useConsolasVenta();
@@ -26,9 +26,9 @@ const ShopTabs = () => {
   const hasMultipleGamePass = gamePassPlanes.length > 4;
 
   const tabs = [
-    { id: "juegos", label: "Juegos", icon: Gamepad2 },
     { id: "consolas", label: "Consolas", icon: Monitor },
     { id: "passes", label: "Pases", icon: CreditCard },
+    { id: "juegos", label: "Juegos", icon: Gamepad2 },
     { id: "servicios", label: "Servicios", icon: Wrench },
   ];
 
@@ -143,7 +143,7 @@ const ShopTabs = () => {
                     )}
                   </div>
                   
-                  <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-2 max-w-4xl mx-auto">
                     {displayedGamePass.map((g, i) => (
                       <GamePassCard key={g.id} {...g} index={i} />
                     ))}

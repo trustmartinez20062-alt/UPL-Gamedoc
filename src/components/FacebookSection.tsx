@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Facebook, Instagram, MessageCircle, Users } from "lucide-react";
+import { Facebook, Instagram, MessageCircle, Users, Handshake } from "lucide-react";
 import { useContacto } from "../admin/store";
 
 const FacebookSection = () => {
@@ -76,6 +76,17 @@ const FacebookSection = () => {
                 <MessageCircle className="h-5 w-5" />
                 Consultas
               </a>
+              {contacto.mercadolibre && (
+                <a
+                  href={contacto.mercadolibre}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition-all hover:border-[#FFE600]/40 hover:text-[#FFE600] hover:shadow-[0_0_15px_rgba(255,230,0,0.15)]"
+                >
+                  <Handshake className="h-5 w-5" />
+                  Mercado Libre
+                </a>
+              )}
             </div>
           </motion.div>
 

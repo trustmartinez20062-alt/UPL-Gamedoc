@@ -6,9 +6,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 const links = [
   { label: "Inicio", href: "/#inicio" },
   { label: "Tienda", href: "/#tienda" },
-  { label: "Juegos", href: "/juegos-digitales" },
   { label: "Consolas", href: "/consolas" },
   { label: "Pases", href: "/game-pass" },
+  { label: "Juegos", href: "/juegos-digitales" },
   { label: "Nosotros", href: "/#nosotros" },
   { label: "Contacto", href: "/#contacto" },
 ];

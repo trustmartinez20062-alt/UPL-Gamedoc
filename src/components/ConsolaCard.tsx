@@ -8,7 +8,7 @@ interface ConsolaCardProps extends ConsolaVenta {
   index: number;
 }
 
-const ConsolaCard = ({ name, image, estado, version, info, garantia, precio, index }: ConsolaCardProps) => {
+const ConsolaCard = ({ name, image, estado, version, info, garantia, precio, mercadolibre_url, index }: ConsolaCardProps) => {
   const isConsultar = !precio || precio.toLowerCase().includes("consultar");
   const infoRef = useRef<HTMLParagraphElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
@@ -212,16 +212,29 @@ const ConsolaCard = ({ name, image, estado, version, info, garantia, precio, ind
                        </p>
                     </div>
 
-                    <a
-                      href={isConsultar 
-                        ? `https://wa.me/59896593154?text=Hola!%20Quiero%20consultar%20el%20precio%20de%20la%20consola%20${encodeURIComponent(name)}` 
-                        : `https://wa.me/59896593154?text=Hola!%20Me%20interesa%20la%20consola%20${encodeURIComponent(name)}%20de%20${encodeURIComponent(precio)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full sm:w-auto px-8 py-4 bg-primary text-black font-black uppercase tracking-tighter rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(14,165,233,0.3)] text-center"
-                    >
-                      Comprar por WhatsApp
-                    </a>
+                    <div className="flex flex-col gap-3 w-full sm:w-auto">
+                      <a
+                        href={isConsultar 
+                          ? `https://wa.me/59896593154?text=Hola!%20Quiero%20consultar%20el%20precio%20de%20la%20consola%20${encodeURIComponent(name)}` 
+                          : `https://wa.me/59896593154?text=Hola!%20Me%20interesa%20la%20consola%20${encodeURIComponent(name)}%20de%20${encodeURIComponent(precio)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full px-8 py-4 bg-[#25D366] text-white font-black uppercase tracking-tighter rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(37,211,102,0.3)] text-center"
+                      >
+                        Consultar por WhatsApp
+                      </a>
+
+                      {mercadolibre_url && (
+                        <a
+                          href={mercadolibre_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full px-8 py-4 bg-[#FFE600] text-[#333333] font-black uppercase tracking-tighter rounded-2xl hover:scale-105 active:scale-95 transition-all text-center"
+                        >
+                          Ver en Mercado Libre
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

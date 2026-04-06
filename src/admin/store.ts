@@ -12,6 +12,7 @@ export interface ConsolaVenta {
   garantia?: string;
   precio: string;
   image: string;
+  mercadolibre_url?: string;
 }
 
 export interface ConsolaCompra {
@@ -50,6 +51,7 @@ export interface GamePassPlan {
   precio: string;
   type_id?: string;
   type?: GamePassType;
+  mercadolibre_url?: string;
 }
 
 export interface GamePassType {
@@ -70,6 +72,7 @@ export interface ContactoInfo {
   sobre_nosotros_imagen?: string;
   facebook?: string;
   instagram?: string;
+  mercadolibre?: string;
 }
 
 export interface Usuario {
@@ -327,7 +330,8 @@ const SEED_CONTACTO: ContactoInfo = {
   ],
   sobre_nosotros_imagen: "",
   facebook: "https://www.facebook.com/gamedoctor2004/?locale=es_LA",
-  instagram: "https://www.instagram.com/gamedoctor2004?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+  instagram: "https://www.instagram.com/gamedoctor2004?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+  mercadolibre: "https://www.mercadolibre.com.uy/"
 };
 
 export const useContacto = () => {

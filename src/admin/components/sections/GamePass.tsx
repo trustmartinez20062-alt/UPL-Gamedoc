@@ -14,14 +14,15 @@ export default function GamePass() {
   const [filterType, setFilterType] = useState<string>("all");
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: GamePassPlan } | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<{ plan: string; precio: string; type_id: string }>({ 
+  const [form, setForm] = useState<{ plan: string; precio: string; type_id: string; mercadolibre_url: string }>({ 
     plan: "", 
     precio: "",
-    type_id: ""
+    type_id: "",
+    mercadolibre_url: ""
   });
 
   const openAdd = () => {
-    setForm({ plan: "", precio: "", type_id: types[0]?.id || "" });
+    setForm({ plan: "", precio: "", type_id: types[0]?.id || "", mercadolibre_url: "" });
     setModal({ mode: "add" });
   };
 
@@ -29,7 +30,8 @@ export default function GamePass() {
     setForm({ 
       plan: item.plan, 
       precio: parsePriceForForm(item.precio),
-      type_id: item.type_id || ""
+      type_id: item.type_id || "",
+      mercadolibre_url: item.mercadolibre_url || ""
     });
     setModal({ mode: "edit", item });
   };
@@ -41,7 +43,8 @@ export default function GamePass() {
       const data = { 
         plan: form.plan, 
         precio: formatPriceForDB(form.precio),
-        type_id: form.type_id || null
+        type_id: form.type_id || null,
+        mercadolibre_url: form.mercadolibre_url || null
       };
 
       if (modal?.mode === "add") {
@@ -245,6 +248,18 @@ export default function GamePass() {
                   onChange={(e) => setForm({ ...form, precio: e.target.value.replace(/\D/g, "") })}
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-muted-foreground">
+                Enlace Mercado Libre (opcional)
+              </label>
+              <input
+                className="input-field"
+                placeholder="https://articulo.mercadolibre.com.uy/..."
+                value={form.mercadolibre_url}
+                onChange={(e) => setForm({ ...form, mercadolibre_url: e.target.value })}
+              />
             </div>
 
             <div className="flex gap-3 pt-2">

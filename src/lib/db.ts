@@ -18,6 +18,7 @@ interface ContactoRow {
   sobre_nosotros_imagen?: string;
   facebook?: string;
   instagram?: string;
+  mercadolibre?: string;
 }
 
 function mapContacto(row: ContactoRow): ContactoInfo {
@@ -32,6 +33,7 @@ function mapContacto(row: ContactoRow): ContactoInfo {
     sobre_nosotros_imagen: row.sobre_nosotros_imagen ?? "",
     facebook: row.facebook ?? "https://www.facebook.com/gamedoctor2004/?locale=es_LA",
     instagram: row.instagram ?? "https://www.instagram.com/gamedoctor2004?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+    mercadolibre: row.mercadolibre ?? "",
   };
 }
 
@@ -295,6 +297,7 @@ export async function upsertContacto(info: ContactoInfo): Promise<void> {
     sobre_nosotros_imagen: info.sobre_nosotros_imagen,
     facebook: info.facebook,
     instagram: info.instagram,
+    mercadolibre: info.mercadolibre,
   };
 
   if (existing?.id) {

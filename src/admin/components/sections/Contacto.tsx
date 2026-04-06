@@ -15,6 +15,9 @@ export default function Contacto() {
     sobre_nosotros_texto: "",
     sobre_nosotros_ticks: [],
     sobre_nosotros_imagen: "",
+    facebook: "",
+    instagram: "",
+    mercadolibre: "",
   });
 
   const [saved, setSaved] = useState(false);
@@ -237,6 +240,16 @@ export default function Contacto() {
                   value={form.instagram || ""}
                   onChange={(e) => setForm({ ...form, instagram: e.target.value })}
                   placeholder="https://instagram.com/..."
+                />
+
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-2 mt-4" style={{ color: "hsl(215 15% 55%)" }}>
+                  Enlace de Mercado Libre
+                </label>
+                <input
+                  className="input-field"
+                  value={form.mercadolibre || ""}
+                  onChange={(e) => setForm({ ...form, mercadolibre: e.target.value })}
+                  placeholder="https://www.mercadolibre.com.uy/perfil/..."
                 />
               </div>
             </div>

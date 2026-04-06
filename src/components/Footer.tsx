@@ -1,4 +1,4 @@
-import { Facebook, Instagram, MessageCircle } from "lucide-react";
+import { Facebook, Instagram, MessageCircle, Handshake } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useContacto } from "../admin/store";
 
@@ -71,6 +71,17 @@ const Footer = () => {
               >
                 <MessageCircle className="h-5 w-5" />
               </a>
+              {contacto.mercadolibre && (
+                <a
+                  href={contacto.mercadolibre}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-[#FFE600]/40 hover:text-[#FFE600]"
+                  aria-label="Mercado Libre de Game Doctor"
+                >
+                  <Handshake className="h-5 w-5" />
+                </a>
+              )}
             </div>
           </div>
         </div>

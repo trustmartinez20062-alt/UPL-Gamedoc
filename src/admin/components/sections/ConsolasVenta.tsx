@@ -13,7 +13,7 @@ export default function ConsolasVenta() {
   const [consolas, setConsolas] = useConsolasVenta();
   const { user } = useAuth();
   const [modal, setModal] = useState<{ mode: "add" | "edit"; item?: ConsolaVenta } | null>(null);
-  const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", image: "" });
+  const [form, setForm] = useState<Omit<ConsolaVenta, "id">>({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", image: "", mercadolibre_url: "" });
   const [search, setSearch] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -29,7 +29,7 @@ export default function ConsolasVenta() {
   }, [consolas, search]);
 
   const openAdd = () => {
-    setForm({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", image: "" });
+    setForm({ name: "", estado: "Nueva", version: "Original", info: "", garantia: "", precio: "", image: "", mercadolibre_url: "" });
     setLocalPreview(null);
     setModal({ mode: "add" });
   };
@@ -42,7 +42,8 @@ export default function ConsolasVenta() {
       info: item.info || "", 
       garantia: item.garantia || "", 
       precio: parsePriceForForm(item.precio), 
-      image: item.image 
+      image: item.image,
+      mercadolibre_url: item.mercadolibre_url || ""
     });
     setLocalPreview(null);
     setModal({ mode: "edit", item });
@@ -298,6 +299,18 @@ export default function ConsolasVenta() {
                   }
                   setForm({ ...form, precio: val.replace(/\D/g, "") });
                 }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "hsl(215 15% 55%)" }}>
+                Enlace Mercado Libre (opcional)
+              </label>
+              <input
+                className="input-field"
+                placeholder="https://articulo.mercadolibre.com.uy/..."
+                value={form.mercadolibre_url}
+                onChange={(e) => setForm({ ...form, mercadolibre_url: e.target.value })}
               />
             </div>
 
