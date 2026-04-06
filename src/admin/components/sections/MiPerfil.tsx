@@ -149,7 +149,7 @@ export default function MiPerfil() {
                 </label>
                 <div className="relative">
                   <input
-                    className="input-field pl-10"
+                    className="input-field !pl-10"
                     value={form.email}
                     disabled={!!user?.pendingEmail || user?.role !== 'admin'}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -200,7 +200,7 @@ export default function MiPerfil() {
                 </label>
                 <div className="relative">
                   <input
-                    className="input-field pl-10"
+                    className="input-field !pl-10"
                     placeholder="Tu nombre de usuario"
                     value={form.nombre}
                     onChange={(e) => setForm({ ...form, nombre: e.target.value.toLowerCase().replace(/\s/g, '') })}
@@ -239,7 +239,7 @@ export default function MiPerfil() {
               </label>
               <div className="relative">
                 <input
-                  className="input-field pl-10 pr-10"
+                  className="input-field !pl-10 !pr-10"
                   type={showPassword ? "text" : "password"}
                   placeholder="Mínimo 6 caracteres"
                   value={form.password}
@@ -262,7 +262,7 @@ export default function MiPerfil() {
               </label>
               <div className="relative">
                 <input
-                  className="input-field pl-10 pr-10"
+                  className="input-field !pl-10 !pr-10"
                   type={showPassword ? "text" : "password"}
                   placeholder="Repite la nueva contraseña"
                   value={form.confirmPassword}

@@ -332,7 +332,7 @@ export default function GamePass() {
                 </label>
                 <div className="flex gap-2">
                   <select
-                    className="input-field w-[95px] text-xs text-center px-1 font-bold bg-black/50 border-primary/30 text-primary cursor-pointer hover:bg-primary/10 hover:border-primary/50 transition-all shadow-[0_0_10px_rgba(0,255,170,0.05)] appearance-none"
+                    className="input-field !w-[105px] text-xs text-center !px-1 font-bold bg-black/50 border-primary/30 text-primary cursor-pointer hover:bg-primary/10 hover:border-primary/50 transition-all shadow-[0_0_10px_rgba(0,255,170,0.05)] appearance-none"
                     value={form.moneda}
                     onChange={(e) => setForm({ ...form, moneda: e.target.value as "UYU" | "USD" })}
                   >

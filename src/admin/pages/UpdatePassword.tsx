@@ -109,7 +109,7 @@ export default function UpdatePassword() {
                   value={pass}
                   onChange={(e) => setPass(e.target.value)}
                   placeholder="Seis caracteres mínimo"
-                  className="input-field pl-12 pr-12"
+                  className="input-field !pl-12 !pr-12"
                   required
                 />
                 <button
@@ -133,7 +133,7 @@ export default function UpdatePassword() {
                   value={confirmPass}
                   onChange={(e) => setConfirmPass(e.target.value)}
                   placeholder="Repetir contraseña"
-                  className="input-field pl-12 pr-12"
+                  className="input-field !pl-12 !pr-12"
                   required
                 />
               </div>

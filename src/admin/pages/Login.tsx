@@ -144,7 +144,7 @@ export default function Login() {
                   value={user}
                   onChange={(e) => setUser(e.target.value)}
                   placeholder="ejemplo@correo.com"
-                  className="input-field pl-12"
+                  className="input-field !pl-12"
                   required
                   autoComplete="email"
                 />
@@ -163,7 +163,7 @@ export default function Login() {
                     value={pass}
                     onChange={(e) => setPass(e.target.value)}
                     placeholder="Ingresá tu contraseña"
-                    className="input-field pl-12 pr-12"
+                    className="input-field !pl-12 !pr-12"
                     required
                     autoComplete="current-password"
                   />

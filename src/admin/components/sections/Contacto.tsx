@@ -168,7 +168,7 @@ export default function Contacto() {
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(215_15%_40%)]" size={16} />
                   <input
-                    className="input-field pl-10"
+                    className="input-field !pl-10"
                     value={form.direccion}
                     onChange={(e) => setForm({ ...form, direccion: e.target.value })}
                     placeholder="Ej: Juan José Castro 2381, Montevideo"
@@ -183,7 +183,7 @@ export default function Contacto() {
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(215_15%_40%)]" size={16} />
                   <input
-                    className="input-field pl-10"
+                    className="input-field !pl-10"
                     value={form.telefono}
                     onChange={(e) => setForm({ ...form, telefono: e.target.value })}
                     placeholder="Ej: 096 593 154"
@@ -198,7 +198,7 @@ export default function Contacto() {
                 <div className="relative">
                   <Clock className="absolute left-3 top-3 text-[hsl(215_15%_40%)]" size={16} />
                   <textarea
-                    className="input-field pl-10 h-24 pt-2"
+                    className="input-field !pl-10 h-24 pt-2"
                     value={form.horario}
                     onChange={(e) => setForm({ ...form, horario: e.target.value })}
                     placeholder="Ej: Lunes a Sábado — Consultá disponibilidad"

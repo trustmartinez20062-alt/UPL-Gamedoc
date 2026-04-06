@@ -118,7 +118,7 @@ export default function Usuarios() {
       <div className="mb-6">
         <div className="relative max-w-sm">
           <input
-            className="input-field pl-10"
+            className="input-field !pl-10"
             placeholder="Buscar por nombre de usuario..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -186,7 +186,7 @@ export default function Usuarios() {
               </label>
               <div className="relative">
                 <input
-                  className="input-field pl-10"
+                  className="input-field !pl-10"
                   placeholder="Ej: santiago"
                   value={form.nombre}
                   onChange={(e) => setForm({ ...form, nombre: e.target.value })}
@@ -203,7 +203,7 @@ export default function Usuarios() {
               <div className="relative">
                 <input
                   type="email"
-                  className="input-field pl-10"
+                  className="input-field !pl-10"
                   placeholder="ejemplo@correo.com"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -219,7 +219,7 @@ export default function Usuarios() {
               </label>
               <div className="relative">
                 <input
-                  className="input-field pl-10"
+                  className="input-field !pl-10"
                   type="text"
                   placeholder="Contraseña segura"
                   value={form.password}
@@ -277,7 +277,7 @@ export default function Usuarios() {
               </label>
               <div className="relative">
                 <input
-                  className="input-field pl-10"
+                  className="input-field !pl-10"
                   value={form.nombre}
                   onChange={(e) => setForm({ ...form, nombre: e.target.value })}
                 />
@@ -292,7 +292,7 @@ export default function Usuarios() {
               <div className="relative">
                 <input
                   type="email"
-                  className="input-field pl-10"
+                  className="input-field !pl-10"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
@@ -307,7 +307,7 @@ export default function Usuarios() {
               </label>
               <div className="relative">
                 <input
-                  className="input-field pl-10"
+                  className="input-field !pl-10"
                   type="text"
                   placeholder="Nueva contraseña segura"
                   value={form.password}
