@@ -41,7 +41,7 @@ const FacebookSection = () => {
             </h2>
             <p className="mb-6 leading-relaxed text-muted-foreground">
               ¡Mantenete al tanto de todas nuestras novedades! En nuestro muro de noticias compartimos 
-              ofertas exclusivas, nuevos ingresos de juegos y consolas, y consejos para tu setup.
+              nuevos ingresos de juegos y consolas.
             </p>
             <p className="mb-8 leading-relaxed text-muted-foreground">
               Sumate a los cientos de gamers que ya confían en Game Doctor. También podés seguirnos 
