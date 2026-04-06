@@ -39,9 +39,25 @@ const JuegoCard = ({ name, plataformas, image, precio, index }: JuegoCardProps) 
           {platformNames || "Sin plataforma"}
         </p>
         <div className="mt-auto flex items-center justify-between border-t border-border pt-2 sm:pt-3">
-          <span className={`font-bold text-primary text-glow ${isConsultar ? "text-sm" : "text-base sm:text-xl"}`}>
-            {isConsultar ? "Consultar precio" : precio}
-          </span>
+          {isConsultar ? (
+            <a 
+              href={`https://wa.me/59896593154?text=Hola!%20Quiero%20consultar%20el%20precio%20del%20juego%20${encodeURIComponent(name)}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm font-bold text-primary text-glow hover:underline underline-offset-4 transition-all"
+            >
+              Consultar precio
+            </a>
+          ) : (
+            <a 
+              href={`https://wa.me/59896593154?text=Hola!%20Me%20interesa%20el%20juego%20${encodeURIComponent(name)}%20por%20${encodeURIComponent(precio)}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-base sm:text-xl font-bold text-primary text-glow hover:underline underline-offset-4 transition-all"
+            >
+              {precio}
+            </a>
+          )}
         </div>
       </div>
     </motion.div>

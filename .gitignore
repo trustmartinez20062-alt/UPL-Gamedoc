@@ -26,6 +26,8 @@ lerna-debug.log*
 *.local
 .env.admin
 CLONE_DATABASE.sql
+DOMAIN_CONFIG.json
+scripts/optimize-og.js
 
 # 🛠️ Editores e IDEs
 .vscode/*
@@ -60,5 +62,6 @@ playwright/.cache/
 # 📜 Otros
 *.tmp
 *.temp
+*.tsbuildinfo
 .temp/
 .tmp/

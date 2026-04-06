@@ -23,13 +23,25 @@ export default function Contacto() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const extractSrc = (value: string) => {
-    if (value.includes("<iframe") && value.includes("src=\"")) {
-      const match = value.match(/src="([^"]+)"/);
+    let finalUrl = value.trim();
+
+    // Si es un bloque de iframe, extraemos el src
+    if (value.includes("<iframe")) {
+      const match = value.match(/src=["']([^"']+)["']/i);
       if (match && match[1]) {
-        return match[1];
+        finalUrl = match[1];
       }
     }
-    return value;
+
+    // Validamos que sea un enlace legítimo de Google Maps Embed
+    const isGoogleMaps = finalUrl.includes("google.com/maps/embed") || finalUrl.includes("google.com/maps/vt");
+    
+    if (finalUrl && !isGoogleMaps) {
+      // Si hay algo pero no es Google Maps, lo ignoramos para seguridad
+      return "";
+    }
+
+    return finalUrl;
   };
 
   // Sync state correctly when component loads
@@ -257,7 +269,7 @@ export default function Contacto() {
                   1. Ve a Google Maps.<br/>
                   2. Busca tu ubicación.<br/>
                   3. Compartir {'>'} Insertar un mapa.<br/>
-                  4. Copia el valor del atributo <strong>src="..."</strong> únicamente.
+                  4. Copia y pega el código <strong>&lt;iframe...&gt;</strong> completo aquí.
                 </div>
               </div>
 
