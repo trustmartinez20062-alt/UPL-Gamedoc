@@ -1,21 +1,67 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
 import * as db from "../lib/db";
 import { logActivity } from "../lib/activity-logs";
 
+// ── Zod Schemas for Validation ──────────────────────────────────────
+export const consolaVentaSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  estado: z.enum(["Nueva", "Usada", "Restaurada"]),
+  version: z.string().optional().default("Original"),
+  info: z.string().optional().default(""),
+  garantia: z.string().optional().default(""),
+  precio: z.string().min(1, "El precio es requerido"),
+  moneda: z.enum(["UYU", "USD"]).default("UYU"),
+  image: z.string().url("La URL de la imagen no es válida").or(z.string().min(1, "La imagen es requerida")),
+  mercadolibre_url: z.string().url("La URL de Mercado Libre no es válida").optional().or(z.literal("")),
+  orden: z.number().optional(),
+});
+
+export const juegoSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, "El nombre es requerido"),
+  plataformas: z.array(z.string()).min(1, "Selecciona al menos una plataforma"),
+  image: z.string().url("URL de imagen no válida"),
+  precio: z.string().optional(),
+});
+
+export const gamePassPlanSchema = z.object({
+  id: z.string().optional(),
+  plan: z.string().min(1, "El nombre del plan es requerido"),
+  precio: z.string().min(1, "El precio es requerido"),
+  moneda: z.enum(["UYU", "USD"]).default("UYU"),
+  type_id: z.string().optional(),
+  mercadolibre_url: z.string().url("URL no válida").optional().or(z.literal("")),
+  orden: z.number().optional(),
+});
+
+export const contactoInfoSchema = z.object({
+  direccion: z.string().min(5, "Dirección demasiado corta"),
+  telefono: z.string().min(8, "Teléfono inválido"),
+  horario: z.string().min(3, "Horario requerido"),
+  whatsapp: z.string().url("Enlace de WhatsApp inválido"),
+  mapaEmbed: z.string().min(10, "Iframe de mapa inválido"),
+  sobre_nosotros_texto: z.string().optional(),
+  sobre_nosotros_ticks: z.array(z.string()).optional(),
+  sobre_nosotros_imagen: z.string().url().optional().or(z.literal("")),
+  facebook: z.string().url().optional().or(z.literal("")),
+  instagram: z.string().url().optional().or(z.literal("")),
+  mercadolibre: z.string().url().optional().or(z.literal("")),
+});
+
 // ── Types ──────────────────────────────────────────────────────────
-export interface ConsolaVenta {
-  id: string;
-  name: string;
-  estado: "Nueva" | "Usada" | "Restaurada";
-  version?: "Original" | "Destrabada" | string;
-  info?: string;
-  garantia?: string;
-  precio: string;
-  moneda: "UYU" | "USD";
-  image: string;
-  mercadolibre_url?: string;
-  orden?: number;
+export type ConsolaVentaInput = z.infer<typeof consolaVentaSchema>;
+export interface ConsolaVenta extends ConsolaVentaInput {}
+
+export type Juego = z.infer<typeof juegoSchema>;
+
+export type GamePassPlanInput = z.infer<typeof gamePassPlanSchema>;
+export interface GamePassPlan extends GamePassPlanInput {
+  type?: GamePassType;
 }
+
+export type ContactoInfo = z.infer<typeof contactoInfoSchema>;
 
 export interface ConsolaCompra {
   id: string;
@@ -34,28 +80,9 @@ export interface DestrabaModelo {
   precio: string;
 }
 
-export interface Juego {
-  id: string;
-  name: string;
-  plataformas: string[];
-  image: string;
-  precio: string;
-}
-
 export interface Plataforma {
   id: string;
   name: string;
-}
-
-export interface GamePassPlan {
-  id: string;
-  plan: string;
-  precio: string;
-  moneda: "UYU" | "USD";
-  type_id?: string;
-  type?: GamePassType;
-  mercadolibre_url?: string;
-  orden?: number;
 }
 
 export interface GamePassType {
@@ -63,20 +90,6 @@ export interface GamePassType {
   name: string;
   image: string;
   prefix: string;
-}
-
-export interface ContactoInfo {
-  direccion: string;
-  telefono: string;
-  horario: string;
-  whatsapp: string;
-  mapaEmbed: string;
-  sobre_nosotros_texto?: string;
-  sobre_nosotros_ticks?: string[];
-  sobre_nosotros_imagen?: string;
-  facebook?: string;
-  instagram?: string;
-  mercadolibre?: string;
 }
 
 export interface Usuario {

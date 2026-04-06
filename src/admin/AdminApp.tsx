@@ -1,10 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import UpdatePassword from "./pages/UpdatePassword";
 import "./admin.css";
+
+// Lazy loading admin pages
+const Login = lazy(() => import("./pages/Login"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const UpdatePassword = lazy(() => import("./pages/UpdatePassword"));
+
+const AdminLoading = () => (
+  <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(220 20% 6%)" }}>
+    <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: "hsl(175 80% 50%) transparent" }} />
+  </div>
+);
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<"loading" | "auth" | "unauth">("loading");
@@ -22,11 +30,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(220 20% 6%)" }}>
-        <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: "hsl(175 80% 50%) transparent" }} />
-      </div>
-    );
+    return <AdminLoading />;
   }
 
   return status === "auth" ? <>{children}</> : <Navigate to="/paneladmin/login" replace />;
@@ -35,18 +39,20 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 export default function AdminApp() {
   return (
     <div id="admin-root">
-      <Routes>
-        <Route path="login" element={<Login />} />
-        <Route path="update-password" element={<UpdatePassword />} />
-        <Route
-          path="*"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
-      </Routes>
+      <Suspense fallback={<AdminLoading />}>
+        <Routes>
+          <Route path="login" element={<Login />} />
+          <Route path="update-password" element={<UpdatePassword />} />
+          <Route
+            path="*"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </Suspense>
     </div>
   );
 }
