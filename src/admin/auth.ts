@@ -6,7 +6,7 @@ import type { Usuario } from "./store";
 // El campo "nombre" se mapea al email (nombre@gamedoctor.uy) para simplificar el login.
 // ── LOGIN TRADICIONAL ──────────────────────────────────────────────────────────
 export async function loginEmailPassword(user: string, pass: string): Promise<{ state: "success" | "error", error?: string }> {
-  const email = user.includes("@") ? user : `${user}@gmail.com`;
+  const email = user;
   
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
   if (error || !data.session) {
@@ -20,7 +20,7 @@ export async function loginEmailPassword(user: string, pass: string): Promise<{ 
 
 
 export async function sendPasswordResetEmail(email: string): Promise<boolean> {
-  const fullEmail = email.includes("@") ? email : `${email}@gmail.com`;
+  const fullEmail = email;
   const { error } = await supabase.auth.resetPasswordForEmail(fullEmail, {
     redirectTo: `${window.location.origin}/paneladmin/update-password`,
   });
@@ -82,7 +82,7 @@ export async function fetchUsuarios(): Promise<Usuario[]> {
 
 // Crear un nuevo usuario en Supabase Auth + perfil (ATÓMICO vía Edge Function)
 export async function createUsuario(nombre: string, email: string, password: string, role: "admin" | "subadmin"): Promise<boolean> {
-  const fullEmail = email.includes("@") ? email : `${email}@gmail.com`;
+  const fullEmail = email;
   const { data: { session } } = await supabase.auth.getSession();
   const { data, error: functionError } = await supabase.functions.invoke("admin-reset-password", {
     body: { action: "create", nombre, email: fullEmail, password, role },
@@ -105,7 +105,7 @@ export async function changeMyPassword(newPassword: string): Promise<boolean> {
 
 // Cambiar mi propio email (requiere verificación)
 export async function changeMyEmail(newEmail: string): Promise<{ ok: boolean, error?: string }> {
-  const fullEmail = newEmail.includes("@") ? newEmail : `${newEmail}@gmail.com`;
+  const fullEmail = newEmail;
   const { error } = await supabase.auth.updateUser({ email: fullEmail });
   if (error) { 
     console.error("Error cambiando el email:", error.message); 
@@ -128,7 +128,7 @@ export async function cancelEmailChange(): Promise<boolean> {
 
 // Actualizar nombre/email y sincronizar con Auth (ATÓMICO vía Edge Function)
 export async function updateUsuario(id: string, nombre: string, email: string, password?: string): Promise<boolean> {
-  const fullEmail = email.includes("@") ? email : `${email}@gmail.com`;
+  const fullEmail = email;
   const { data: { session } } = await supabase.auth.getSession();
   
   // Enviamos tanto newEmail (para auth.users) como email (por si la lógica antigua lo requiere) -> Edge Function safe.

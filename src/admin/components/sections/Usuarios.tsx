@@ -202,10 +202,12 @@ export default function Usuarios() {
               </label>
               <div className="relative">
                 <input
+                  type="email"
                   className="input-field pl-10"
                   placeholder="ejemplo@correo.com"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
                 />
                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
               </div>
@@ -289,9 +291,11 @@ export default function Usuarios() {
               </label>
               <div className="relative">
                 <input
+                  type="email"
                   className="input-field pl-10"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
                 />
                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 opacity-30" />
               </div>
