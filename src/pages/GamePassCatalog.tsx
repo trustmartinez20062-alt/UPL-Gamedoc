@@ -84,7 +84,9 @@ const GamePassCatalog = () => {
 
                 {/* Filter Checks */}
                 <div className="flex flex-wrap gap-3 items-center">
-                  {types.map((t) => (
+                  {types
+                    .filter(t => gamePassPlanes.some(p => p.type_id === t.id))
+                    .map((t) => (
                     <button
                       key={t.id}
                       onClick={() => toggleType(t.id)}

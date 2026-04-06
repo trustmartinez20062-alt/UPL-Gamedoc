@@ -56,7 +56,7 @@ export default function Modal({ title, onClose, children }: ModalProps) {
         </div>
 
         {/* Content */}
-        <div className="px-6 py-5">{children}</div>
+        <div className="px-6 py-5 max-h-[80vh] overflow-y-auto custom-scrollbar">{children}</div>
       </div>
     </div>
   );

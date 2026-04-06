@@ -118,7 +118,7 @@ const ConsolaCard = ({ name, image, estado, version, info, garantia, precio, mer
                       
                       <div className="h-px w-full bg-border" />
                       
-                      <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                      <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto custom-scrollbar pr-2">
                         {info}
                       </p>
                     </div>
@@ -199,7 +199,7 @@ const ConsolaCard = ({ name, image, estado, version, info, garantia, precio, mer
                       <CheckCircle2 size={12} className="text-primary" />
                       Especificaciones y Detalles
                     </h3>
-                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto custom-scrollbar pr-2">
                       {info || "No hay información adicional disponible para esta consola."}
                     </p>
                   </div>
