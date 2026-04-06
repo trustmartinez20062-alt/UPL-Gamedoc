@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -17,8 +17,39 @@ const links = [
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("inicio");
   const navigate = useNavigate();
   const location = useLocation();
+
+  // @ScrollSpy logic — detect which section is in viewport
+  useEffect(() => {
+    if (location.pathname !== "/") return;
+
+    const sectionIds = ["inicio", "servicios", "tienda", "nosotros", "contacto"];
+    
+    const observerOptions = {
+        root: null,
+        rootMargin: '-85px 0px -40% 0px', // Compensate for fixed navbar (approx 64-80px)
+        threshold: 0
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    sectionIds.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, [location.pathname]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -54,6 +85,10 @@ const Navbar = () => {
   const isAnchorActive = (href: string) => {
     if (location.pathname !== "/") return false;
     const hash = href.split("#")[1];
+    
+    // Prioritize scrollSpy state if on home page
+    if (activeSection) return activeSection === hash;
+    
     if (hash === "inicio") return location.hash === "" || location.hash === "#inicio";
     return location.hash === `#${hash}`;
   };

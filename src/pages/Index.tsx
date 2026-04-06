@@ -24,7 +24,7 @@ const Index = () => {
         "@type": "LocalBusiness",
         "name": "Game Doctor",
         "description": contacto.sobre_nosotros_texto || "Reparación y venta de consolas en Montevideo.",
-        "url": "https://gamedoctor.uy",
+        "url": import.meta.env.VITE_SITE_URL || "https://gamedoctor.uy",
         "telephone": contacto.telefono,
         "address": {
           "@type": "PostalAddress",
@@ -39,7 +39,7 @@ const Index = () => {
           "longitude": -56.1452
         },
         "priceRange": "$$",
-        "image": "https://gamedoctor.uy/assets/hero-bg.jpg"
+        "image": `${import.meta.env.VITE_SITE_URL || "https://gamedoctor.uy"}/assets/hero-bg.jpg`
       },
       {
         "@type": "Service",
@@ -63,8 +63,8 @@ const Index = () => {
       <SEOHead
         title="Reparación y Venta de Consolas en Montevideo | Game Doctor"
         description="Especialistas en reparación de consolas en Montevideo. Venta de PS5, Xbox y Switch. Servicio técnico con garantía y juegos digitales en La Unión, Uruguay."
-        canonical="https://gamedoctor.uy/"
-        ogImage="https://gamedoctor.uy/og-image.jpg"
+        canonical="/"
+        ogImage="/og-image.jpg"
         jsonLd={jsonLd}
       />
       <Navbar />

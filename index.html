@@ -6,8 +6,15 @@
     <meta name="author" content="Game Doctor" />
     <meta name="robots" content="index, follow" />
 
-    <!-- @SEO Metadata is handled dynamically via SEOHead.tsx + React Helmet -->
+    <!-- @SEO Metadata fallback for static crawlers -->
+    <title>Reparación y Venta de Consolas en Montevideo | Game Doctor</title>
+    <meta name="description" content="Servicio técnico especializado en consolas PlayStation, Xbox y Nintendo en Montevideo. Venta de consolas nuevas y usadas, juegos digitales y Game Pass. Garantía y confianza." />
+    
+    <!-- @SEO Dynamic metadata is handled via SEOHead.tsx + React Helmet -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:url" content="%VITE_SITE_URL%" />
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image.jpg" />
+    <meta property="og:type" content="website" />
 
     <!-- Favicon & PWA -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

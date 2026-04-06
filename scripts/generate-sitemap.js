@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DOMAIN = 'https://gamedoctor.uy';
+const DOMAIN = process.env.VITE_SITE_URL || 'https://gamedoctor.uy';
 const TODAY = new Date().toISOString().split('T')[0];
 
 const routes = [

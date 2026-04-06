@@ -8,7 +8,7 @@ const services = [
     icon: Wrench,
     title: "Reparación y Destraba de consolas",
     desc: "Servicio técnico profesional para PlayStation, Xbox y Nintendo en Montevideo. Diagnóstico rápido y garantía en cada reparación.",
-    link: null,
+    link: "/consolas#reparacion",
   },
   {
     icon: Gamepad2,

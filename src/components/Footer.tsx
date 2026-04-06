@@ -8,7 +8,7 @@ const Footer = () => {
   return (
     <footer className="border-t border-border bg-card py-12">
       <div className="container">
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-4">
           {/* Brand + SEO text */}
           <div>
             <span className="font-heading text-lg font-bold tracking-wider text-primary text-glow">GAME DOCTOR</span>
@@ -35,6 +35,32 @@ const Footer = () => {
               <li>
                 <Link to="/game-pass" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Game Pass y suscripciones
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-heading text-sm font-bold text-foreground mb-3 uppercase tracking-wider">Servicios</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/consolas#reparacion" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Reparación de consolas
+                </Link>
+              </li>
+              <li>
+                <Link to="/consolas#venta" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Venta de accesorios
+                </Link>
+              </li>
+              <li>
+                <Link to="/#nosotros" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Sobre Game Doctor
+                </Link>
+              </li>
+              <li>
+                <Link to="/#contacto" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Ubicación y contacto
                 </Link>
               </li>
             </ul>
