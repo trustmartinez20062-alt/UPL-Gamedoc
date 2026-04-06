@@ -127,7 +127,7 @@ const Consolas = () => {
                 ¿Buscás una consola en particular?
               </h2>
               <p className="mx-auto mb-8 max-w-md text-muted-foreground">
-                Tomamos consolas como parte de pago y conseguimos modelos a pedido. ¡Consultanos por WhatsApp!
+                Si no encontrás lo que buscás, ¡preguntanos! Estamos para ayudarte a encontrar el mejor precio.
               </p>
               <WhatsAppButton size="lg" text="Consultar por Consolas" />
             </motion.div>

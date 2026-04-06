@@ -159,7 +159,7 @@ const GamePassCatalog = () => {
                 ¿Buscás un plan diferente?
               </h2>
               <p className="mx-auto mb-8 max-w-md text-muted-foreground">
-                Activamos cualquier tipo de suscripción para Xbox y PlayStation. ¡Consultanos por WhatsApp y te pasamos presupuesto!
+                Si no encontrás lo que buscás, ¡preguntanos! Estamos para ayudarte a encontrar el mejor precio.
               </p>
               <WhatsAppButton size="lg" text="Consultar Planes Custom" />
             </motion.div>
