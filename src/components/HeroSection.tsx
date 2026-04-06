@@ -44,7 +44,7 @@ const HeroSection = () => (
 
         <h1 className="mb-6 font-heading text-4xl font-black leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
           Reparación y venta de{" "}
-          <span className="text-primary text-glow">consolas</span> en Montevideo
+          <span className="text-primary text-glow">consolas</span> en Montevideo, Uruguay
         </h1>
 
         {/* @SEO Párrafo descriptivo con keywords principales */}

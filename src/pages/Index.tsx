@@ -61,8 +61,8 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="Game Doctor — Reparación y Venta de Consolas en Montevideo, Uruguay"
-        description="Reparación profesional de consolas PlayStation, Xbox y Nintendo en La Unión, Montevideo. Venta de consolas nuevas y restauradas, juegos digitales y Game Pass al mejor precio de Uruguay."
+        title="Reparación y Venta de Consolas en Montevideo | Game Doctor"
+        description="Especialistas en reparación de consolas en Montevideo. Venta de PS5, Xbox y Switch. Servicio técnico con garantía y juegos digitales en La Unión, Uruguay."
         canonical="https://gamedoctor.uy/"
         ogImage="https://gamedoctor.uy/og-image.jpg"
         jsonLd={jsonLd}

@@ -12,8 +12,8 @@ const SEOSection = () => (
       >
         <p className="text-sm leading-relaxed text-muted-foreground/70">
           <strong>Game Doctor</strong> es tu centro especializado en <strong>reparación de consolas en Montevideo</strong>. 
-          Ubicados en <strong>La Unión</strong>, ofrecemos servicio técnico profesional para <strong>PlayStation 3, PS4, PS5, 
-          Xbox 360, Xbox One, Xbox Series X|S y Nintendo Switch</strong>. Realizamos reparaciones de puerto HDMI, 
+          Ubicados en <strong>La Unión</strong>, ofrecemos servicio técnico profesional para <strong>PlayStation</strong> (PS3, PS4, PS5), 
+          <strong>Xbox</strong> (360, One, Series X|S) y <strong>Nintendo Switch</strong>. Realizamos reparaciones de puerto HDMI, 
           fallas de placa, errores de disco, limpieza interna profunda, cambio de pasta térmica y 
           reemplazo de componentes. También brindamos servicio de <strong>destraba y liberación de consolas</strong> con 
           software actualizado y garantía. Además de nuestro taller, contamos con una{" "}

@@ -38,7 +38,7 @@ const ShopTabs = () => {
       <div className="container">
         <div className="mb-12 text-center">
           <h2 className="mb-4 font-heading text-3xl font-bold text-foreground sm:text-4xl">
-            Nuestra <span className="text-primary text-glow">Tienda</span>
+            Explorá nuestra <span className="text-primary text-glow">Tienda</span>
           </h2>
           <p className="mx-auto max-w-lg text-muted-foreground">
             Elegí una categoría para explorar nuestro catálogo completo y servicios técnicos profesionales.
@@ -81,9 +81,9 @@ const ShopTabs = () => {
               >
                 <div className="space-y-8">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-heading text-xl font-bold text-foreground sm:text-2xl">Digitales Destacados</h3>
+                    <h3 className="font-heading text-xl font-bold text-foreground sm:text-2xl">Juegos Digitales</h3>
                     <Link to="/juegos-digitales" className="group flex items-center gap-1 text-sm font-semibold text-primary">
-                      Ver todo <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      Ver catálogo juegos <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </div>
                   <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
@@ -107,10 +107,10 @@ const ShopTabs = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <ShoppingCart className="h-5 w-5 text-primary" />
-                      <h3 className="font-heading text-xl font-bold text-foreground sm:text-2xl">Venta de Consolas</h3>
+                      <h3 className="font-heading text-xl font-bold text-foreground sm:text-2xl">Consolas en Venta</h3>
                     </div>
                     <Link to="/consolas" className="group flex items-center gap-1 text-sm font-semibold text-primary">
-                      Ver todo <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      Ver todas las consolas <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </div>
                   <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4">
@@ -134,11 +134,11 @@ const ShopTabs = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <CreditCard className="h-6 w-6 text-primary" />
-                      <h3 className="font-heading text-xl font-bold text-foreground sm:text-2xl">Suscripciones & Pases</h3>
+                      <h3 className="font-heading text-xl font-bold text-foreground sm:text-2xl">Pases y Suscripciones</h3>
                     </div>
                     {hasMultipleGamePass && (
                       <Link to="/game-pass" className="group flex items-center gap-1 text-sm font-semibold text-primary">
-                        Ver todos <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        Ver pases disponibles <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </Link>
                     )}
                   </div>
