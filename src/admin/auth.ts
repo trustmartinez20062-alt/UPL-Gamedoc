@@ -1,4 +1,6 @@
 import { supabase } from "../lib/supabase";
+import { sanitizeEmail } from "../lib/sanitize";
+import { enforceRateLimit } from "../lib/rate-limiter";
 import type { Usuario } from "./store";
 
 // ── LOGIN CON SUPABASE AUTH ───────────────────────────────────────────────
@@ -6,7 +8,12 @@ import type { Usuario } from "./store";
 // El campo "nombre" se mapea al email (nombre@gamedoctor.uy) para simplificar el login.
 // ── LOGIN TRADICIONAL ──────────────────────────────────────────────────────────
 export async function loginEmailPassword(user: string, pass: string): Promise<{ state: "success" | "error", error?: string }> {
-  const email = user;
+  enforceRateLimit("auth_login");
+
+  const email = sanitizeEmail(user);
+  if (!email) return { state: "error", error: "Email inválido" };
+  if (!pass || pass.length < 8) return { state: "error", error: "La contraseña debe tener al menos 8 caracteres" };
+  if (pass.length > 128) return { state: "error", error: "Contraseña demasiado larga" };
   
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
   if (error || !data.session) {
@@ -20,7 +27,11 @@ export async function loginEmailPassword(user: string, pass: string): Promise<{ 
 
 
 export async function sendPasswordResetEmail(email: string): Promise<boolean> {
-  const fullEmail = email;
+  enforceRateLimit("auth_reset");
+
+  const fullEmail = sanitizeEmail(email);
+  if (!fullEmail) return false;
+
   const { error } = await supabase.auth.resetPasswordForEmail(fullEmail, {
     redirectTo: `${window.location.origin}/paneladmin/update-password`,
   });

@@ -2,52 +2,54 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import * as db from "../lib/db";
 import { logActivity } from "../lib/activity-logs";
+import { sanitizeText, sanitizeUrl } from "../lib/sanitize";
+import { enforceRateLimit } from "../lib/rate-limiter";
 
 // ── Zod Schemas for Validation ──────────────────────────────────────
 export const consolaVentaSchema = z.object({
   id: z.string().optional(),
-  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres").max(200).transform(v => sanitizeText(v, 200)),
   estado: z.enum(["Nueva", "Usada", "Restaurada"]),
-  version: z.string().optional().default("Original"),
-  info: z.string().optional().default(""),
-  garantia: z.string().optional().default(""),
-  precio: z.string().min(1, "El precio es requerido"),
+  version: z.string().max(100).optional().default("Original").transform(v => sanitizeText(v, 100)),
+  info: z.string().max(2000).optional().default("").transform(v => sanitizeText(v, 2000)),
+  garantia: z.string().max(500).optional().default("").transform(v => sanitizeText(v, 500)),
+  precio: z.string().min(1, "El precio es requerido").max(50).transform(v => sanitizeText(v, 50)),
   moneda: z.enum(["UYU", "USD"]).default("UYU"),
-  image: z.string().url("La URL de la imagen no es válida").or(z.string().min(1, "La imagen es requerida")),
-  mercadolibre_url: z.string().url("La URL de Mercado Libre no es válida").optional().or(z.literal("")),
+  image: z.string().url("La URL de la imagen no es válida").or(z.string().min(1, "La imagen es requerida")).transform(v => sanitizeUrl(v)),
+  mercadolibre_url: z.string().url("La URL de Mercado Libre no es válida").optional().or(z.literal("")).transform(v => v ? sanitizeUrl(v) : ""),
   orden: z.number().optional(),
 });
 
 export const juegoSchema = z.object({
   id: z.string().optional(),
-  name: z.string().min(1, "El nombre es requerido"),
-  plataformas: z.array(z.string()).min(1, "Selecciona al menos una plataforma"),
-  image: z.string().url("URL de imagen no válida"),
-  precio: z.string().optional(),
+  name: z.string().min(1, "El nombre es requerido").max(300).transform(v => sanitizeText(v, 300)),
+  plataformas: z.array(z.string().max(50)).min(1, "Selecciona al menos una plataforma").max(20),
+  image: z.string().url("URL de imagen no válida").transform(v => sanitizeUrl(v)),
+  precio: z.string().max(50).optional().transform(v => v ? sanitizeText(v, 50) : undefined),
 });
 
 export const gamePassPlanSchema = z.object({
   id: z.string().optional(),
-  plan: z.string().min(1, "El nombre del plan es requerido"),
-  precio: z.string().min(1, "El precio es requerido"),
+  plan: z.string().min(1, "El nombre del plan es requerido").max(200).transform(v => sanitizeText(v, 200)),
+  precio: z.string().min(1, "El precio es requerido").max(50).transform(v => sanitizeText(v, 50)),
   moneda: z.enum(["UYU", "USD"]).default("UYU"),
   type_id: z.string().optional(),
-  mercadolibre_url: z.string().url("URL no válida").optional().or(z.literal("")),
+  mercadolibre_url: z.string().url("URL no válida").optional().or(z.literal("")).transform(v => v ? sanitizeUrl(v) : ""),
   orden: z.number().optional(),
 });
 
 export const contactoInfoSchema = z.object({
-  direccion: z.string().min(5, "Dirección demasiado corta"),
-  telefono: z.string().min(8, "Teléfono inválido"),
-  horario: z.string().min(3, "Horario requerido"),
-  whatsapp: z.string().url("Enlace de WhatsApp inválido"),
-  mapaEmbed: z.string().min(10, "Iframe de mapa inválido"),
-  sobre_nosotros_texto: z.string().optional(),
-  sobre_nosotros_ticks: z.array(z.string()).optional(),
-  sobre_nosotros_imagen: z.string().url().optional().or(z.literal("")),
-  facebook: z.string().url().optional().or(z.literal("")),
-  instagram: z.string().url().optional().or(z.literal("")),
-  mercadolibre: z.string().url().optional().or(z.literal("")),
+  direccion: z.string().min(5, "Dirección demasiado corta").max(300).transform(v => sanitizeText(v, 300)),
+  telefono: z.string().min(8, "Teléfono inválido").max(30).transform(v => sanitizeText(v, 30)),
+  horario: z.string().min(3, "Horario requerido").max(200).transform(v => sanitizeText(v, 200)),
+  whatsapp: z.string().url("Enlace de WhatsApp inválido").transform(v => sanitizeUrl(v)),
+  mapaEmbed: z.string().min(10, "Iframe de mapa inválido").max(2000).transform(v => sanitizeText(v, 2000)),
+  sobre_nosotros_texto: z.string().max(3000).optional().transform(v => v ? sanitizeText(v, 3000) : undefined),
+  sobre_nosotros_ticks: z.array(z.string().max(200).transform(v => sanitizeText(v, 200))).max(20).optional(),
+  sobre_nosotros_imagen: z.string().url().optional().or(z.literal("")).transform(v => v ? sanitizeUrl(v) : ""),
+  facebook: z.string().url().optional().or(z.literal("")).transform(v => v ? sanitizeUrl(v) : ""),
+  instagram: z.string().url().optional().or(z.literal("")).transform(v => v ? sanitizeUrl(v) : ""),
+  mercadolibre: z.string().url().optional().or(z.literal("")).transform(v => v ? sanitizeUrl(v) : ""),
 });
 
 // ── Types ──────────────────────────────────────────────────────────
@@ -113,6 +115,7 @@ export const usePlataformas = () => {
   const plataformas = query.data ?? [];
 
   const setPlataformas = async (val: Plataforma[] | ((prev: Plataforma[]) => Plataforma[])) => {
+    enforceRateLimit("plataformas");
     const next = typeof val === "function" ? val(plataformas) : val;
 
     const existingIds = new Set(plataformas.map(p => p.id));
@@ -145,6 +148,7 @@ export const useJuegos = () => {
   const juegos = query.data ?? [];
 
   const setJuegos = async (val: Juego[] | ((prev: Juego[]) => Juego[])) => {
+    enforceRateLimit("juegos");
     const next = typeof val === "function" ? val(juegos) : val;
     // Detect added / removed by diffing
     const existingIds = new Set(juegos.map(j => j.id));
@@ -186,6 +190,7 @@ export const useConsolasVenta = () => {
   const items = query.data ?? [];
 
   const setItems = async (val: ConsolaVenta[] | ((prev: ConsolaVenta[]) => ConsolaVenta[])) => {
+    enforceRateLimit("consolas_venta");
     const next = typeof val === "function" ? val(items) : val;
     const existingIds = new Set(items.map(i => i.id));
     const nextIds = new Set(next.map(i => i.id));
@@ -209,6 +214,7 @@ export const useConsolasCompra = () => {
   const items = query.data ?? [];
 
   const setItems = async (val: ConsolaCompra[] | ((prev: ConsolaCompra[]) => ConsolaCompra[])) => {
+    enforceRateLimit("consolas_compra");
     const next = typeof val === "function" ? val(items) : val;
     const existingIds = new Set(items.map(i => i.id));
     const nextIds = new Set(next.map(i => i.id));
@@ -235,6 +241,7 @@ export const useGamePassTypes = () => {
   const items = query.data ?? [];
 
   const setItems = async (val: GamePassType[] | ((prev: GamePassType[]) => GamePassType[])) => {
+    enforceRateLimit("game_pass_types");
     const next = typeof val === "function" ? val(items) : val;
     const existingIds = new Set(items.map(i => i.id));
     const nextIds = new Set(next.map(i => i.id));
@@ -259,6 +266,7 @@ export const useGamePass = () => {
   const items = query.data ?? [];
 
   const setItems = async (val: GamePassPlan[] | ((prev: GamePassPlan[]) => GamePassPlan[])) => {
+    enforceRateLimit("game_pass");
     const next = typeof val === "function" ? val(items) : val;
     const existingIds = new Set(items.map(i => i.id));
     const nextIds = new Set(next.map(i => i.id));
@@ -290,6 +298,7 @@ export const useReparacion = () => {
   const items = query.data ?? [];
 
   const setItems = async (val: ReparacionModelo[] | ((prev: ReparacionModelo[]) => ReparacionModelo[])) => {
+    enforceRateLimit("reparacion");
     const next = typeof val === "function" ? val(items) : val;
     const existingIds = new Set(items.map(i => i.id));
     const nextIds = new Set(next.map(i => i.id));
@@ -313,6 +322,7 @@ export const useDestraba = () => {
   const items = query.data ?? [];
 
   const setItems = async (val: DestrabaModelo[] | ((prev: DestrabaModelo[]) => DestrabaModelo[])) => {
+    enforceRateLimit("destraba");
     const next = typeof val === "function" ? val(items) : val;
     const existingIds = new Set(items.map(i => i.id));
     const nextIds = new Set(next.map(i => i.id));
@@ -361,6 +371,7 @@ export const useContacto = () => {
   const contacto = query.data ?? SEED_CONTACTO;
 
   const setContacto = async (val: ContactoInfo | ((prev: ContactoInfo) => ContactoInfo)) => {
+    enforceRateLimit("contacto");
     const next = typeof val === "function" ? val(contacto) : val;
     await db.upsertContacto(next);
     logActivity("UPDATE", "Contacto/Sobre Nosotros", "Configuración");

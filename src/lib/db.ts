@@ -1,6 +1,7 @@
 // src/lib/db.ts
 // Funciones centralizadas para interactuar con Supabase
 import { supabase } from "./supabase";
+import { validateImageFile } from "./sanitize";
 import type {
   Juego, ConsolaVenta, ConsolaCompra, ReparacionModelo,
   DestrabaModelo, GamePassPlan, ContactoInfo, Plataforma, GamePassType
@@ -330,9 +331,18 @@ export async function upsertContacto(info: ContactoInfo): Promise<void> {
 
 // ── STORAGE ───────────────────────────────────────────────────────────
 export async function uploadImage(file: File, folder: string): Promise<string | null> {
-  const fileExt = file.name.split('.').pop();
+  // ── Validate file type and size ──
+  const validation = validateImageFile(file);
+  if (!validation.valid) {
+    console.error("Archivo rechazado:", validation.error);
+    throw new Error(validation.error ?? "Archivo inválido");
+  }
+
+  // ── Sanitize folder name ──
+  const safeFolder = folder.replace(/[^a-zA-Z0-9_-]/g, "_");
+  const fileExt = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') ?? 'jpg';
   const fileName = `${Math.random().toString(36).slice(2)}.${fileExt}`;
-  const filePath = `${folder}/${fileName}`;
+  const filePath = `${safeFolder}/${fileName}`;
 
   const { error: uploadError } = await supabase.storage
     .from("images")
