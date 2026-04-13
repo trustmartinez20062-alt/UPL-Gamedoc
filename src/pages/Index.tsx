@@ -24,7 +24,7 @@ const Index = () => {
         "@type": "LocalBusiness",
         "name": "Game Doctor",
         "description": contacto.sobre_nosotros_texto || "Reparación y venta de consolas en Montevideo.",
-        "url": import.meta.env.VITE_SITE_URL || "https://gamedoctor.uy",
+        "url": import.meta.env.VITE_SITE_URL || "",
         "telephone": contacto.telefono,
         "address": {
           "@type": "PostalAddress",
@@ -39,7 +39,7 @@ const Index = () => {
           "longitude": -56.1452
         },
         "priceRange": "$$",
-        "image": `${import.meta.env.VITE_SITE_URL || "https://gamedoctor.uy"}/assets/hero-bg.jpg`
+        "image": `${import.meta.env.VITE_SITE_URL || ""}/assets/hero-bg.jpg`
       },
       {
         "@type": "Service",

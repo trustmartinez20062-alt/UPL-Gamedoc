@@ -31,8 +31,8 @@ const Consolas = () => {
       <SEOHead
         title="Venta de Consolas en Montevideo — PlayStation, Xbox, Nintendo | Game Doctor"
         description="Comprá consolas PlayStation, Xbox y Nintendo nuevas, restauradas y usadas con garantía en La Unión, Montevideo, Uruguay. Precios mayoristas y minoristas. Tomamos tu consola como parte de pago."
-        canonical="https://gamedoctor.uy/consolas"
-        ogImage="https://gamedoctor.uy/assets/hero-bg.jpg"
+        canonical="/consolas"
+        ogImage="/assets/hero-bg.jpg"
       />
       <Navbar />
       

@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: /paneladmin/
 
-Sitemap: https://gamedoctor.uy/sitemap.xml
+Sitemap: https://gamed-one.vercel.app/sitemap.xml

@@ -32,8 +32,8 @@ const JuegosDigitales = () => {
       <SEOHead
         title="Juegos Digitales en Uruguay — PS4, PS5, Xbox, PC | Game Doctor"
         description="Catálogo de juegos digitales al mejor precio en Uruguay. Juegos para PlayStation 4, PS5, Xbox y PC con entrega inmediata. Comprá seguro en Game Doctor, La Unión, Montevideo."
-        canonical="https://gamedoctor.uy/juegos-digitales"
-        ogImage="https://gamedoctor.uy/assets/hero-bg.jpg"
+        canonical="/juegos-digitales"
+        ogImage="/assets/hero-bg.jpg"
       />
       <Navbar />
       

@@ -3,15 +3,16 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
 
 // ── CORS — restrict to production domains ─────────────────────────────
 const ALLOWED_ORIGINS = [
-  "https://gamedoctor.uy",
-  "https://www.gamedoctor.uy",
+  "https://gamed-one.vercel.app",
   "https://game-doctor.vercel.app",
   "http://localhost:8080",
 ];
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("Origin") ?? "";
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const isLocal = origin.includes("localhost") || origin.includes("127.0.0.1");
+  const allowedOrigin = (ALLOWED_ORIGINS.includes(origin) || isLocal) ? origin : ALLOWED_ORIGINS[0];
+  
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -63,101 +64,56 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // Only allow POST
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Método no permitido" }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 405,
-    });
-  }
-
   try {
-    // ── Rate Limit Check ──────────────────────────────────────────────
-    const clientIp =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      req.headers.get("cf-connecting-ip") ??
-      "unknown";
+    if (req.method !== "POST") throw new Error("Método no permitido");
 
-    if (isRateLimited(clientIp)) {
-      return new Response(
-        JSON.stringify({ error: "Demasiadas solicitudes. Intenta de nuevo en 15 minutos." }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 429,
-        }
-      );
+    // ── Client Init ──────────────────────────────────────────────────
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!SUPABASE_URL || !SERVICE_ROLE) {
+      throw new Error("Configuración del servidor incompleta");
     }
 
-    // ── Payload Size Check ────────────────────────────────────────────
-    const contentLength = parseInt(req.headers.get("content-length") ?? "0");
-    if (contentLength > 10_000) {
-      return new Response(
-        JSON.stringify({ error: "Payload demasiado grande" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 413,
-        }
-      );
-    }
-
-    // ── Auth ──────────────────────────────────────────────────────────
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    );
+    const supabaseClient = createClient(SUPABASE_URL, SERVICE_ROLE, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("No autorizado — falta Authorization header");
-    }
+    if (!authHeader) throw new Error("No autorizado");
 
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
+    // ── Get Caller Identity ──────────────────────────────────────────
+    const { data: { user: caller }, error: authError } = await supabaseClient.auth.getUser(
       authHeader.replace("Bearer ", "")
     );
+    if (authError || !caller) throw new Error("Token inválido");
 
-    if (authError || !user) {
-      throw new Error("No autorizado");
-    }
-
-    // Check if user is admin in public.profiles
-    const { data: profile, error: profileError } = await supabaseClient
+    const { data: callerProfile } = await supabaseClient
       .from("profiles")
       .select("role")
-      .eq("id", user.id)
+      .eq("id", caller.id)
       .single();
 
-    if (profileError || profile?.role !== "admin") {
-      throw new Error("Solo los administradores pueden realizar esta acción");
-    }
-
-    // ── Parse & Validate Body ─────────────────────────────────────────
-    const body = await req.json() as Record<string, unknown>;
+    // ── Parse Request ────────────────────────────────────────────────
+    const body = await req.json() as any;
     const action = sanitize(body.action, 10);
+    const userId = body.userId ? sanitize(String(body.userId), 36).toLowerCase() : null;
+    const isSelf = (userId === caller.id.toLowerCase());
+    const isAdmin = (callerProfile?.role === "admin");
 
-    if (!isValidAction(action)) {
-      throw new Error("Acción no reconocida. Valores permitidos: create, update, delete");
+    // Security Check: Admin can do anything, Subadmin can only update SELF
+    if (!isAdmin && (!isSelf || action !== "update")) {
+      return new Response(JSON.stringify({ error: "Permiso denegado" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 403,
+      });
     }
 
-    // ── CREATE ─────────────────────────────────────────────────────────
+    // ── CREATE ────────────────────────────────────────────────────────
     if (action === "create") {
       const email = sanitize(body.email, 254);
-      const password = body.password;
+      const password = body.password as string;
       const nombre = sanitize(body.nombre, 100);
-      const role = sanitize(body.role, 10);
-
-      if (!email || !isValidEmail(email)) throw new Error("Email inválido");
-      if (!password || typeof password !== "string" || password.length < 8) {
-        throw new Error("La contraseña debe tener al menos 8 caracteres");
-      }
-      if (password.length > 128) throw new Error("Contraseña demasiado larga");
-      if (!nombre) throw new Error("Nombre es requerido");
-      if (role !== "admin" && role !== "subadmin") throw new Error("Rol inválido");
 
       const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
         email,
@@ -167,82 +123,66 @@ Deno.serve(async (req: Request) => {
 
       if (createError) throw createError;
 
-      const { error: insertError } = await supabaseClient.from("profiles").insert({
+      // Anti-Trigger Delay: Es frecuente que triggers de BD inserten el perfil 
+      // automáticamente. Esperamos 200ms para asegurar que nuestra sobreescritura funcione.
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      const { error: profileError } = await supabaseClient.from("profiles").upsert({
         id: newUser.user.id,
         nombre,
-        role,
+        role: "subadmin", // Siempre subadmin al crear
         email,
-      });
+      }, { onConflict: 'id' });
 
-      if (insertError) throw insertError;
+      if (profileError) {
+        console.error("Error al sincronizar perfil:", profileError);
+        throw new Error(`Usuario creado pero perfil falló: ${profileError.message}`);
+      }
 
-      return new Response(JSON.stringify({ message: "Usuario creado" }), {
+      return new Response(JSON.stringify({ message: "Usuario creado con éxito", id: newUser.user.id }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // ── UPDATE ─────────────────────────────────────────────────────────
+    // ── UPDATE ────────────────────────────────────────────────────────
     if (action === "update") {
-      const userId = sanitize(body.userId, 36);
       if (!userId) throw new Error("userId es requerido");
 
-      const updateData: Record<string, string> = {};
-      if (body.email) {
-        const email = sanitize(body.email, 254);
-        if (!isValidEmail(email)) throw new Error("Email inválido");
-        updateData.email = email;
-      }
-      if (body.password) {
-        if (typeof body.password !== "string" || body.password.length < 8) {
-          throw new Error("La contraseña debe tener al menos 8 caracteres");
-        }
-        if (body.password.length > 128) throw new Error("Contraseña demasiado larga");
-        updateData.password = body.password;
+      const authUpdates: Record<string, string> = {};
+      if (body.email) authUpdates.email = sanitize(body.email, 254);
+      if (body.password) authUpdates.password = body.password as string;
+
+      if (Object.keys(authUpdates).length > 0) {
+        const { error: authUpErr } = await supabaseClient.auth.admin.updateUserById(userId, authUpdates);
+        if (authUpErr) throw authUpErr;
       }
 
-      if (Object.keys(updateData).length > 0) {
-        const { error: updateAuthError } = await supabaseClient.auth.admin.updateUserById(
-          userId,
-          updateData
-        );
-        if (updateAuthError) throw updateAuthError;
+      const profileUpdates: Record<string, string> = {};
+      if (body.nombre) profileUpdates.nombre = sanitize(body.nombre, 100);
+      if (body.email) profileUpdates.email = sanitize(body.email, 254);
+
+      if (Object.keys(profileUpdates).length > 0) {
+        const { error: profUpErr } = await supabaseClient.from("profiles").upsert({
+          id: userId,
+          ...profileUpdates
+        }, { onConflict: 'id' });
+        if (profUpErr) throw profUpErr;
       }
 
-      // Update Profile
-      const nombre = body.nombre ? sanitize(body.nombre, 100) : undefined;
-      const email = body.email ? sanitize(body.email, 254) : undefined;
-      const profileUpdate: Record<string, string> = {};
-      if (nombre) profileUpdate.nombre = nombre;
-      if (email) profileUpdate.email = email;
-
-      if (Object.keys(profileUpdate).length > 0) {
-        const { error: updateProfileError } = await supabaseClient
-          .from("profiles")
-          .update(profileUpdate)
-          .eq("id", userId);
-
-        if (updateProfileError) throw updateProfileError;
-      }
-
-      return new Response(JSON.stringify({ message: "Usuario actualizado" }), {
+      return new Response(JSON.stringify({ message: "Perfil actualizado" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // ── DELETE ─────────────────────────────────────────────────────────
+    // ── DELETE ────────────────────────────────────────────────────────
     if (action === "delete") {
-      const userId = sanitize(body.userId, 36);
       if (!userId) throw new Error("userId es requerido");
+      if (isSelf) throw new Error("No puedes eliminarte a ti mismo");
 
-      // Prevent self-deletion
-      if (userId === user.id) {
-        throw new Error("No puedes eliminar tu propia cuenta");
-      }
-
-      const { error: deleteError } = await supabaseClient.auth.admin.deleteUser(userId);
-      if (deleteError) throw deleteError;
+      const { error: delError } = await supabaseClient.auth.admin.deleteUser(userId);
+      if (delError) throw delError;
 
       return new Response(JSON.stringify({ message: "Usuario eliminado" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -250,11 +190,15 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    throw new Error("Acción no reconocida");
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Error desconocido";
-    return new Response(JSON.stringify({ error: message }), {
-      headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
+    throw new Error("Operación no permitida");
+
+  } catch (error: any) {
+    console.error("[Function Error]:", error.message);
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      code: error.code || null
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
     });
   }

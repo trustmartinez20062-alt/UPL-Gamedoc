@@ -41,10 +41,23 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCurrentUser().then(u => {
-      setUser(u);
-      setLoading(false);
-    });
+    const fetchUser = () => {
+      getCurrentUser().then(u => {
+        setUser(u);
+        setLoading(false);
+      });
+    };
+
+    fetchUser();
+
+    // Listener para refresco silencioso al cambiar perfil
+    const handleProfileUpdate = () => {
+      console.log("Perfil actualizado detectado, refrescando Dashboard...");
+      fetchUser();
+    };
+
+    window.addEventListener("gd-profile-updated", handleProfileUpdate);
+    return () => window.removeEventListener("gd-profile-updated", handleProfileUpdate);
   }, []);
 
   const filteredNavItems = navItems.filter(item => {

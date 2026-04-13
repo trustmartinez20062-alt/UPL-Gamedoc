@@ -61,25 +61,29 @@ export default function Login() {
     }
 
     if (mode === "login") {
-      const result = await loginEmailPassword(user, pass);
-      if (result.state === "success") {
-        setFailedAttempts(0);
-        navigate("/paneladmin", { replace: true });
-        return;
-      } else {
-        const newAttempts = failedAttempts + 1;
-        setFailedAttempts(newAttempts);
-        if (newAttempts >= 3) {
-          // Incremento exponencial: 15s -> 30s -> 60s
-          const penalty = Math.pow(2, newAttempts - 3) * 15000;
-          const lockoutTime = Date.now() + penalty;
-          setLockoutUntil(lockoutTime);
-          setError(`Se ha bloqueado temporalmente el acceso. Intenta en ${penalty / 1000}s.`);
+      try {
+        const result = await loginEmailPassword(user, pass);
+        if (result.state === "success") {
+          setFailedAttempts(0);
+          navigate("/paneladmin", { replace: true });
+          return;
         } else {
-          setError(result.error || "Correo o contraseña incorrectos.");
+          const newAttempts = failedAttempts + 1;
+          setFailedAttempts(newAttempts);
+          if (newAttempts >= 3) {
+            const penalty = Math.pow(2, newAttempts - 3) * 15000;
+            const lockoutTime = Date.now() + penalty;
+            setLockoutUntil(lockoutTime);
+            setError(`Se ha bloqueado temporalmente el acceso. Intenta en ${penalty / 1000}s.`);
+          } else {
+            setError(result.error || "Correo o contraseña incorrectos.");
+          }
         }
+      } catch (err: any) {
+        setError(err.message || "Ocurrió un error inesperado al iniciar sesión.");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
       return;
     }
   };

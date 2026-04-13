@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
 import { User, Key, Save, Shield, Mail, CheckCircle2, Eye, EyeOff } from "lucide-react";
-import { getCurrentUser, updateUsuario, changeMyPassword, changeMyEmail, cancelEmailChange } from "../../auth";
+import { getCurrentUser, updateUsuario, changeMyPassword, changeMyEmail, cancelEmailChange, logout } from "../../auth";
 import type { Usuario } from "../../store";
 import PageHeader from "../PageHeader";
+import Modal from "../Modal";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { AlertTriangle } from "lucide-react";
 
 export default function MiPerfil() {
+  const navigate = useNavigate();
   const [user, setUser] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [modalType, setModalType] = useState<"password" | "email">("password");
   
   const [form, setForm] = useState({ nombre: "", email: "", password: "", confirmPassword: "" });
 
@@ -39,6 +45,8 @@ export default function MiPerfil() {
 
     if (ok) {
       toast.success("Nombre de usuario actualizado correctamente");
+      // Despachamos evento para que el Dashboard se entere sin cerrar sesión
+      window.dispatchEvent(new CustomEvent("gd-profile-updated"));
       await load();
     } else {
       toast.error("Error al actualizar el nombre de usuario");
@@ -53,14 +61,27 @@ export default function MiPerfil() {
     
     if (form.email.trim() === user.email) return;
 
+    setModalType("email");
+    setShowConfirmModal(true);
+  };
+
+  const executeEmailChange = async () => {
+    if (!user) return;
+    
+    setShowConfirmModal(false);
     setSaving(true);
     const result = await changeMyEmail(form.email.trim());
-    setSaving(false);
-
+    
     if (result.ok) {
-      toast.success("Se ha enviado un correo de verificación a la nueva dirección. Revisa tu buzón para confirmar.");
-      setForm(prev => ({ ...prev, email: user.email })); 
+      toast.success("Enlaces enviados a ambos correos. Deberás validar ambos (Paso 1/2 y 2/2)");
+      
+      // Logout inmediato por seguridad (Opción A)
+      setTimeout(async () => {
+        await logout();
+        navigate("/paneladmin/login", { replace: true });
+      }, 2500);
     } else {
+      setSaving(false);
       if (result.error?.toLowerCase().includes("rate limit") || result.error?.toLowerCase().includes("exceeded")) {
         toast.error("Límite de seguridad alcanzado (Spam protection). Por favor, intenta de nuevo en 60 minutos.");
       } else {
@@ -78,13 +99,30 @@ export default function MiPerfil() {
       toast.error("Las contraseñas no coinciden");
       return;
     }
+    
+    // En lugar de ejecutar, mostramos el modal de confirmación
+    setModalType("password");
+    setShowConfirmModal(true);
+  };
+
+  const executePasswordChange = async () => {
+    if (!user) return;
+    
+    setShowConfirmModal(false);
     setSaving(true);
+    
     const ok = await updateUsuario(user.id, form.nombre, form.email, form.password);
-    setSaving(false);
+    
     if (ok) {
-      toast.success("Contraseña actualizada correctamente");
-      setForm({ ...form, password: "", confirmPassword: "" });
+      toast.success("Contraseña actualizada. Cerrando sesión por seguridad...");
+      
+      // Esperamos un momento para que el usuario vea el mensaje
+      setTimeout(async () => {
+        await logout();
+        navigate("/paneladmin/login", { replace: true });
+      }, 2000);
     } else {
+      setSaving(false);
       toast.error("Error al cambiar la contraseña");
     }
   };
@@ -296,6 +334,50 @@ export default function MiPerfil() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Confirmación para Cambio de Contraseña / Email */}
+      {showConfirmModal && (
+        <Modal 
+          title="Confirmar Cambio Seguro" 
+          onClose={() => !saving && setShowConfirmModal(false)}
+        >
+          <div className="space-y-5">
+            <div className="flex items-center gap-3 p-4 rounded-xl border bg-amber-500/10 border-amber-500/20 text-amber-200">
+              <AlertTriangle className="shrink-0" size={24} />
+              <p className="text-sm font-medium leading-relaxed">
+                {modalType === "password" 
+                  ? "Por seguridad, al cambiar tu contraseña se cerrará tu sesión actual y deberás ingresar nuevamente con tus nuevas credenciales."
+                  : "Por seguridad, se enviará un mensaje de verificación a AMBOS correos (el actual y el nuevo). Deberás validar ambos enlaces para completar el cambio (Validación 1/2 y 2/2). La sesión se cerrará inmediatamente."}
+              </p>
+            </div>
+            
+            <p className="text-[hsl(215_15%_70%)] text-sm">
+              ¿Estás seguro de que deseas actualizar tu {modalType === "password" ? "contraseña" : "correo electrónico"} ahora?
+            </p>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 py-2.5 rounded-lg border font-bold text-xs uppercase tracking-wider transition-all hover:bg-white/5"
+                style={{ borderColor: "hsl(220 15% 20%)", color: "hsl(215 15% 55%)" }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={modalType === "password" ? executePasswordChange : executeEmailChange}
+                className="flex-1 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all"
+                style={{ 
+                  background: "hsl(175 80% 50%)", 
+                  color: "hsl(220 20% 6%)",
+                  boxShadow: "0 0 20px hsl(175 80% 50% / 0.2)"
+                }}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -13,7 +13,7 @@ interface SEOHeadProps {
  * Maneja el dominio base automáticamente desde las variables de entorno.
  */
 const SEOHead = ({ title, description, canonical, ogImage, jsonLd }: SEOHeadProps) => {
-  const siteUrl = import.meta.env.VITE_SITE_URL || "https://gamedoctor.uy";
+  const siteUrl = import.meta.env.VITE_SITE_URL || "";
   
   // Limpiar slash inicial si existe y concatenar
   const fullCanonical = canonical ? `${siteUrl}${canonical.startsWith("/") ? "" : "/"}${canonical}` : undefined;

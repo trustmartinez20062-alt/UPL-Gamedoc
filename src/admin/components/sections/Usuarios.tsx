@@ -233,22 +233,16 @@ export default function Usuarios() {
               <label className="block text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "hsl(215 15% 50%)" }}>
                 Nivel de Acceso
               </label>
-              <div className="grid grid-cols-2 gap-3">
-                {(["subadmin", "admin"] as const).map((r) => (
-                  <button key={r} onClick={() => setForm({ ...form, role: r })}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${
-                      form.role === r
-                        ? "border-[hsl(175_80%_50%/0.4)] bg-[hsl(175_80%_50%/0.08)] text-[hsl(175_80%_50%)]"
-                        : "border-[hsl(220_15%_18%)] bg-[hsl(220_15%_10%)] text-[hsl(215_15%_45%)]"
-                    }`}>
-                    {r === "admin" ? <Shield size={20} /> : <User size={20} />}
-                    <div className="text-center">
-                      <div className="text-xs font-bold uppercase">{r}</div>
-                      <div className="text-[9px] opacity-60">{r === "admin" ? "Control total" : "Solo contenidos"}</div>
-                    </div>
-                  </button>
-                ))}
+              <div className="flex items-center gap-3 p-4 rounded-2xl border border-[hsl(175_80%_50%/0.4)] bg-[hsl(175_80%_50%/0.08)] text-[hsl(175_80%_50%)]">
+                <User size={20} />
+                <div className="text-left">
+                  <div className="text-xs font-bold uppercase">Subadmin</div>
+                  <div className="text-[9px] opacity-60">Acceso a gestión de contenidos</div>
+                </div>
               </div>
+              <p className="mt-2 text-[10px] text-[hsl(215_15%_45%)] italic">
+                Solo puede existir un Administrador principal. Los nuevos usuarios se crean como Subadmin.
+              </p>
             </div>
 
             {errorMsg && (

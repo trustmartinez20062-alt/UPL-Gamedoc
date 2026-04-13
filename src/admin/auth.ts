@@ -70,7 +70,7 @@ export async function getCurrentUser(): Promise<Usuario | null> {
       id: session.user.id,
       nombre: session.user.email?.split("@")[0] || "Usuario",
       email: session.user.email ?? "",
-      role: "admin", // Simplificado para que el SQL se encargue de todo
+      role: "subadmin", // Fallback seguro
       pendingEmail: session.user.new_email,
     };
   }
@@ -79,7 +79,7 @@ export async function getCurrentUser(): Promise<Usuario | null> {
     id: profile.id,
     nombre: profile.nombre,
     email: session.user.email || profile.email || "",
-    role: "admin",
+    role: profile.role as "admin" | "subadmin",
     pendingEmail: session.user.new_email,
   };
 }
@@ -101,7 +101,10 @@ export async function createUsuario(nombre: string, email: string, password: str
   });
 
   if (functionError || data?.error) {
-    console.error("Error creando usuario:", functionError?.message || data?.error);
+    console.group("Detalle CRÍTICO del fallo en Edge Function");
+    console.error("Mensaje:", functionError?.message || data?.error || "Desconocido");
+    console.error("Cuerpo técnico:", data);
+    console.groupEnd();
     return false;
   }
   return true;
